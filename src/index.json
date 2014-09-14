@@ -1,0 +1,17 @@
+[
+    "utilities",
+    "arrays",
+    "arithmetic",
+    "numbertheory",
+    "combinatorics",
+    "probability",
+    "statistics",
+    "complex",
+    "vector",
+    "matrix",
+    "geometry",
+    "polynomial",
+    "cryptography",
+    "numeric",
+    "units"
+]
