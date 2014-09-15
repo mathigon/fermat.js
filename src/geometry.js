@@ -52,7 +52,7 @@
         if (x instanceof M.geo.Rect) return 'rect';
         if (x instanceof M.geo.Polygon) return 'polygon';
         return '';
-    }
+    };
 
 
     // ---------------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@
         return phi;
     };
 
-    M.reco.Rect.toPolygon = function() {
+    M.geo.Rect.prototype.toPolygon = function() {
         var a = new M.geo.Point(this.x,     this.y);
         var b = new M.geo.Point(this.x + w, this.y);
         var c = new M.geo.Point(this.x + w, this.y + h);
@@ -81,7 +81,7 @@
         var x2 = l2.p2.x - l2.p1.x;
         var y2 = l2.p2.y - l2.p1.y;
 
-        return (x1 === 0 && x2 === 0) || (y1 === 0 && y2 === 0) || M.nearlyEquals(y1/x1, y2/x2)
+        return (x1 === 0 && x2 === 0) || (y1 === 0 && y2 === 0) || M.nearlyEquals(y1/x1, y2/x2);
     };
 
 
@@ -100,15 +100,15 @@
         return M.geo.distance(this.p1, this.p2);
     };
 
-    M.Circle.prorotype.circumference = function() {
+    M.geo.Circle.prototype.circumference = function() {
         return 2 * Math.PI * this.r;
     };
 
-    M.Rect.prorotype.circumference = function() {
+    M.geo.Rect.prototype.circumference = function() {
         return 2 * w + 2 * h;
     };
 
-    M.Polygon.prorotype.circumference = function() {
+    M.geo.Polygon.prototype.circumference = function() {
         var C = 0, p = this.points, n = p.length;
         for (var i = 1; i < n; ++i) C += M.geo.distance(p[i - 1], p[i]);
         C += M.geo.distance(p[n-1], p[0]);
@@ -210,7 +210,7 @@
     // Finds the rotation of a point p around a center c by an angle phi
     var rotatePoint = function(p, c, phi) {
         var x0 = p.x - c.x;
-        var y0 = p.y - x.y;
+        var y0 = p.y - c.y;
 
         var cos = Math.cos(phi);
         var sin = Math.sin(phi);
@@ -254,10 +254,10 @@
 
     // Finds a perpendicular to the line l which goes through a point p.
     M.geo.perpendicular = function(l, p) {
-        var x, y,c, z,
+        /*var x, y, c, z;
 
         // Special case: point is the first point of the line
-        if (M.geo.same(p === l.p1) {
+        if (M.geo.same(p === l.p1)) {
             x = a.x + b.y - a.y;
             y = a.y - b.x + a.x;
             z = A[0] * B[0];
@@ -269,7 +269,7 @@
             c = [z, x, y];
 
         // Special case: point is the second point of the line
-        } else if (M.geo.same(p === l.p2) {
+        } else if (M.geo.same(p === l.p2)) {
             x = B[1] + A[2] - B[2];
             y = B[2] - A[1] + B[1];
             z = A[0] * B[0];
@@ -281,7 +281,7 @@
             c = [z, x, y];
 
         // special case: point lies somewhere else on the line
-        } else if (Math.abs(Mat.innerProduct(C, line.stdform, 3)) < Mat.eps) {
+        } else if (Math.abs(Mat.innerProduct(C, line.stdform, 3)) < EPS) {
             x = C[1] + B[2] - C[2];
             y = C[2] - B[1] + C[1];
             z = B[0];
@@ -291,7 +291,7 @@
                 y = -B[1];
             }
 
-            if (Math.abs(z) > Mat.eps && Math.abs(x - C[1]) < Mat.eps && Math.abs(y - C[2]) < Mat.eps) {
+            if (Math.abs(z) > EPS && Math.abs(x - C[1]) < EPS && Math.abs(y - C[2]) < EPS) {
                 x = C[1] + A[2] - C[2];
                 y = C[2] - A[1] + C[1];
             }
@@ -305,20 +305,12 @@
             c = Mat.crossProduct(c, line.stdform);       // intersection of line and perpendicular
         }
 
-        return [new Coords(Type.COORDS_BY_USER, c, board), change];
+        return [new Coords(Type.COORDS_BY_USER, c, board), change];*/
     };
 
     // Returns the circumcenter of the circumcircle two three points a, b and c
     M.geo.circumcenter = function(a, b, c) {
-        u = [B[0] - A[0], -B[2] + A[2], B[1] - A[1]];
-        v = [(A[0] + B[0])  * 0.5, (A[1] + B[1]) * 0.5, (A[2] + B[2]) * 0.5];
-        m1 = Mat.crossProduct(u, v);
-
-        u = [C[0] - B[0], -C[2] + B[2], C[1] - B[1]];
-        v = [(B[0] + C[0]) * 0.5, (B[1] + C[1]) * 0.5, (B[2] + C[2]) * 0.5];
-        m2 = Mat.crossProduct(u, v);
-
-        return new Coords(Const.COORDS_BY_USER, Mat.crossProduct(m1, m2), board);
+        // TODO
     };
 
 
@@ -353,11 +345,11 @@
 
     };
 
-    var pointCircleIntersect = function(p, ) {
+    var pointCircleIntersect = function(p, c) {
 
     };
 
-    var pointPolygonIntersect = function() {
+    var pointPolygonIntersect = function(p1, p2) {
 
     };
 
@@ -387,7 +379,7 @@
 
     var lineCircleIntersect = function(l, c) {
         // TODO
-    }
+    };
 
     var linePolygonIntersect = function(l, c) {
         // TODO
@@ -413,10 +405,7 @@
         if (x instanceof M.geo.Rect) x = x.toPolygon();
         if (y instanceof M.geo.Rect) y = y.toPolygon();
 
-        var typeX = (x instanceof M.geo.Line) ? 'line' : (x instanceof M.geo.Circle) ? 'circle' : (x instanceof M.geo.Polygon) ? 'polygon';
-        var typeY = (y instanceof M.geo.Line) ? 'line' : (y instanceof M.geo.Circle) ? 'circle' : (y instanceof M.geo.Polygon) ? 'polygon';
-
-        switch (typeX + '-' + typeY) {
+        switch (getGeoType(x) + '-' + getGeoType(y)) {
             case 'line-line':       return lineLineIntersect(x, y);
             case 'line-circle':     return lineCircleIntersect(x, y);
             case 'line-polygon':    return linePolygonIntersect(x, y);

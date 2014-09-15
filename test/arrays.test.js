@@ -1,4 +1,4 @@
-require('../dist/core.js');
+require('../dist/tesla.js');
 require('../dist/fermat.js');
 
 exports.tabulate = function(test){

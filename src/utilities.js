@@ -4,7 +4,7 @@
 // =================================================================================================
 
 
-if (typeof M !== 'object' || !M.core) throw new Error('fermat.js requires core.js.');
+if (typeof M !== 'object' || !M.tesla) throw new Error('fermat.js requires tesla.js.');
 M.fermat = true;
 
 // Epsilon/tolerance value used by default
