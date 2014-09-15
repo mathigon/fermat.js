@@ -10,6 +10,10 @@ M.fermat = true;
 // Epsilon/tolerance value used by default
 var EPS = 0.000001;
 
+M.setPrecision = function(eps) {
+    EPS = eps || 0.000001;
+};
+
 var _arrayJoin = Array.prototype.join;
 var _arrayPush = Array.prototype.push;
 

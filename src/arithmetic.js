@@ -9,7 +9,7 @@
     // ---------------------------------------------------------------------------------------------
     // Simple Functions
 
-    M.equals = function(x, y, tolerance) {
+    M.nearlyEquals = function(x, y, tolerance) {
         return Math.abs(x - y) < (tolerance || EPS);
     };
 
@@ -112,7 +112,7 @@
 
     M.toFixed = function(n, precision) {
         var fixed = n.toFixed(precision);
-        return M.equals(n, +fixed) ? fixed : '~ ' + fixed;
+        return M.nearlyEquals(n, +fixed) ? fixed : '~ ' + fixed;
     };
 
     // Returns a [numerator, denominator] array rational representation of `decimal`
@@ -128,7 +128,7 @@
         var rem = decimal - a;
 
         while (d[0] <= maxDenominator) {
-            if (M.equals(n[0] / d[0], decimal)) return [n[0], d[0]];
+            if (M.nearlyEquals(n[0] / d[0], decimal)) return [n[0], d[0]];
             n = [a*n[0] + n[1], n[0]];
             d = [a*d[0] + d[1], d[0]];
             a = Math.floor(1 / rem);

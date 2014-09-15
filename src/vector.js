@@ -14,7 +14,7 @@
     // M.Vector(3) = [null, null, null]
     // M.Vector(3, 1) = [1, 1, 1]
 
-    // M.Vector is a subclass of the native JavaScript Array type and contains all usual Array methods.
+    // M.Vector is a subclass of the native JS Array type and contains all usual Arraymethods.
     // For very long or very large numbers of vectors, native Arrays perform significantly better.
     // All functions in M.vector work with M.Vector objects as well as native arrays
 
