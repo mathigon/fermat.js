@@ -1,16 +1,16 @@
 {
   "name": "fermat",
-  "title": "Fermat.js Mathematics Tools",
-  "description": "",
+  "title": "Fermat Mathematics Tools",
+  "description": "Powerful mathematics, statistics and geometry library for JavaScript.",
   "version": "0.1.0",
   "homepage": "http://mathigon.io/fermat",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mathigon/fermat.git"
+    "url": "https://github.com/mathigon/fermat.js.git"
   },
   "license": {
     "type": "MIT",
-    "url": "https://github.com/mathigon/fermat/master/LICENSE"
+    "url": "https://github.com/Mathigon/fermat.js/blob/master/LICENSE"
   },
   "devDependencies": {
     "grunt": "~0.4.5",

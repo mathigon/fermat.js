@@ -1,23 +1,13 @@
-# Contributing to Bootstrap
+# Contributing to Fermat.js
 
-Looking to contribute something to Bootstrap? **Here's how you can help.**
-
-Following these guidelines helps to communicate that you respect the time of
-the developers managing and developing this open source project. In return,
-they should reciprocate that respect in addressing your issue or assessing
-patches and features.
-
+TODO
 
 
 ## Bug Reports and Feature Requests
 
 Please submit bug reports if you find any problems in our code. It is helpful if these bug reports are as details as possible: your browser, OS, and what steps will reproduce the bug.
 
-Feature requests are just as welcome.
-welcome. But take a moment to find out whether your idea
-fits with the scope and aims of the project. It's up to *you* to make a strong
-case to convince the project's developers of the merits of this feature. Please
-provide as much detail and context as possible.
+TODO
 
 
 ## Testing
