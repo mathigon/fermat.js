@@ -8,6 +8,10 @@
 
     M.random = {};
 
+
+    // ---------------------------------------------------------------------------------------------
+    // Simple Random Number Generators
+
     M.random.integer = function(a, b) {
         return Math.floor(a + (b == null ? 1 : b-a+1) * Math.random());
     };
@@ -45,7 +49,26 @@
         return a.shuffle();
     };
 
-    // =============================================================================================
+
+    // ---------------------------------------------------------------------------------------------
+    // Array Shuffle
+
+    // Randomly shuffles the elements in an array
+    M.shuffle = function(a) {
+        a = _arraySlice.call(a, 0); // create copy
+        var j, tmp;
+        for (var i = a.length - 1; i; --i) {
+            j = Math.floor(Math.random() * (i+1));
+            tmp = a[j];
+            a[j] = a[i];
+            a[i] = tmp;
+        }
+        return a;
+    };
+
+
+    // ---------------------------------------------------------------------------------------------
+    // Discrete Distribution
 
     M.random.bernoulli = function(p) {
         p = Math.max(0,Math.min(1,p));
@@ -65,7 +88,9 @@
         return k-1;
     };
 
-    // =============================================================================================
+
+    // ---------------------------------------------------------------------------------------------
+    // Continuous Distribution
 
     M.random.uniform = function(a, b) {
         return a + (b-a) * Math.random();
@@ -96,6 +121,10 @@
         } while (rr >= 1);
         return v1/v2;
     };
+
+
+    // ---------------------------------------------------------------------------------------------
+    // PDFs
 
     M.normalPDF = function(mean, stddev, x) {
         return (1 / Math.sqrt(2 * Math.PI * stddev * stddev)) *
