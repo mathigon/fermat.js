@@ -1,5 +1,6 @@
 // =================================================================================================
 // Fermat.js | Geometry
+// ***EXPERIMENTAL ***
 // (c) 2014 Mathigon / Philipp Legner
 // =================================================================================================
 
@@ -9,15 +10,17 @@
     M.geo = {};
 
     // TODO  M.geo.Curve class (length, area)
-    // circle-circle and circle-polygon intersections
+    // TODO circle-circle and circle-polygon intersections
+    // TODO Advanced projections functions
 
 
     // ---------------------------------------------------------------------------------------------
     // Types
 
     M.geo.Point = function(x, y) {
-        this.x = x || 0;
-        this.y = y || 0;
+        this.x = this[0] = (+x || 0);
+        this.y = this[1] = (+y || 0);
+        this.length = 2;
     };
 
     // Defines a line that goes through two M.Points p1 and p2
@@ -82,6 +85,28 @@
         var y2 = l2.p2.y - l2.p1.y;
 
         return (x1 === 0 && x2 === 0) || (y1 === 0 && y2 === 0) || M.nearlyEquals(y1/x1, y2/x2);
+    };
+
+    M.geo.Line.prototype.contains = function(p) {
+        var grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
+        var grad2 = (p.y - this.p1.y) / (p - this.p1.x);
+        return M.nearlyEquals(grad1, grad2);
+    };
+
+    M.geo.Line.prototype.normalVector = function() {
+        var l = this.length();
+        var x = (this.p2.x - this.p1.x) / l;
+        var y = (this.p2.y - this.p1.y) / l;
+        return new M.Point(x, y);
+    };
+
+    M.geo.project = function(p, l) {
+        var k = M.vector.dot(M.vector.subtr(p, l.p1), l.normalVector());
+        return new Point(l.p1.x + k.x, l.p1.y + k.y);
+    };
+
+    M.geo.lineToPointDistance = function(p, l) {
+        return M.geo.distance(p, M.gep.project(p, l));
     };
 
 
@@ -254,58 +279,31 @@
 
     // Finds a perpendicular to the line l which goes through a point p.
     M.geo.perpendicular = function(l, p) {
-        /*var x, y, c, z;
+        var dx, dy;
 
         // Special case: point is the first point of the line
-        if (M.geo.same(p === l.p1)) {
-            x = a.x + b.y - a.y;
-            y = a.y - b.x + a.x;
-            z = A[0] * B[0];
-
-            if (Math.abs(z) < EPS) {
-                x =  B[2];
-                y = -B[1];
-            }
-            c = [z, x, y];
+        if (M.geo.same(p, l.p1)) {
+            dx = l.p2.y - l.p1.y;
+            dy = l.p1.x - l.p2.x;
 
         // Special case: point is the second point of the line
         } else if (M.geo.same(p === l.p2)) {
-            x = B[1] + A[2] - B[2];
-            y = B[2] - A[1] + B[1];
-            z = A[0] * B[0];
-
-            if (Math.abs(z) < Mat.eps) {
-                x =  A[2];
-                y = -A[1];
-            }
-            c = [z, x, y];
+            dx = l.p1.y - l.p2.y;
+            dy = l.p2.x - l.p1.x;
 
         // special case: point lies somewhere else on the line
-        } else if (Math.abs(Mat.innerProduct(C, line.stdform, 3)) < EPS) {
-            x = C[1] + B[2] - C[2];
-            y = C[2] - B[1] + C[1];
-            z = B[0];
-
-            if (Math.abs(z) < Mat.eps) {
-                x =  B[2];
-                y = -B[1];
-            }
-
-            if (Math.abs(z) > EPS && Math.abs(x - C[1]) < EPS && Math.abs(y - C[2]) < EPS) {
-                x = C[1] + A[2] - C[2];
-                y = C[2] - A[1] + C[1];
-            }
-            c = [z, x, y];
+        } else if (l.contains(p)) {
+            dx = l.p1.y - p.y;
+            dy = p.x - l.p1.x;
 
         // general case: point does not lie on the line
-        // -> calculate the foot of the dropped perpendicular
         } else {
-            c = [0, line.stdform[1], line.stdform[2]];
-            c = Mat.crossProduct(c, C);                  // perpendicuar to line
-            c = Mat.crossProduct(c, line.stdform);       // intersection of line and perpendicular
+            var b = M.geo.project(p, l);
+            dx = b.x;
+            dy = b.y;
         }
 
-        return [new Coords(Type.COORDS_BY_USER, c, board), change];*/
+        return new M.geo.Line(new M.geo.Point(p.x, p.y), new M.geo.Point(p.x + dx, p.y + dy));
     };
 
     // Returns the circumcenter of the circumcircle two three points a, b and c
@@ -325,8 +323,24 @@
         // TODO
     };
 
-    M.geo.travellingSalesman = function() {
-        // TODO
+    M.geo.travellingSalesman = function(dist) {
+        var n = dist.length;
+        var cities = M.list(n);
+
+        var minLength = Infinity;
+        var minPath = null;
+
+        M.permutations(cities).each(function(path) {
+            var length = 0;
+            for (var i=0; i<n-1; ++i) {
+                length += dist[path[i]][path[i+1]];
+                if (length > minLength) return;
+            }
+            if (length < minLength) minLength = length;
+            minPath = path;
+        });
+
+        return { path: minPath, length: minLength };
     };
 
 
@@ -342,15 +356,15 @@
     };
 
     var pointRectIntersect = function(p, r) {
-
+        // TODO
     };
 
     var pointCircleIntersect = function(p, c) {
-
+        // TODO
     };
 
     var pointPolygonIntersect = function(p1, p2) {
-
+        // TODO
     };
 
     var lineLineIntersect = function(l1, l2) {
@@ -416,19 +430,5 @@
 
         throw new Error('Can\'t intersect ' + typeX + 's and ' + typeY + '.');
     };
-
-
-    // ---------------------------------------------------------------------------------------------
-    // Projections
-
-    M.geo.projectPointOnLine = function() {
-        // TODO
-    };
-
-    M.geo.projectLineOnLine = function() {
-        // TODO
-    };
-
-    // TODO More Projections Functions
 
 })();
