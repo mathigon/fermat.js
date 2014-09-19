@@ -86,7 +86,7 @@
         return M.Vector(a);
     };
 
-    M.vector.subt = function(v1, v2) {
+    M.vector.subtr = function(v1, v2) {
         var n = Math.max(v1.length, v2.length);
         var a = [];
         for (var i=0; i<n; ++i) a.push(v1[i] - v2[i]);

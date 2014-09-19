@@ -9,8 +9,8 @@
     "vector",
     "matrix",
     "geometry",
-    "polynomial",
     "cryptography",
     "numeric",
-    "units"
+    "units",
+    "expression"
 ]
