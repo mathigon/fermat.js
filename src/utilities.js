@@ -10,6 +10,10 @@ M.fermat = true;
 // Epsilon/tolerance value used by default
 var EPS = 0.000001;
 
+// Constants
+M.PHI = 1.618033988749895;
+M.SQRT2 = 1.4142135623730951;
+
 M.setPrecision = function(eps) {
     EPS = eps || 0.000001;
 };
