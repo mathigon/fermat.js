@@ -403,6 +403,15 @@ M.isOneOf = function(x, values) {
         return str.strip().split(/\s+/);
     };
 
+    if ( !String.prototype.contains ) {
+        M.extend(String.prototype, {
+
+            contains: function() {
+                return String.prototype.indexOf.apply( this, arguments ) !== -1;
+            }
+        }, true);
+    }
+
 })();
 ;(function() {
 
@@ -456,7 +465,7 @@ M.isOneOf = function(x, values) {
 
 
     // ---------------------------------------------------------------------------------------------
-    // Array Mapping
+    // Array Functions
 
     M.map = function(fn) {
         var arrays = toArray(arguments);
@@ -467,6 +476,22 @@ M.isOneOf = function(x, values) {
         return M.tabulate(function(i) {
             return fn.apply(null, M.each(arrays, function(x) { return x[i]; }));
         }, maxLength);
+    };
+
+
+    // Flatten a multi dimensional array, put all elements in a one dimensional array
+    M.flatten = function(array) {
+        var flat = array;
+
+        while (M.isArray(flat[0])) {
+            var next = [];
+            for (var i = 0, n = flat.length; i < n; ++i) {
+                next = next.concat.apply(next, flat[i]);
+            }
+            flat = next;
+        }
+
+        return flat;
     };
 
 

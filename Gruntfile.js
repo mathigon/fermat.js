@@ -51,7 +51,7 @@ module.exports = function(grunt) {
                 options: {
                     banner: '<%= project.banner %> (function() {\n',
                     footer: '\n\n})();',
-                    separator: ';',
+                    separator: '\n',
                     stripBanners: { line: true }
                 },
                 src: jsFiles,
