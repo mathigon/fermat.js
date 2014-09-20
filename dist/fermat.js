@@ -49,7 +49,8 @@ function findInArray(array, x) {
 function concatArrays(a1, a2) {
     return Array.prototype.concat.apply(a1, a2);
 }
-;(function() {
+
+(function() {
 
     // ---------------------------------------------------------------------------------------------
     // Simple Functions
@@ -215,7 +216,8 @@ function concatArrays(a1, a2) {
     };
 
 })();
-;(function() {
+
+(function() {
 
     var smallPrimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
 
@@ -307,7 +309,8 @@ function concatArrays(a1, a2) {
     };
 
 })();
-;(function() {
+
+(function() {
 
     M.factorial = caching(function(x) {
         if (x < 0) return NaN;
@@ -409,7 +412,8 @@ function concatArrays(a1, a2) {
 
 
 })();
-;(function() {
+
+(function() {
 
     M.random = {};
 
@@ -421,37 +425,23 @@ function concatArrays(a1, a2) {
         return Math.floor(a + (b == null ? 1 : b-a+1) * Math.random());
     };
 
-    /*
-    TODO
-    // Get an array of unique random numbers between min and max
-    randRangeUnique: function(min, max, count) {
-        if (count == null) {
-            return KhanUtil.randRange(min, max);
-        } else {
-            var toReturn = [];
-            for (var i = min; i <= max; i++) {
-                toReturn.push(i);
-            }
-
-            return KhanUtil.shuffle(toReturn, count);
-        }
-    },
-
-    // Get a random integer between min and max with a perc chance of hitting
-    // target (which is assumed to be in the range, but it doesn't have to be).
-    randRangeWeighted: function(min, max, target, perc) {
-        if (KhanUtil.random() < perc || (target === min && target === max)) {
-            return target;
-        } else {
-            return KhanUtil.randRangeExclude(min, max, [target]);
-        }
-    }
-    */
-
     M.random.integerArray = function(n) {
         var a = [];
         for (var i=0; i<n; ++i) a.push(i);
         return a.shuffle();
+    };
+
+    // Choses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }
+    M.random.weighted = function(obj) {
+        var total = 0, i;
+        M.each(obj, function(x) { total += (+x); });
+        var rand = Math.random() * total;
+
+        var curr = 0;
+        return M.some(obj, function(x, i) {
+            curr += obj[i];
+            if (rand <= curr) return i;
+        });
     };
 
 
@@ -531,13 +521,14 @@ function concatArrays(a1, a2) {
     // ---------------------------------------------------------------------------------------------
     // PDFs
 
-    M.normalPDF = function(mean, stddev, x) {
+    M.normalPDF = function(x, mean, stddev) {
         return (1 / Math.sqrt(2 * Math.PI * stddev * stddev)) *
             Math.exp(-((x - mean) * (x - mean)) / (2 * stddev * stddev));
     };
 
 })();
-;(function() {
+
+(function() {
 
     M.mean = M.average = function(a) {
         return a.length ? M.total(a) / a.length : 0;
@@ -654,7 +645,8 @@ function concatArrays(a1, a2) {
 
 
 })();
-;(function() {
+
+(function() {
 
 
     M.Complex = function(re, im) {
@@ -723,7 +715,8 @@ function concatArrays(a1, a2) {
 
 
 })();
-;(function() {
+
+(function() {
 
     var setPrototype = Object.setPrototypeOf ||
                        function(obj, proto) { obj.__proto__ = proto; }; // jshint ignore:line
@@ -843,7 +836,8 @@ function concatArrays(a1, a2) {
 
 
 })();
-;(function() {
+
+(function() {
 
     // M.Matrix([[1,2],[3,4]]) = [[1,2],[3,4]];
     // M.Matrix(2) = [[0,0],[0,0]];
@@ -1004,7 +998,8 @@ function concatArrays(a1, a2) {
     };
 
 })();
-;(function() {
+
+(function() {
 
     M.geo = {};
 
@@ -1431,7 +1426,8 @@ function concatArrays(a1, a2) {
     };
 
 })();
-;(function() {
+
+(function() {
 
     var LOWER_CASE = 'abcdefghijklmnopqrstuvwxyz';
     var UPPER_CASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -1511,7 +1507,8 @@ function concatArrays(a1, a2) {
     };
 
 })();
-;(function() {
+
+(function() {
 
 
     // M.bisect(function(x){ return Math.cos(x/2); }, 10) => Pi
@@ -1561,7 +1558,8 @@ function concatArrays(a1, a2) {
 
 
 })();
-;(function() {
+
+(function() {
 
     // ---------------------------------------------------------------------------------------------
     // Configuration
@@ -1715,7 +1713,8 @@ function concatArrays(a1, a2) {
     };
 
 })();
-;(function() {
+
+(function() {
 
     M.expression = {};
 
