@@ -189,6 +189,22 @@ function concatArrays(a1, a2) {
     // ---------------------------------------------------------------------------------------------
     // Special Functions
 
+    M.add = function() {
+        var sum = 0;
+        for (var i=0; i<arguments.length; ++i) sum += (+arguments[i] || 0);
+        return sum;
+    };
+
+    M.mult = function() {
+        var sum = 0;
+        for (var i=0; i<arguments.length; ++i) sum *= (+arguments[i] || 1);
+        return sum;
+    };
+
+    M.subtr = function(a, b) {
+        return a - b;
+    };
+
     // The JS implementation of the % operator returns the symmetric modulo.
     // Both are identical if a >= 0 and m >= 0 but the results differ if a or m < 0.
     M.mod = function(a, m) {
@@ -432,12 +448,18 @@ function concatArrays(a1, a2) {
     };
 
     // Choses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }
-    M.random.weighted = function(obj) {
-        var total = 0, i;
-        M.each(obj, function(x) { total += (+x); });
-        var rand = Math.random() * total;
+    // Total is optional to specify the total of the weights, if the function is called repeatedly
+    M.random.weighted = function(obj, setTotal) {
+        var total = 0;
+        if (setTotal == null) {
+            M.each(obj, function(x) { total += (+x); });
+        } else {
+            total = setTotal;
+        }
 
+        var rand = Math.random() * total;
         var curr = 0;
+
         return M.some(obj, function(x, i) {
             curr += obj[i];
             if (rand <= curr) return i;
@@ -466,21 +488,25 @@ function concatArrays(a1, a2) {
     // Discrete Distribution
 
     M.random.bernoulli = function(p) {
+        if (p == null) p = 0.5;
         p = Math.max(0,Math.min(1,p));
         return (Math.random() < p ? 1 : 0);
     };
 
     M.random.binomial = function(n,p) {
+        if (n == null) n = 1;
+        if (p == null) p = 0.5;
         var t = 0;
         for (var i=0; i<n; ++i) t += M.random.bernoulli(p);
         return t;
     };
 
     M.random.poisson = function(l) {
+        if (l == null) l = 1;
         if (l <= 0) return 0;
         var L = Math.exp(-l), p = 1;
         for (var k = 0; p > L; ++k) p = p * Math.random();
-        return k-1;
+        return k - 1;
     };
 
 
@@ -488,22 +514,30 @@ function concatArrays(a1, a2) {
     // Continuous Distribution
 
     M.random.uniform = function(a, b) {
+        if (a == null) a = 0;
+        if (b == null) b = 1;
         return a + (b-a) * Math.random();
     };
 
-    M.random.normal = function() {
+    M.random.normal = function(m, v) {
+        if (m == null) m = 0;
+        if (v == null) v = 1;
+
         var u1 = Math.random();
         var u2 = Math.random();
-        return Math.sqrt( -2 * Math.log(u1) ) * Math.cos( 2 * Math.PI * u2 );
+        var rand = Math.sqrt( -2 * Math.log(u1) ) * Math.cos( 2 * Math.PI * u2 );
+
+        return rand * Math.sqrt(s) + m;
     };
 
     M.random.exponential = function(l) {
-        if (l <= 0) return 0;
-        return -Math.log(Math.random()) / l;
+        if (l == null) l = 1;
+        return l <= 0 ? 0 : -Math.log(Math.random()) / l;
     };
 
     M.random.geometric = function(p) {
-        if (p <= 0 || p > 0) return null;
+        if (p == null) p = 0.5;
+        if (p <= 0 || p > 1) return null;
         return Math.floor( Math.log(Math.random()) / Math.log(1-p) );
     };
 
@@ -521,9 +555,8 @@ function concatArrays(a1, a2) {
     // ---------------------------------------------------------------------------------------------
     // PDFs
 
-    M.normalPDF = function(x, mean, stddev) {
-        return (1 / Math.sqrt(2 * Math.PI * stddev * stddev)) *
-            Math.exp(-((x - mean) * (x - mean)) / (2 * stddev * stddev));
+    M.normalPDF = function(x, m, v) {
+        return Math.exp(-M.square(x - m) / (2 * v)) / Math.sqrt(2 * Math.PI * v);
     };
 
 })();
@@ -686,7 +719,7 @@ function concatArrays(a1, a2) {
         return new M.Complex(c1.re + c2.re, c1.im + c2.im);
     };
 
-    M.complex.sub = function(c1, c2) {
+    M.complex.subtr = function(c1, c2) {
         if (!(c1 instanceof M.Complex)) c1 = new M.Complex(c1, 0);
         if (!(c2 instanceof M.Complex)) c2 = new M.Complex(c2, 0);
         return new M.Complex(c1.re - c2.re, c1.im - c2.im);
@@ -780,40 +813,20 @@ function concatArrays(a1, a2) {
         },
 
         toString: function() {
-            return '(' + Array.join.call(this, ', ') + ')';
+            return '(' + _arrayJoin.call(this, ', ') + ')';
         }
 
     }, true);
 
-
     // ---------------------------------------------------------------------------------------------
 
-
     M.vector = {};
-
-    M.vector.add = function(v1, v2) {
-        var n = Math.max(v1.length, v2.length);
-        var a = [];
-        for (var i=0; i<n; ++i) a.push(v1[i] + v2[i]);
-        return M.Vector(a);
-    };
-
-    M.vector.subtr = function(v1, v2) {
-        var n = Math.max(v1.length, v2.length);
-        var a = [];
-        for (var i=0; i<n; ++i) a.push(v1[i] - v2[i]);
-        return M.Vector(a);
-    };
 
     M.vector.dot = function(v1, v2) {
         var n = Math.max(v1.length, v2.length);
         var d = 0;
         for (var i=0; i<n; ++i) d += (v1[i] || 0) * (v2[i] || 0);
         return d;
-    };
-
-    M.vector.mult = function(v1, v2) {
-        // TODO
     };
 
     M.vector.cross2D = function(x, y) {
@@ -825,15 +838,6 @@ function concatArrays(a1, a2) {
                          v1[2] * v2[0] - v1[0] * v2[2],
                          v1[0] * v2[1] - v1[1] * v2[0]]);
     };
-
-    M.vector.angle = function(a, b) {
-        // TODO
-    };
-
-    M.vector.project = function(a, b) {
-        // TODO
-    };
-
 
 })();
 
@@ -1363,26 +1367,24 @@ function concatArrays(a1, a2) {
 
     var lineLineIntersect = function(l1, l2) {
 
-        /* TODO
-        var da = M.vector.diff(a2, a1);
-        var db = M.vector.diff(b2, b1);
-        var ab = M.vector.diff(a1, b1);
+        var d1 = M.map(M.subtr, l1.p2, l1.p1);
+        var d2 = M.map(M.subtr, l2.p2, l2.p1);
+        var d  = M.map(M.subtr, l2.p1, l1.p1);
 
-        var denominator = M.vector.cross(db, da);
+        var denominator = M.vector.cross2D(d2, d1);
         if (denominator === 0) return;  // -> colinear
 
-        var numeratorA = db[1] * ab[0] - db[0] * ab[1];
-        var numeratorB = da[1] * ab[0] - da[0] * ab[1];
+        var n1 = M.vector.cross2D(d2, d);
+        var n2 = M.vector.cross2D(d1, d);
 
-        var A = numeratorA / denominator;
-        var B = numeratorB / denominator;
+        var x = n1 / denominator;
+        var y = n2 / denominator;
 
-        if (M.bound(A,0,1) && M.bound(B,0,1)) {
-            var intersectionX = a1[0] + A * (a2[0] - a1[0]);
-            var intersectionY = a1[1] + B * (a2[1] - a1[1]);
+        if (M.bound(x,0,1) && M.bound(y,0,1)) {
+            var intersectionX = l1.p1.x + x * (l1.p2.x - l1.p1.x);
+            var intersectionY = l1.p1.y + y * (l1.p2.y - l1.p1.y);
             return [intersectionX, intersectionY];
         }
-        */
     };
 
     var lineCircleIntersect = function(l, c) {

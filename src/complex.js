@@ -44,7 +44,7 @@
         return new M.Complex(c1.re + c2.re, c1.im + c2.im);
     };
 
-    M.complex.sub = function(c1, c2) {
+    M.complex.subtr = function(c1, c2) {
         if (!(c1 instanceof M.Complex)) c1 = new M.Complex(c1, 0);
         if (!(c2 instanceof M.Complex)) c2 = new M.Complex(c2, 0);
         return new M.Complex(c1.re - c2.re, c1.im - c2.im);

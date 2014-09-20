@@ -204,6 +204,25 @@
     // ---------------------------------------------------------------------------------------------
     // Transformations
 
+    var scalePoint = function(p, sx, sy) {
+        return new M.geo.Point(p.x * sx, p.y * sy)
+    };
+
+    M.geo.scale = function(x, sx, sy) {
+        if (sy == null) sy = sx;
+
+        if (x instanceof M.geo.Rect) x = x.toPolygon();
+        var type = getGeoType(x);
+
+        switch (type) {
+            case 'point':   return scalePoint(x, sx, sy);
+            case 'line':    return new M.geo.Line(scalePoint(x.p1, sx, sy), scalePoint(x.p2, sx, sy));
+            case 'circle':  return new M.geo.Circle(scalePoint(x.c, sx, sy), x.r * (sx + sy) / 2);
+            case 'polygon': return new M.geo.Polygon(x.points.map(function(p) {
+                                                                return scalePoint(p, sx, sy); }));
+        }
+    };
+
     // Finds the reflection of a point p in a line l
     var reflectPoint = function(p, l) {
         var v = l.p2.x - l.p1.x;
@@ -306,10 +325,7 @@
         return new M.geo.Line(new M.geo.Point(p.x, p.y), new M.geo.Point(p.x + dx, p.y + dy));
     };
 
-    // Returns the circumcenter of the circumcircle two three points a, b and c
-    M.geo.circumcenter = function(a, b, c) {
-        // TODO
-    };
+    // TODO More Constructions
 
 
     // ---------------------------------------------------------------------------------------------
@@ -369,26 +385,24 @@
 
     var lineLineIntersect = function(l1, l2) {
 
-        /* TODO
-        var da = M.vector.diff(a2, a1);
-        var db = M.vector.diff(b2, b1);
-        var ab = M.vector.diff(a1, b1);
+        var d1 = M.map(M.subtr, l1.p2, l1.p1);
+        var d2 = M.map(M.subtr, l2.p2, l2.p1);
+        var d  = M.map(M.subtr, l2.p1, l1.p1);
 
-        var denominator = M.vector.cross(db, da);
+        var denominator = M.vector.cross2D(d2, d1);
         if (denominator === 0) return;  // -> colinear
 
-        var numeratorA = db[1] * ab[0] - db[0] * ab[1];
-        var numeratorB = da[1] * ab[0] - da[0] * ab[1];
+        var n1 = M.vector.cross2D(d1, d);
+        var n2 = M.vector.cross2D(d2, d);
 
-        var A = numeratorA / denominator;
-        var B = numeratorB / denominator;
+        var x = n2 / denominator;
+        var y = n1 / denominator;
 
-        if (M.bound(A,0,1) && M.bound(B,0,1)) {
-            var intersectionX = a1[0] + A * (a2[0] - a1[0]);
-            var intersectionY = a1[1] + B * (a2[1] - a1[1]);
+        if (M.bound(x,0,1) && M.bound(y,0,1)) {
+            var intersectionX = l1.p1.x + x * (l1.p2.x - l1.p1.x);
+            var intersectionY = l1.p1.y + y * (l1.p2.y - l1.p1.y);
             return [intersectionX, intersectionY];
         }
-        */
     };
 
     var lineCircleIntersect = function(l, c) {

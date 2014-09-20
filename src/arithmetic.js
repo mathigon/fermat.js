@@ -143,6 +143,22 @@
     // ---------------------------------------------------------------------------------------------
     // Special Functions
 
+    M.add = function() {
+        var sum = 0;
+        for (var i=0; i<arguments.length; ++i) sum += (+arguments[i] || 0);
+        return sum;
+    };
+
+    M.mult = function() {
+        var sum = 0;
+        for (var i=0; i<arguments.length; ++i) sum *= (+arguments[i] || 1);
+        return sum;
+    };
+
+    M.subtr = function(a, b) {
+        return a - b;
+    };
+
     // The JS implementation of the % operator returns the symmetric modulo.
     // Both are identical if a >= 0 and m >= 0 but the results differ if a or m < 0.
     M.mod = function(a, m) {

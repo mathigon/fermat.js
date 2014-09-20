@@ -68,40 +68,20 @@
         },
 
         toString: function() {
-            return '(' + Array.join.call(this, ', ') + ')';
+            return '(' + _arrayJoin.call(this, ', ') + ')';
         }
 
     }, true);
 
-
     // ---------------------------------------------------------------------------------------------
 
-
     M.vector = {};
-
-    M.vector.add = function(v1, v2) {
-        var n = Math.max(v1.length, v2.length);
-        var a = [];
-        for (var i=0; i<n; ++i) a.push(v1[i] + v2[i]);
-        return M.Vector(a);
-    };
-
-    M.vector.subtr = function(v1, v2) {
-        var n = Math.max(v1.length, v2.length);
-        var a = [];
-        for (var i=0; i<n; ++i) a.push(v1[i] - v2[i]);
-        return M.Vector(a);
-    };
 
     M.vector.dot = function(v1, v2) {
         var n = Math.max(v1.length, v2.length);
         var d = 0;
         for (var i=0; i<n; ++i) d += (v1[i] || 0) * (v2[i] || 0);
         return d;
-    };
-
-    M.vector.mult = function(v1, v2) {
-        // TODO
     };
 
     M.vector.cross2D = function(x, y) {
@@ -113,14 +93,5 @@
                          v1[2] * v2[0] - v1[0] * v2[2],
                          v1[0] * v2[1] - v1[1] * v2[0]]);
     };
-
-    M.vector.angle = function(a, b) {
-        // TODO
-    };
-
-    M.vector.project = function(a, b) {
-        // TODO
-    };
-
 
 })();
