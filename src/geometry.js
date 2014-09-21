@@ -205,7 +205,7 @@
     // Transformations
 
     var scalePoint = function(p, sx, sy) {
-        return new M.geo.Point(p.x * sx, p.y * sy)
+        return new M.geo.Point(p.x * sx, p.y * sy);
     };
 
     M.geo.scale = function(x, sx, sy) {
@@ -216,7 +216,8 @@
 
         switch (type) {
             case 'point':   return scalePoint(x, sx, sy);
-            case 'line':    return new M.geo.Line(scalePoint(x.p1, sx, sy), scalePoint(x.p2, sx, sy));
+            case 'line':    return new M.geo.Line(scalePoint(x.p1, sx, sy),
+                                                  scalePoint(x.p2, sx, sy));
             case 'circle':  return new M.geo.Circle(scalePoint(x.c, sx, sy), x.r * (sx + sy) / 2);
             case 'polygon': return new M.geo.Polygon(x.points.map(function(p) {
                                                                 return scalePoint(p, sx, sy); }));

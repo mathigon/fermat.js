@@ -78,9 +78,9 @@
         return digits;
     };
 
-    // Returns the decimal digits of a number
+    // Returns the fractional digits of a number
     // decimalDigits(3.456) = [4, 5, 6]
-    M.decimalDigits= function(n) {
+    M.fractionalDigits= function(n) {
         var str = '' + Math.abs(n - Math.floor(n));
         return toNumberArray(str.split(''));
     };
@@ -90,11 +90,6 @@
         var str = '' + Math.abs(n);
         str = str.split('.');
         return str.length === 1 ? 0 : str[1].length;
-    };
-
-    M.roundTowardsZero = function(x) {
-        // Add 0.0001 because of floating points uncertainty
-        return x < 0 ? Math.ceil(x - 0.0001) : Math.floor(x + 0.0001);
     };
 
     // Round a number to a certain number of decimal places
@@ -110,25 +105,22 @@
         return Math.round(n / increment) * increment;
     };
 
-    M.toFixed = function(n, precision) {
-        var fixed = n.toFixed(precision);
-        return M.nearlyEquals(n, +fixed) ? fixed : '~ ' + fixed;
+    M.roundTowardsZero = function(x) {
+        // Add 0.00001 because of floating points uncertainty
+        return x < 0 ? Math.ceil(x - 0.00001) : Math.floor(x + 0.00001);
     };
 
     // Returns a [numerator, denominator] array rational representation of `decimal`
     // See http://en.wikipedia.org/wiki/Continued_fraction for implementation details
-    // toFraction(4/8) => [1, 2]
-    // toFraction(0.66) => [33, 50]
-    // toFraction(0.66, 0.01) => [2/3]
-    M.toFraction = function(decimal, maxDenominator) {
-        maxDenominator = maxDenominator || 1000;
+    M.toFraction = function(decimal, precision) {
+        precision = precision || 0.0001;
 
         var n = [1, 0], d = [0, 1];
         var a = Math.floor(decimal);
         var rem = decimal - a;
 
-        while (d[0] <= maxDenominator) {
-            if (M.nearlyEquals(n[0] / d[0], decimal)) return [n[0], d[0]];
+        while (d[0] <= 1/precision) {
+            if (M.nearlyEquals(n[0] / d[0], precision)) return [n[0], d[0]];
             n = [a*n[0] + n[1], n[0]];
             d = [a*d[0] + d[1], d[0]];
             a = Math.floor(1 / rem);
@@ -141,7 +133,7 @@
 
 
     // ---------------------------------------------------------------------------------------------
-    // Special Functions
+    // Operations
 
     M.add = function() {
         var sum = 0;
@@ -157,6 +149,10 @@
 
     M.subtr = function(a, b) {
         return a - b;
+    };
+
+    M.div = function(a, b) {
+        return a / b;
     };
 
     // The JS implementation of the % operator returns the symmetric modulo.

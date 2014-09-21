@@ -90,12 +90,13 @@ module.exports = function(grunt) {
 
         markdown: {
             options: {
-                preCompile: function(src, context) {
+                preCompile: function(src) {
                     return src.split('\n').map(function(line) {
                         var m = (/^###\s+(.*)/g).exec(line);
                         return m ? ['### <a name="', '"></a>[M.', '](#', ')'].join(m[1]) : line;
                     }).join('\n');
-                }
+                },
+                template: 'docs/template.jst'
             },
             docs: {
                 files: { 'dist/docs.html': 'dist/docs.html' }
