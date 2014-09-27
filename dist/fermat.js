@@ -3,7 +3,7 @@
 // MIT License (https://github.com/Mathigon/fermat.js/blob/master/LICENSE)
 
  (function() {
-if (typeof M !== 'object' || !M.tesla) throw new Error('fermat.js requires tesla.js.');
+if (typeof M !== 'object' || !M.core) throw new Error('fermat.js requires core.js.');
 M.fermat = true;
 
 // Epsilon/tolerance value used by default
@@ -159,7 +159,7 @@ function concatArrays(a1, a2) {
     // Returns a [numerator, denominator] array rational representation of `decimal`
     // See http://en.wikipedia.org/wiki/Continued_fraction for implementation details
     M.toFraction = function(decimal, precision) {
-        maxDenominator = maxDenominator || 1000;
+        precision = precision || 0.0001;
 
         var n = [1, 0], d = [0, 1];
         var a = Math.floor(decimal);
@@ -1023,6 +1023,17 @@ function concatArrays(a1, a2) {
         this.p2 = p2;
     };
 
+    // Defines a cubic bezier curve from p1 to p2 with control points q1 and q2
+    M.geo.Curve = function(p1, p2, q1, q2) {
+        if (q1 == null) q1 = p1;
+        if (q2 == null) q1 = p2;
+
+        this.p1 = p1;
+        this.p2 = p2;
+        this.q1 = q1;
+        this.q2 = q2;
+    };
+
     // Defines a circle
     M.geo.Circle = function(c, r) {
         this.c = (r == null) ? new M.Point(0,0) : c;
@@ -1103,6 +1114,40 @@ function concatArrays(a1, a2) {
         return M.geo.distance(p, M.gep.project(p, l));
     };
 
+    M.geo.Polygon.prototype.centroid = function() {
+        // TODO
+    };
+
+
+    // ---------------------------------------------------------------------------------------------
+    // Interpolation
+
+    M.geo.Line.prototype.at = function(t) {
+        var x = t * p1.x + (1-t) * p2.x;
+        var y = t * p1.y + (1-t) * p2.y;
+        return new M.geo.Point(x, y);
+    };
+
+    M.geo.Circle.prototype.at = function() {
+        // TODO
+    };
+
+    M.geo.Rect.prototype.at = function() {
+        // TODO
+    };
+
+    M.geo.Polygon.prototype.at = function() {
+        // TODO
+    };
+
+    M.geo.Curve.prototype.at = function(t) {
+        var x = M.cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*q1.x +
+                    3*t*t*(1-t)*q2.x + M.cube(t)*this.p2.x;
+        var y = M.cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*q1.y +
+                    3*t*t*(1-t)*q2.y + M.cube(t)*this.p2.y;
+        return new M.geo.Point(x, y);
+    };
+
 
     // ---------------------------------------------------------------------------------------------
     // Distances
@@ -1117,6 +1162,10 @@ function concatArrays(a1, a2) {
 
     M.geo.Line.prototype.length = function() {
         return M.geo.distance(this.p1, this.p2);
+    };
+
+    M.geo.Curve.prototype.length = function() {
+        // TODO
     };
 
     M.geo.Circle.prototype.circumference = function() {
@@ -1146,15 +1195,15 @@ function concatArrays(a1, a2) {
         return Math.abs(this.w * this.h);
     };
 
-    var signedTriangleArea = function(a, b, c) {
-        return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) / 2;
-    };
-
     // Polygon has to be non-intersecting
     M.geo.Polygon.prototype.area = function() {
-        var A = 0, p = this.points, n = p.length;
-        for (var i = 1; i < n; ++i) A += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y;
-        A += p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
+        var p = this.points;
+        var n = p.length;
+        var A = p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
+
+        for (var i = 1; i < n; ++i)
+            A += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y;
+
         return Math.abs(A/2);
     };
 
@@ -1742,10 +1791,11 @@ function concatArrays(a1, a2) {
             case '{': ++brkt['{']; break;
             case '}': --brkt['{']; break;
             case '|': brkt['|'] = 1-brkt['|']; break;
+            case '"': brkt['"'] = 1-brkt['"']; break;
         }
 
         // TODO Error on negative brkt
-        return brkt['('] + brkt['['] + brkt['{'] + brkt['|'];
+        return brkt['('] + brkt['['] + brkt['{'] + brkt['|'] + brkt['"'];
     }
 
     function splitAt(array, del) {
@@ -1765,10 +1815,9 @@ function concatArrays(a1, a2) {
     // ---------------------------------------------------------------------------------------------
     // Expression Parsing
 
-    // TODO Strings ""
-    // TODO propagate errors
+    // TODO Error Handling
 
-    M.expression.parse = function parse(str, multiple) {
+    function parse(str, multiple) {
 
         var current = '';
         var result = [];
@@ -1783,7 +1832,7 @@ function concatArrays(a1, a2) {
             result.push(num === num ? num : x);
         }
 
-        var brkt = { '(': 0, '[': 0, '{': 0, '|': 0 };
+        var brkt = { '(': 0, '[': 0, '{': 0, '|': 0, '"': 0 };
 
         for (var i=0; i<n; ++i) {
 
@@ -1793,8 +1842,8 @@ function concatArrays(a1, a2) {
 
             // TODO fail on {}@&\?<>=~`±§
 
-            if (('([{').contains(x) && !wasOpen) {
-                if (x === '(' && +current !== +current && !('+-*/!^,').contains(current)) {
+            if (('([{|"').contains(x) && !wasOpen) {
+                if (x === '(' && +current !== +current && !('+-*/!^%,').contains(current)) {
                     openFn = current;
                 } else {
                     push(current);
@@ -1803,12 +1852,16 @@ function concatArrays(a1, a2) {
                 current = '';
             } else if (isOpen) {
                 current += x;
-            } else if ((')]}').contains(x)) {
+            } else if ((')]}|"').contains(x)) {
                 if (current) {
                     if (openFn) {
                         result.push(Array.prototype.concat([openFn], parse(current, true)));
                     } else if (openBrk === '[') {
                         result.push(Array.prototype.concat(['[]'], parse(current, true)));
+                    } else if (openBrk === '|') {
+                        result.push(Array.prototype.concat(['abs'], parse(current, true)));
+                    } else if (openBrk === '"') {
+                        result.push(Array.prototype.concat(['"'], parse(current, true)));
                     } else {
                         result.push(parse(current));
                     }
@@ -1828,21 +1881,17 @@ function concatArrays(a1, a2) {
             }
         }
 
-        if (brkt['('] + brkt['['] + brkt['{'] + brkt['|']) return ['Error: non-matching brackets'];
+        if (brkt['('] + brkt['['] + brkt['{'] + brkt['|'] + brkt['"'])
+            return ['Error: non-matching brackets'];
 
         push(current);
 
-        // Handle Factorials
+        // Handle Factorials and Percentages
         for (i=0; i<result.length; ++i) {
             if (result[i] === '!') {
                 result.splice(i-1, 2, ['!', result[i-1]]);
                 i -= 1;
-            }
-        }
-
-        // Handle Percentages
-        for (i=0; i<result.length; ++i) {
-            if (result[i] === '!') {
+            } else if (result[i] === '%') {
                 result.splice(i-1, 2, ['/', result[i-1], 100]);
                 i -= 1;
             }
@@ -1882,26 +1931,29 @@ function concatArrays(a1, a2) {
         }
 
         return result[0];
-    };
+    }
 
 
     // ---------------------------------------------------------------------------------------------
     // Expression Simplify
 
-    M.expression.simplify = function(expr, vars) {
+    function simplify (expr, vars) {
         // TODO
-    };
+    }
 
 
     // ---------------------------------------------------------------------------------------------
     // Expression to String
 
-    M.expression.toString = function(expr) {
+    function toString(expr) {
         // TODO
-    };
+    }
+
 
     // ---------------------------------------------------------------------------------------------
     // Expression Evaluate
+
+    // TODO Return expressions when undefined variables
 
     var fn = {
         '+': function(a, b) { return a + b; },
@@ -1911,10 +1963,11 @@ function concatArrays(a1, a2) {
         '!': function(n) { return M.factorial(n); },
         '^': function(a, b) { return Math.pow(a, b); },
         '[]': function() { return arguments; },
+        '"': function(str) { return '' + str; },
         'mod': function(a, b) { return M.mod(a, b); }
     };
 
-    M.expression.evaluate = function evaluate(expr, vars) {
+    function evaluate(expr, vars) {
 
         // Individual Values
         if (M.isNumber(expr)) return expr;
@@ -1925,7 +1978,28 @@ function concatArrays(a1, a2) {
         for (var i=1; i<expr.length; ++i) args.push(evaluate(expr[i], vars));
         var f = fn[expr[0]] || Math[expr[0]] || M[expr[0]];
         return f.apply(null, args);
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    // Expression Evaluate
+
+    M.Expression = function(str) {
+        this._expr = parse(str);
     };
+
+    M.Expression.prototype.toString = function() {
+        return toString(this._expr);
+    };
+
+    M.Expression.prototype.simplify = function() {
+        return toString(this._expr);
+    };
+
+    M.Expression.prototype.toString = function() {
+        return toString(this._expr);
+    };
+
 
 })();
 

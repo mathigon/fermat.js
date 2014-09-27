@@ -29,6 +29,17 @@
         this.p2 = p2;
     };
 
+    // Defines a cubic bezier curve from p1 to p2 with control points q1 and q2
+    M.geo.Curve = function(p1, p2, q1, q2) {
+        if (q1 == null) q1 = p1;
+        if (q2 == null) q1 = p2;
+
+        this.p1 = p1;
+        this.p2 = p2;
+        this.q1 = q1;
+        this.q2 = q2;
+    };
+
     // Defines a circle
     M.geo.Circle = function(c, r) {
         this.c = (r == null) ? new M.Point(0,0) : c;
@@ -109,6 +120,40 @@
         return M.geo.distance(p, M.gep.project(p, l));
     };
 
+    M.geo.Polygon.prototype.centroid = function() {
+        // TODO
+    };
+
+
+    // ---------------------------------------------------------------------------------------------
+    // Interpolation
+
+    M.geo.Line.prototype.at = function(t) {
+        var x = t * p1.x + (1-t) * p2.x;
+        var y = t * p1.y + (1-t) * p2.y;
+        return new M.geo.Point(x, y);
+    };
+
+    M.geo.Circle.prototype.at = function() {
+        // TODO
+    };
+
+    M.geo.Rect.prototype.at = function() {
+        // TODO
+    };
+
+    M.geo.Polygon.prototype.at = function() {
+        // TODO
+    };
+
+    M.geo.Curve.prototype.at = function(t) {
+        var x = M.cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*q1.x +
+                    3*t*t*(1-t)*q2.x + M.cube(t)*this.p2.x;
+        var y = M.cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*q1.y +
+                    3*t*t*(1-t)*q2.y + M.cube(t)*this.p2.y;
+        return new M.geo.Point(x, y);
+    };
+
 
     // ---------------------------------------------------------------------------------------------
     // Distances
@@ -123,6 +168,10 @@
 
     M.geo.Line.prototype.length = function() {
         return M.geo.distance(this.p1, this.p2);
+    };
+
+    M.geo.Curve.prototype.length = function() {
+        // TODO
     };
 
     M.geo.Circle.prototype.circumference = function() {
@@ -152,15 +201,15 @@
         return Math.abs(this.w * this.h);
     };
 
-    var signedTriangleArea = function(a, b, c) {
-        return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) / 2;
-    };
-
     // Polygon has to be non-intersecting
     M.geo.Polygon.prototype.area = function() {
-        var A = 0, p = this.points, n = p.length;
-        for (var i = 1; i < n; ++i) A += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y;
-        A += p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
+        var p = this.points;
+        var n = p.length;
+        var A = p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
+
+        for (var i = 1; i < n; ++i)
+            A += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y;
+
         return Math.abs(A/2);
     };
 

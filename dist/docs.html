@@ -12,67 +12,53 @@
 <h2 id="arithmetic">Arithmetic</h2>
 <h3 id="-a-name-nearlyequals-a-m-nearlyequals-nearlyequals-"><a name="nearlyEquals"></a><a href="#nearlyEquals">M.nearlyEquals</a></h3>
 <h4 id="-m-nearlyequals-number-a-number-b-optional-number-t-boolean-"><code>M.nearlyEquals(Number a, Number b, optional Number t) : Boolean</code></h4>
-<p>checks if two numbers a and b are almost equal. If the tolerance t isn&#39;t specified, the default tolerance is used.</p>
+<p>checks if two numbers <code>a</code> and <code>b</code> are almost equal. If the tolerance <code>t</code> isn&#39;t specified, the default tolerance is used.</p>
 <h3 id="-a-name-sign-a-m-sign-sign-"><a name="sign"></a><a href="#sign">M.sign</a></h3>
 <h4 id="-m-sign-number-x-1-0-1-"><code>M.sign(Number x) : (-1 | 0 | 1)</code></h4>
-<p>returns the sign of a number x.</p>
+<p>returns the sign of a number <code>x</code>.</p>
 <h3 id="-a-name-square-a-m-square-square-"><a name="square"></a><a href="#square">M.square</a></h3>
 <h4 id="-m-square-number-x-number-"><code>M.square(Number x) : Number</code></h4>
-<p>returns the square of a number x.</p>
+<p>returns the square of a number <code>x</code>.</p>
 <h3 id="-a-name-cube-a-m-cube-cube-"><a name="cube"></a><a href="#cube">M.cube</a></h3>
 <h4 id="-m-cube-number-x-number-"><code>M.cube(Number x) : Number</code></h4>
-<p>returns the cube of a number x.</p>
+<p>returns the cube of a number <code>x</code>.</p>
 <h3 id="-a-name-bound-a-m-bound-bound-"><a name="bound"></a><a href="#bound">M.bound</a></h3>
 <h4 id="-m-bound-number-x-number-min-number-max-number-"><code>M.bound(Number x, Number min, Number max) : Number</code></h4>
-<p>returns x, bounded between two limits min and max.</p>
+<p>returns <code>x</code>, bounded between two limits min and max.</p>
 <h3 id="-a-name-between-a-m-between-between-"><a name="between"></a><a href="#between">M.between</a></h3>
 <h4 id="-m-between-number-x-number-min-number-max-boolean-"><code>M.between(Number x, Number min, Number max) : Boolean</code></h4>
-<p>checks if x lies on or between the two limits min and max.</p>
+<p>checks if <code>x</code> lies on or between the two limits min and max.</p>
 <h3 id="-a-name-numberformat-a-m-numberformat-numberformat-"><a name="numberFormat"></a><a href="#numberFormat">M.numberFormat</a></h3>
 <h4 id="-m-numberformat-number-x-string-"><code>M.numberFormat(Number x) : String</code></h4>
-<p>formats a number x with thousands separators.</p>
+<p>formats a number <code>x</code> with thousands separators.</p>
 <h3 id="-a-name-toordinal-a-m-toordinal-toordinal-"><a name="toOrdinal"></a><a href="#toOrdinal">M.toOrdinal</a></h3>
 <h4 id="-m-toordinal-number-x-string-"><code>M.toOrdinal(Number x) : String</code></h4>
-<p>returns the <em>ordinal</em> (1st, 2nd, ...) of a number x.</p>
+<p>returns the <em>ordinal</em> (1st, 2nd, ...) of a number <code>x</code>.</p>
 <h3 id="-a-name-digits-a-m-digits-digits-"><a name="digits"></a><a href="#digits">M.digits</a></h3>
-<h4 id="-m-digits-number-x-number-"><code>M.digits(Number x) : [Number]</code></h4>
-<p>returns an array with the integer decimal digits of x, in reverse order.
+<h4 id="-m-digits-number-x-number-"><code>M.digits(Number x) : [Number, ...]</code></h4>
+<p>returns an array with the integer decimal digits of <code>x</code>, in reverse order.
 For example, <code>M.digits(376) = [6, 7, 3]</code>.</p>
 <h3 id="-a-name-fractionaldigits-a-m-fractionaldigits-fractionaldigits-"><a name="fractionalDigits"></a><a href="#fractionalDigits">M.fractionalDigits</a></h3>
-<h4 id="-m-fractionaldigits-number-x-number-"><code>M.fractionalDigits(Number x) : [Number]</code></h4>
-<p>returns an array with the fractional decimal digits of x.
+<h4 id="-m-fractionaldigits-number-x-number-"><code>M.fractionalDigits(Number x) : [Number, ...]</code></h4>
+<p>returns an array with the fractional decimal digits of <code>x</code>.
 For example, <code>fractionalDigits(3.456) = [4, 5, 6]</code>.</p>
 <h3 id="-a-name-decimalplaces-a-m-decimalplaces-decimalplaces-"><a name="decimalPlaces"></a><a href="#decimalPlaces">M.decimalPlaces</a></h3>
 <h4 id="-m-decimalplaces-number-x-number-"><code>M.decimalPlaces(Number x) : Number</code></h4>
-<p>returns the number of fractional decimal digits of x.</p>
-<p>M.roundTowardsZero = function(x) {
-};</p>
-<p>// Round a number to a certain number of decimal places
-M.round = function(n, precision) {
-};</p>
-<p>// Round a number n to the nearest increment (or 1)
-// round(70, 30) = 60, round(45,30) = 60, round(20.6) = 21
-M.roundTo = function(n, increment) {</p>
-<p>M.toFixed = function(n, precision) {</p>
-<p>// Returns a [numerator, denominator] array rational representation of <code>decimal</code>
-// toFraction(4/8) =&gt; [1, 2]
-// toFraction(0.66) =&gt; [33, 50]
-// toFraction(0.66, 0.01) =&gt; [2/3]
-M.toFraction = function(decimal, maxDenominator) {</p>
-<p>// ---------------------------------------------------------------------------------------------
-// Operations</p>
-<p>M.add = function() {</p>
-<p>M.mult = function() {</p>
-<p>M.subtr = function(a, b) {</p>
-<p>M.div = function(a, b) {</p>
-<p>// The JS implementation of the % operator returns the symmetric modulo.
-// Both are identical if a &gt;= 0 and m &gt;= 0 but the results differ if a or m &lt; 0.
-M.mod = function(a, m) {</p>
-<p>M.log = function(x, b) {</p>
-<p>M.log10 = Math.log10 || function (x) {</p>
-<p>M.log2 = Math.log2 || function (x) {</p>
-<p>M.cosh = Math.cosh || function (x) {</p>
-<p>M.sinh = Math.sinh || function (x) {</p>
+<p>returns the number of fractional decimal digits of <code>x</code>.</p>
+<h3 id="-a-name-round-a-m-round-round-"><a name="round"></a><a href="#round">M.round</a></h3>
+<h4 id="-m-round-number-x-optional-number-precision-0-number-"><code>M.round(Number x, optional Number precision = 0) : Number</code></h4>
+<p>rounds <code>x</code> to have at most <code>precision</code> decimal places.</p>
+<h3 id="-a-name-round-a-m-round-round-"><a name="round"></a><a href="#round">M.round</a></h3>
+<h4 id="-m-roundto-number-x-optional-number-increment-1-number-"><code>M.roundTo(Number x, optional Number increment = 1) : Number</code></h4>
+<p>rounds <code>x</code> to the nearest multiple of <code>increment</code>.</p>
+<h3 id="-a-name-roundtowardszero-a-m-roundtowardszero-roundtowardszero-"><a name="roundTowardsZero"></a><a href="#roundTowardsZero">M.roundTowardsZero</a></h3>
+<h4 id="-m-roundtowardszero-number-x-number-"><code>M.roundTowardsZero(Number x) : Number</code></h4>
+<p>rounds <code>x</code> to the nearest integer towards 0;</p>
+<h3 id="-a-name-tofraction-a-m-tofraction-tofraction-"><a name="toFraction"></a><a href="#toFraction">M.toFraction</a></h3>
+<h4 id="-m-tofraction-number-x-optional-number-maxdenom-1000-number-number-"><code>M.toFraction(Number x, optional Number maxDenom = 1000) : [Number, Number]</code></h4>
+<p>uses continued fractions to find a rational representation of a decimal <code>x</code>, and returns the array <code>[numerator, denominator]</code>.
+If there is no rational representation with a denominator <code>&lt;= maxDenom</code>, then <code>[x, 1]</code> is returned.
+For example, <code>M.toFraction(3/6) = [1, 2]</code>, <code>M.toFraction(0.33) = [33, 100]</code> and  <code>M.toFraction(0.66, 0.01) = [2/3]</code></p>
 <h2 id="numbertheory">NumberTheory</h2>
 <h3 id="-a-name-gcd-a-m-gcd-gcd-"><a name="gcd"></a><a href="#gcd">M.gcd</a></h3>
 <h4 id="-m-gcd-integer-a-integer-b-"><code>M.gcd(Integer a, Integer b, ...)</code></h4>

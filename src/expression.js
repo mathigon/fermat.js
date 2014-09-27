@@ -18,10 +18,11 @@
             case '{': ++brkt['{']; break;
             case '}': --brkt['{']; break;
             case '|': brkt['|'] = 1-brkt['|']; break;
+            case '"': brkt['"'] = 1-brkt['"']; break;
         }
 
         // TODO Error on negative brkt
-        return brkt['('] + brkt['['] + brkt['{'] + brkt['|'];
+        return brkt['('] + brkt['['] + brkt['{'] + brkt['|'] + brkt['"'];
     }
 
     function splitAt(array, del) {
@@ -41,10 +42,9 @@
     // ---------------------------------------------------------------------------------------------
     // Expression Parsing
 
-    // TODO Strings ""
-    // TODO propagate errors
+    // TODO Error Handling
 
-    M.expression.parse = function parse(str, multiple) {
+    function parse(str, multiple) {
 
         var current = '';
         var result = [];
@@ -59,7 +59,7 @@
             result.push(num === num ? num : x);
         }
 
-        var brkt = { '(': 0, '[': 0, '{': 0, '|': 0 };
+        var brkt = { '(': 0, '[': 0, '{': 0, '|': 0, '"': 0 };
 
         for (var i=0; i<n; ++i) {
 
@@ -69,8 +69,8 @@
 
             // TODO fail on {}@&\?<>=~`±§
 
-            if (('([{').contains(x) && !wasOpen) {
-                if (x === '(' && +current !== +current && !('+-*/!^,').contains(current)) {
+            if (('([{|"').contains(x) && !wasOpen) {
+                if (x === '(' && +current !== +current && !('+-*/!^%,').contains(current)) {
                     openFn = current;
                 } else {
                     push(current);
@@ -79,12 +79,16 @@
                 current = '';
             } else if (isOpen) {
                 current += x;
-            } else if ((')]}').contains(x)) {
+            } else if ((')]}|"').contains(x)) {
                 if (current) {
                     if (openFn) {
                         result.push(Array.prototype.concat([openFn], parse(current, true)));
                     } else if (openBrk === '[') {
                         result.push(Array.prototype.concat(['[]'], parse(current, true)));
+                    } else if (openBrk === '|') {
+                        result.push(Array.prototype.concat(['abs'], parse(current, true)));
+                    } else if (openBrk === '"') {
+                        result.push(Array.prototype.concat(['"'], parse(current, true)));
                     } else {
                         result.push(parse(current));
                     }
@@ -104,21 +108,17 @@
             }
         }
 
-        if (brkt['('] + brkt['['] + brkt['{'] + brkt['|']) return ['Error: non-matching brackets'];
+        if (brkt['('] + brkt['['] + brkt['{'] + brkt['|'] + brkt['"'])
+            return ['Error: non-matching brackets'];
 
         push(current);
 
-        // Handle Factorials
+        // Handle Factorials and Percentages
         for (i=0; i<result.length; ++i) {
             if (result[i] === '!') {
                 result.splice(i-1, 2, ['!', result[i-1]]);
                 i -= 1;
-            }
-        }
-
-        // Handle Percentages
-        for (i=0; i<result.length; ++i) {
-            if (result[i] === '!') {
+            } else if (result[i] === '%') {
                 result.splice(i-1, 2, ['/', result[i-1], 100]);
                 i -= 1;
             }
@@ -158,26 +158,29 @@
         }
 
         return result[0];
-    };
+    }
 
 
     // ---------------------------------------------------------------------------------------------
     // Expression Simplify
 
-    M.expression.simplify = function(expr, vars) {
+    function simplify (expr, vars) {
         // TODO
-    };
+    }
 
 
     // ---------------------------------------------------------------------------------------------
     // Expression to String
 
-    M.expression.toString = function(expr) {
+    function toString(expr) {
         // TODO
-    };
+    }
+
 
     // ---------------------------------------------------------------------------------------------
     // Expression Evaluate
+
+    // TODO Return expressions when undefined variables
 
     var fn = {
         '+': function(a, b) { return a + b; },
@@ -187,10 +190,11 @@
         '!': function(n) { return M.factorial(n); },
         '^': function(a, b) { return Math.pow(a, b); },
         '[]': function() { return arguments; },
+        '"': function(str) { return '' + str; },
         'mod': function(a, b) { return M.mod(a, b); }
     };
 
-    M.expression.evaluate = function evaluate(expr, vars) {
+    function evaluate(expr, vars) {
 
         // Individual Values
         if (M.isNumber(expr)) return expr;
@@ -201,6 +205,27 @@
         for (var i=1; i<expr.length; ++i) args.push(evaluate(expr[i], vars));
         var f = fn[expr[0]] || Math[expr[0]] || M[expr[0]];
         return f.apply(null, args);
+    }
+
+
+    // ---------------------------------------------------------------------------------------------
+    // Expression Evaluate
+
+    M.Expression = function(str) {
+        this._expr = parse(str);
     };
+
+    M.Expression.prototype.toString = function() {
+        return toString(this._expr);
+    };
+
+    M.Expression.prototype.simplify = function() {
+        return toString(this._expr);
+    };
+
+    M.Expression.prototype.toString = function() {
+        return toString(this._expr);
+    };
+
 
 })();
