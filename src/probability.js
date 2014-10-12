@@ -13,7 +13,7 @@
     // Simple Random Number Generators
 
     M.random.integer = function(a, b) {
-        return Math.floor(a + (b == null ? 1 : b-a+1) * Math.random());
+        return (b == null ? 0 : a) +  Math.floor((b == null ? a : b - a + 1) * Math.random());
     };
 
     M.random.integerArray = function(n) {

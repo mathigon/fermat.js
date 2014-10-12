@@ -434,7 +434,7 @@ function concatArrays(a1, a2) {
     // Simple Random Number Generators
 
     M.random.integer = function(a, b) {
-        return Math.floor(a + (b == null ? 1 : b-a+1) * Math.random());
+        return (b == null ? 0 : a) +  Math.floor((b == null ? a : b - a + 1) * Math.random());
     };
 
     M.random.integerArray = function(n) {
@@ -1780,182 +1780,215 @@ function concatArrays(a1, a2) {
 
 (function() {
 
-    M.expression = {};
-
-    function handleBracket(brkt, x) {
-        switch(x) {
-            case '(': ++brkt['(']; break;
-            case ')': --brkt['(']; break;
-            case '[': ++brkt['[']; break;
-            case ']': --brkt['[']; break;
-            case '{': ++brkt['{']; break;
-            case '}': --brkt['{']; break;
-            case '|': brkt['|'] = 1-brkt['|']; break;
-            case '"': brkt['"'] = 1-brkt['"']; break;
-        }
-
-        // TODO Error on negative brkt
-        return brkt['('] + brkt['['] + brkt['{'] + brkt['|'] + brkt['"'];
-    }
-
-    function splitAt(array, del) {
-        var result = [];
-        var last = -1;
-        for (var i=0; i<array.length; ++i) {
-            if (array[i] === del) {
-                result.push(array.slice(last+1, i));
-                last = i;
-            }
-        }
-        result.push(array.slice(last+1, i));
-        return result;
-    }
-
+    // TODO fix parser errors + test
+    // TODO + and * with multiple arguments
+    // TODO Simplify expressions
+    // TODO More error messages: 1(1), "str"(10), %(x)
 
     // ---------------------------------------------------------------------------------------------
-    // Expression Parsing
+    // Expression Parser
 
-    // TODO Error Handling
+    var brackets = { '(': ')', '[': ']', '{': '}', '|': '|' };
 
-    function parse(str, multiple) {
+    function bracketsMatch(a, b) {
+        return brackets[a] === b || brackets[b] === a;
+    }
 
-        var current = '';
-        var result = [];
-        var n = str.length;
-        var isOpen = false;
-        var openFn;
-        var openBrk;
+    function ExpressionParser() {
+        this.current = '';
+        this.result = [];
 
-        function push(x) {
-            if (!x) return;
-            var num = +x;
-            result.push(num === num ? num : x);
-        }
+        this.currentParser = null;
+        this.currentBracket = null;
+        this.currentFn = null;
+    }
 
-        var brkt = { '(': 0, '[': 0, '{': 0, '|': 0, '"': 0 };
+    // Pushes a new letter to the expression parser
+    ExpressionParser.prototype.send = function(x) {
 
-        for (var i=0; i<n; ++i) {
+        // Handle Strings
+        if (this.currentBracket === '"' && x !== '"') {
+            this.current += x;
 
-            var x = str[i];
-            var wasOpen = isOpen;
-            isOpen = handleBracket(brkt, x);
+        // Closing Strings
+    } else if (!this.currentBracket && x === '"') {
+            this.pushCurrent();
+            this.currentBracket = '"';
 
-            // TODO fail on {}@&\?<>=~`±§
+        // Opening Strings
+    } else if (this.currentBracket === '"' && x === '"') {
+            this.result.push(new Expression('"', [this.current]));
 
-            if (('([{|"').contains(x) && !wasOpen) {
-                if (x === '(' && +current !== +current && !('+-*/!^%,').contains(current)) {
-                    openFn = current;
+        // Handle Invalid Characters
+        // } else if (('@&\?<>=~`±§').contains(x)) {
+            // throw new Error('Unexpected "' + x + '".');
+
+        // Handle Content for CHild parsers
+        } else if (this.currentParser) {
+
+            if ((')]}|').contains(x) && this.currentParser.isReady()) {
+
+                if (!bracketsMatch(x,this.currentBracket))
+                    throw new Error('Unexpected "' + x + '".');
+
+                var completed = this.currentParser.complete();
+                if (this.currentFn) {
+                    this.result.push(new Expression(this.currentFn, completed));
+                } else if (x === ']') {
+                    this.result.push(new Expression('[]', completed));
+                } else if (x === '|') {
+                    this.result.push(new Expression('abs', completed));
                 } else {
-                    push(current);
+                    if (completed.length !== 1) throw new Error('Unexpected ",".');
+                    this.result.push(new Expression(completed[i]));
                 }
-                openBrk = x;
-                current = '';
-            } else if (isOpen) {
-                current += x;
-            } else if ((')]}|"').contains(x)) {
-                if (current) {
-                    if (openFn) {
-                        result.push(Array.prototype.concat([openFn], parse(current, true)));
-                    } else if (openBrk === '[') {
-                        result.push(Array.prototype.concat(['[]'], parse(current, true)));
-                    } else if (openBrk === '|') {
-                        result.push(Array.prototype.concat(['abs'], parse(current, true)));
-                    } else if (openBrk === '"') {
-                        result.push(Array.prototype.concat(['"'], parse(current, true)));
-                    } else {
-                        result.push(parse(current));
-                    }
-                }
-                openFn = openBrk = null;
-                current = '';
-            } else if (('+-*/!^%,').contains(x)) {
-                if (x === ',' && !multiple) return ['Error: unexpected ",".'];
-                push(current);
-                if (x !== ',') result.push(x);
-                current = '';
-            } else if (x.match(/\s\n\t/)) {
-                push(current);
-                current = '';
+                this.current = '';
+                this.currentBracket = this.currentParser = this.currentFn = null;
+
             } else {
-                current += x.trim();
+                this.currentParser.send(x);
             }
+
+        // Handle Open Brackets
+        } else if (('([{|').contains(x)) {
+            if (x === '(' && isNaN(+this.current) && !('+-*/!^%,').contains(this.current)) {
+                this.currentFn = this.current;
+                this.current = '';
+            } else {
+                this.pushCurrent();
+            }
+            this.currentParser = new ExpressionParser();
+            this.currentBracket = x;
+
+        } else if (('+-*/!^%,').contains(x)) {
+            this.pushCurrent();
+            if (x !== ',') this.result.push(x);
+
+        } else if (x.match(/\s\n\t/)) {
+            this.pushCurrent();
+
+        } else {
+            this.current += x.trim();
         }
+    };
 
-        if (brkt['('] + brkt['['] + brkt['{'] + brkt['|'] + brkt['"'])
-            return ['Error: non-matching brackets'];
+    ExpressionParser.prototype.isReady = function() {
+        return this.currentParser == null;
+    };
 
-        push(current);
+    // Adds a new letter, number or expression to the results object
+    ExpressionParser.prototype.pushCurrent = function() {
+        if (!this.current) return;
+        var num = +this.current;
+        this.result.push(new Expression(num === num ? num : this.current));
+        this.current = '';
+    };
+
+    // Completes the expression and returns a new expression
+    ExpressionParser.prototype.complete = function(x) {
+
+        this.pushCurrent();
 
         // Handle Factorials and Percentages
-        for (i=0; i<result.length; ++i) {
-            if (result[i] === '!') {
-                result.splice(i-1, 2, ['!', result[i-1]]);
+        for (i=0; i<this.result.length; ++i) {
+            if (this.result[i] === '!') {
+                this.result.splice(i-1, 2, new Expression('!', [this.result[i-1]]));
                 i -= 1;
-            } else if (result[i] === '%') {
-                result.splice(i-1, 2, ['/', result[i-1], 100]);
+            } else if (this.result[i] === '%') {
+                this.result.splice(i-1, 2, new Expression('/', [this.result[i-1], 100]));
                 i -= 1;
             }
         }
 
         // Handle Powers
-        for (i=0; i<result.length; ++i) {
-            if (result[i] === '^') {
-                result.splice(i-1, 3, ['^', result[i-1], result[i+1]]);
+        for (i=0; i<this.result.length; ++i) {
+            if (this.result[i] === '^') {
+                this.result.splice(i-1, 3, new Expression('^', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             }
         }
 
         // Handle Leading -
-        if (result[0] === '-') result.splice(0, 2, ['-', result[1]]);
+        if (this.result[0] === '-') this.result.splice(0, 2, new Expression('-', [this.result[1]]));
 
         // Handle Multiplication and Division
-        for (i=0; i<result.length; ++i) {
-            if (result[i] === '/') {
-                result.splice(i-1, 3, ['/', result[i-1], result[i+1]]);
+        for (i=0; i<this.result.length; ++i) {
+            if (this.result[i] === '/') {
+                this.result.splice(i-1, 3, new Expression('/', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
-            } else if (result[i] === '*') {
-                result.splice(i-1, 3, ['*', result[i-1], result[i+1]]);
+            } else if (this.result[i] === '*') {
+                this.result.splice(i-1, 3, new Expression('*', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             }
         }
 
         // Handle Addition and Subtraction
-        for (i=0; i<result.length; ++i) {
-            if (result[i] === '-') {
-                result.splice(i-1, 3, ['-', result[i-1], result[i+1]]);
+        for (i=0; i<this.result.length; ++i) {
+            if (this.result[i] === '-') {
+                this.result.splice(i-1, 3, new Expression('-', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
-            } else if (result[i] === '+') {
-                result.splice(i-1, 3, ['+', result[i-1], result[i+1]]);
+            } else if (this.result[i] === '+') {
+                this.result.splice(i-1, 3, new Expression('+', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             }
         }
 
-        return result[0];
-    }
+        return this.result;
+    };
 
 
     // ---------------------------------------------------------------------------------------------
-    // Expression Simplify
+    // Expressions
 
-    function simplify (expr, vars) {
-        // TODO
+    function Expression(fn, args) {
+        if (arguments.length === 1) {
+            this.isVal = true;
+            this.val = fn;
+        } else {
+            this.fn = fn;
+            this.args = args;
+        }
     }
+
+    Expression.prototype.simplify = function() {
+        // TODO !!!
+        return this;
+    };
+
+    Expression.prototype.toString = function() {
+        if (this.isVal) return this.val.toString();
+
+        var newArgs = [];
+        for (var i=0; i<this.args.length; ++i) newArgs.push(this.args[i].toString());
+
+        var fn = strings[this.fn];
+        return fn ? fn.apply(null, args) : this.fn + '(' + this.args.join(', ') + ')';
+    };
+
+    Expression.prototype.evaluate = function(vars) {
+        if (vars == null) vars = {};
+        if (this.isVal) {
+            console.log(this.val);
+            return (vars[this.val] === undefined) ? this.val : vars[this.val];
+        }
+
+        var newArgs = [];
+        for (var i=0; i<this.args.length; ++i) {
+            var newArg = this.args[i].evaluate();
+            if (newArg instanceof Expression) return this;
+            newArgs.push(newArg);
+        }
+
+        var fn = vars[this.fn] || functions[this.fn] || Math[this.fn] || M[this.fn];
+        console.log.apply(null, newArgs);
+        return (fn instanceof Function) ? fn.apply(null, newArgs) : this;
+    };
 
 
     // ---------------------------------------------------------------------------------------------
-    // Expression to String
+    // Expression Functions
 
-    function toString(expr) {
-        // TODO
-    }
-
-
-    // ---------------------------------------------------------------------------------------------
-    // Expression Evaluate
-
-    // TODO Return expressions when undefined variables
-
-    var fn = {
+    var functions = {
         '+': function(a, b) { return a + b; },
         '-': function(a, b) { return (b === undefined) ? -a : a - b; },
         '*': function(a, b) { return a * b; },
@@ -1967,39 +2000,33 @@ function concatArrays(a1, a2) {
         'mod': function(a, b) { return M.mod(a, b); }
     };
 
-    function evaluate(expr, vars) {
-
-        // Individual Values
-        if (M.isNumber(expr)) return expr;
-        if (M.isString(expr)) return M.has(vars, expr) ? vars[expr] : expr;
-
-        // Functions
-        var args = [];
-        for (var i=1; i<expr.length; ++i) args.push(evaluate(expr[i], vars));
-        var f = fn[expr[0]] || Math[expr[0]] || M[expr[0]];
-        return f.apply(null, args);
-    }
+    var strings = {
+        '+': function() { return arguments.join(' + '); },
+        '-': function(a, b) { return (b === undefined) ? '-' + a : a + ' - ' + b; },
+        '*': function() { return arguments.join(' * '); },
+        '/': function(a, b) { return a + ' / ' + b; },
+        '!': function(n) { return n + '!'; },
+        '^': function(a, b) { return a + ' ^ ' + b; },
+        '[]': function() { return '[' + arguments.join(', ') + ']'; },
+        '"': function(str) { return '"' + str + '"'; },
+        'mod': function(a, b) { return a + ' mod ' + b; }
+    };
 
 
     // ---------------------------------------------------------------------------------------------
-    // Expression Evaluate
+    // Public Interface
 
-    M.Expression = function(str) {
-        this._expr = parse(str);
+    M.expression = {};
+
+    M.expression.parse = function(str) {
+
+        var parser = new ExpressionParser();
+
+        var n = str.length;
+        for (var i=0; i<n; ++i) parser.send(str[i]);
+
+        return parser.complete()[0].simplify();
     };
-
-    M.Expression.prototype.toString = function() {
-        return toString(this._expr);
-    };
-
-    M.Expression.prototype.simplify = function() {
-        return toString(this._expr);
-    };
-
-    M.Expression.prototype.toString = function() {
-        return toString(this._expr);
-    };
-
 
 })();
 

@@ -38,12 +38,12 @@
             this.current += x;
 
         // Closing Strings
-        } else if (!this.currentBracket && x == '"') {
+    } else if (!this.currentBracket && x === '"') {
             this.pushCurrent();
-            this.currentBracket = '"'
+            this.currentBracket = '"';
 
         // Opening Strings
-        } else if (this.currentBracket === '"' && x == '"') {
+    } else if (this.currentBracket === '"' && x === '"') {
             this.result.push(new Expression('"', [this.current]));
 
         // Handle Invalid Characters
@@ -195,7 +195,7 @@
     Expression.prototype.evaluate = function(vars) {
         if (vars == null) vars = {};
         if (this.isVal) {
-            console.log(this.val)
+            console.log(this.val);
             return (vars[this.val] === undefined) ? this.val : vars[this.val];
         }
 
@@ -207,7 +207,7 @@
         }
 
         var fn = vars[this.fn] || functions[this.fn] || Math[this.fn] || M[this.fn];
-        console.log.apply(null, newArgs)
+        console.log.apply(null, newArgs);
         return (fn instanceof Function) ? fn.apply(null, newArgs) : this;
     };
 
@@ -229,7 +229,7 @@
 
     var strings = {
         '+': function() { return arguments.join(' + '); },
-        '-': function(a, b) { return (b === undefined) ? '-' + a : a + ' - ' + b },
+        '-': function(a, b) { return (b === undefined) ? '-' + a : a + ' - ' + b; },
         '*': function() { return arguments.join(' * '); },
         '/': function(a, b) { return a + ' / ' + b; },
         '!': function(n) { return n + '!'; },

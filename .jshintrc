@@ -12,7 +12,7 @@
     "nonew": true,
     "quotmark": "single",
     "maxdepth": 5,
-    "maxlen": 100,
+    "maxlen": 120,
 
     "eqnull": true,
     "maxerr": 100,
