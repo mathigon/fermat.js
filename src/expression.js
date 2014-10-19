@@ -67,7 +67,7 @@
                     this.result.push(new Expression('abs', completed));
                 } else {
                     if (completed.length !== 1) throw new Error('Unexpected ",".');
-                    this.result.push(new Expression(completed[i]));
+                    this.result.push(new Expression(completed[0]));
                 }
                 this.current = '';
                 this.currentBracket = this.currentParser = this.currentFn = null;
@@ -115,6 +115,7 @@
     ExpressionParser.prototype.complete = function(x) {
 
         this.pushCurrent();
+        var i;
 
         // Handle Factorials and Percentages
         for (i=0; i<this.result.length; ++i) {
@@ -189,7 +190,7 @@
         for (var i=0; i<this.args.length; ++i) newArgs.push(this.args[i].toString());
 
         var fn = strings[this.fn];
-        return fn ? fn.apply(null, args) : this.fn + '(' + this.args.join(', ') + ')';
+        return fn ? fn.apply(null, newArgs) : this.fn + '(' + this.args.join(', ') + ')';
     };
 
     Expression.prototype.evaluate = function(vars) {

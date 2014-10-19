@@ -20,6 +20,7 @@ M.setPrecision = function(eps) {
 
 var _arrayJoin = Array.prototype.join;
 var _arrayPush = Array.prototype.push;
+var _arraySlice = Array.prototype.slice;
 
 // The function remembers previously evaluated values, avoiding repetitive calculations
 // http://blog.thejit.org/2008/09/05/memoization-in-javascript/

@@ -16,7 +16,7 @@
         if (!n) return 0;
 
         var sorted = values.slice(0).sort();
-        return (len % 2 === 1) ? sorted[Math.floor(n/2)] : (sorted[n/2 - 1] + sorted[n/2]) / 2;
+        return (n % 2 === 1) ? sorted[Math.floor(n/2)] : (sorted[n/2 - 1] + sorted[n/2]) / 2;
     };
 
 

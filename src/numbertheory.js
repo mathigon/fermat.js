@@ -69,7 +69,7 @@
 
         var maxf = Math.sqrt(n);
         for (var f = 2; f <= maxf; ++f) {
-            if (n % f === 0) return concatArray(fact(f), fact(n / f));
+            if (n % f === 0) return concatArrays(fact(f), fact(n / f));
         }
     };
 

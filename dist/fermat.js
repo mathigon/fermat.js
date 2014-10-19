@@ -19,6 +19,7 @@ M.setPrecision = function(eps) {
 
 var _arrayJoin = Array.prototype.join;
 var _arrayPush = Array.prototype.push;
+var _arraySlice = Array.prototype.slice;
 
 // The function remembers previously evaluated values, avoiding repetitive calculations
 // http://blog.thejit.org/2008/09/05/memoization-in-javascript/
@@ -294,7 +295,7 @@ function concatArrays(a1, a2) {
 
         var maxf = Math.sqrt(n);
         for (var f = 2; f <= maxf; ++f) {
-            if (n % f === 0) return concatArray(fact(f), fact(n / f));
+            if (n % f === 0) return concatArrays(fact(f), fact(n / f));
         }
     };
 
@@ -523,7 +524,7 @@ function concatArrays(a1, a2) {
         var u2 = Math.random();
         var rand = Math.sqrt( -2 * Math.log(u1) ) * Math.cos( 2 * Math.PI * u2 );
 
-        return rand * Math.sqrt(s) + m;
+        return rand * Math.sqrt(v) + m;
     };
 
     M.random.exponential = function(l) {
@@ -569,7 +570,7 @@ function concatArrays(a1, a2) {
         if (!n) return 0;
 
         var sorted = values.slice(0).sort();
-        return (len % 2 === 1) ? sorted[Math.floor(n/2)] : (sorted[n/2 - 1] + sorted[n/2]) / 2;
+        return (n % 2 === 1) ? sorted[Math.floor(n/2)] : (sorted[n/2 - 1] + sorted[n/2]) / 2;
     };
 
 
@@ -900,7 +901,7 @@ function concatArrays(a1, a2) {
             return this[0][0] * this[1][1] - this[0][1] * this[1][0];
         }
 
-        for (var col = 0; col < cols; ++col) {
+        for (var col = 0; col < this.cols; ++col) {
             var diagLeft  = this[0][col];
             var diagRight = this[0][col];
 
@@ -935,9 +936,9 @@ function concatArrays(a1, a2) {
     M.matrix = {};
 
     // Create an identity matrix of dimension n x n
-    M.matrix.identity = function(n) {
-        var x = new M.Matrix(n, m, 0);
-        for (var i = 0; i < Math.min(n, m); ++i) x[i][i] = 1;
+    M.matrix.identity = function() {
+        var x = new M.Matrix(n, n, 0);
+        for (var i = 0; i < n; ++i) x[i][i] = 1;
         return x;
     };
 
@@ -1076,10 +1077,10 @@ function concatArrays(a1, a2) {
     };
 
     M.geo.Rect.prototype.toPolygon = function() {
-        var a = new M.geo.Point(this.x,     this.y);
-        var b = new M.geo.Point(this.x + w, this.y);
-        var c = new M.geo.Point(this.x + w, this.y + h);
-        var d = new M.geo.Point(this.x,     this.y + h);
+        var a = new M.geo.Point(this.x, this.y);
+        var b = new M.geo.Point(this.x + this.w, this.y);
+        var c = new M.geo.Point(this.x + this.w, this.y + this.h);
+        var d = new M.geo.Point(this.x, this.y + this.h);
         return new M.geo.Polygon([a, b, c, d]);
     };
 
@@ -1107,11 +1108,11 @@ function concatArrays(a1, a2) {
 
     M.geo.project = function(p, l) {
         var k = M.vector.dot(M.vector.subtr(p, l.p1), l.normalVector());
-        return new Point(l.p1.x + k.x, l.p1.y + k.y);
+        return new M.geo.Point(l.p1.x + k.x, l.p1.y + k.y);
     };
 
     M.geo.lineToPointDistance = function(p, l) {
-        return M.geo.distance(p, M.gep.project(p, l));
+        return M.geo.distance(p, M.geo.project(p, l));
     };
 
     M.geo.Polygon.prototype.centroid = function() {
@@ -1123,8 +1124,8 @@ function concatArrays(a1, a2) {
     // Interpolation
 
     M.geo.Line.prototype.at = function(t) {
-        var x = t * p1.x + (1-t) * p2.x;
-        var y = t * p1.y + (1-t) * p2.y;
+        var x = t * this.p1.x + (1-t) * this.p2.x;
+        var y = t * this.p1.y + (1-t) * this.p2.y;
         return new M.geo.Point(x, y);
     };
 
@@ -1141,10 +1142,10 @@ function concatArrays(a1, a2) {
     };
 
     M.geo.Curve.prototype.at = function(t) {
-        var x = M.cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*q1.x +
-                    3*t*t*(1-t)*q2.x + M.cube(t)*this.p2.x;
-        var y = M.cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*q1.y +
-                    3*t*t*(1-t)*q2.y + M.cube(t)*this.p2.y;
+        var x = M.cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*this.q1.x +
+                    3*t*t*(1-t)*this.q2.x + M.cube(t)*this.p2.x;
+        var y = M.cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*this.q1.y +
+                    3*t*t*(1-t)*this.q2.y + M.cube(t)*this.p2.y;
         return new M.geo.Point(x, y);
     };
 
@@ -1173,7 +1174,7 @@ function concatArrays(a1, a2) {
     };
 
     M.geo.Rect.prototype.circumference = function() {
-        return 2 * w + 2 * h;
+        return 2 * this.w + 2 * this.h;
     };
 
     M.geo.Polygon.prototype.circumference = function() {
@@ -1272,8 +1273,8 @@ function concatArrays(a1, a2) {
         var v = l.p2.x - l.p1.x;
         var w = l.p2.y - l.p1.y;
 
-        var x0 = p.x - p1.x;
-        var y0 = p.y - p1.y;
+        var x0 = p.x - l.p1.x;
+        var y0 = p.y - l.p1.y;
 
         var mu = (v * y0 - w * x0) / (v * v + w * w);
 
@@ -1469,7 +1470,7 @@ function concatArrays(a1, a2) {
 
         if (arguments.length > 2) {
             var rest = _arraySlice.call(arguments, 1);
-            return lcm(x, M.geo.intersect.apply(null, rest));
+            return M.geo.intersect(x, M.geo.intersect.apply(null, rest));
         }
 
         // Handle Rectangles
@@ -1486,7 +1487,7 @@ function concatArrays(a1, a2) {
             case 'polygon-polygon': return polygonPolygonIntersect(x, y);
         }
 
-        throw new Error('Can\'t intersect ' + typeX + 's and ' + typeY + '.');
+        throw new Error('Can\'t intersect ' + getGeoType(x) + 's and ' + getGeoType(y) + '.');
     };
 
 })();
@@ -1840,7 +1841,7 @@ function concatArrays(a1, a2) {
                     this.result.push(new Expression('abs', completed));
                 } else {
                     if (completed.length !== 1) throw new Error('Unexpected ",".');
-                    this.result.push(new Expression(completed[i]));
+                    this.result.push(new Expression(completed[0]));
                 }
                 this.current = '';
                 this.currentBracket = this.currentParser = this.currentFn = null;
@@ -1888,6 +1889,7 @@ function concatArrays(a1, a2) {
     ExpressionParser.prototype.complete = function(x) {
 
         this.pushCurrent();
+        var i;
 
         // Handle Factorials and Percentages
         for (i=0; i<this.result.length; ++i) {
@@ -1962,7 +1964,7 @@ function concatArrays(a1, a2) {
         for (var i=0; i<this.args.length; ++i) newArgs.push(this.args[i].toString());
 
         var fn = strings[this.fn];
-        return fn ? fn.apply(null, args) : this.fn + '(' + this.args.join(', ') + ')';
+        return fn ? fn.apply(null, newArgs) : this.fn + '(' + this.args.join(', ') + ')';
     };
 
     Expression.prototype.evaluate = function(vars) {

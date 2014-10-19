@@ -82,10 +82,10 @@
     };
 
     M.geo.Rect.prototype.toPolygon = function() {
-        var a = new M.geo.Point(this.x,     this.y);
-        var b = new M.geo.Point(this.x + w, this.y);
-        var c = new M.geo.Point(this.x + w, this.y + h);
-        var d = new M.geo.Point(this.x,     this.y + h);
+        var a = new M.geo.Point(this.x, this.y);
+        var b = new M.geo.Point(this.x + this.w, this.y);
+        var c = new M.geo.Point(this.x + this.w, this.y + this.h);
+        var d = new M.geo.Point(this.x, this.y + this.h);
         return new M.geo.Polygon([a, b, c, d]);
     };
 
@@ -113,11 +113,11 @@
 
     M.geo.project = function(p, l) {
         var k = M.vector.dot(M.vector.subtr(p, l.p1), l.normalVector());
-        return new Point(l.p1.x + k.x, l.p1.y + k.y);
+        return new M.geo.Point(l.p1.x + k.x, l.p1.y + k.y);
     };
 
     M.geo.lineToPointDistance = function(p, l) {
-        return M.geo.distance(p, M.gep.project(p, l));
+        return M.geo.distance(p, M.geo.project(p, l));
     };
 
     M.geo.Polygon.prototype.centroid = function() {
@@ -129,8 +129,8 @@
     // Interpolation
 
     M.geo.Line.prototype.at = function(t) {
-        var x = t * p1.x + (1-t) * p2.x;
-        var y = t * p1.y + (1-t) * p2.y;
+        var x = t * this.p1.x + (1-t) * this.p2.x;
+        var y = t * this.p1.y + (1-t) * this.p2.y;
         return new M.geo.Point(x, y);
     };
 
@@ -147,10 +147,10 @@
     };
 
     M.geo.Curve.prototype.at = function(t) {
-        var x = M.cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*q1.x +
-                    3*t*t*(1-t)*q2.x + M.cube(t)*this.p2.x;
-        var y = M.cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*q1.y +
-                    3*t*t*(1-t)*q2.y + M.cube(t)*this.p2.y;
+        var x = M.cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*this.q1.x +
+                    3*t*t*(1-t)*this.q2.x + M.cube(t)*this.p2.x;
+        var y = M.cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*this.q1.y +
+                    3*t*t*(1-t)*this.q2.y + M.cube(t)*this.p2.y;
         return new M.geo.Point(x, y);
     };
 
@@ -179,7 +179,7 @@
     };
 
     M.geo.Rect.prototype.circumference = function() {
-        return 2 * w + 2 * h;
+        return 2 * this.w + 2 * this.h;
     };
 
     M.geo.Polygon.prototype.circumference = function() {
@@ -278,8 +278,8 @@
         var v = l.p2.x - l.p1.x;
         var w = l.p2.y - l.p1.y;
 
-        var x0 = p.x - p1.x;
-        var y0 = p.y - p1.y;
+        var x0 = p.x - l.p1.x;
+        var y0 = p.y - l.p1.y;
 
         var mu = (v * y0 - w * x0) / (v * v + w * w);
 
@@ -475,7 +475,7 @@
 
         if (arguments.length > 2) {
             var rest = _arraySlice.call(arguments, 1);
-            return lcm(x, M.geo.intersect.apply(null, rest));
+            return M.geo.intersect(x, M.geo.intersect.apply(null, rest));
         }
 
         // Handle Rectangles
@@ -492,7 +492,7 @@
             case 'polygon-polygon': return polygonPolygonIntersect(x, y);
         }
 
-        throw new Error('Can\'t intersect ' + typeX + 's and ' + typeY + '.');
+        throw new Error('Can\'t intersect ' + getGeoType(x) + 's and ' + getGeoType(y) + '.');
     };
 
 })();

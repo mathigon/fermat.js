@@ -102,7 +102,7 @@
         var u2 = Math.random();
         var rand = Math.sqrt( -2 * Math.log(u1) ) * Math.cos( 2 * Math.PI * u2 );
 
-        return rand * Math.sqrt(s) + m;
+        return rand * Math.sqrt(v) + m;
     };
 
     M.random.exponential = function(l) {

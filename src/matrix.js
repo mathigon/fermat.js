@@ -67,7 +67,7 @@
             return this[0][0] * this[1][1] - this[0][1] * this[1][0];
         }
 
-        for (var col = 0; col < cols; ++col) {
+        for (var col = 0; col < this.cols; ++col) {
             var diagLeft  = this[0][col];
             var diagRight = this[0][col];
 
@@ -102,9 +102,9 @@
     M.matrix = {};
 
     // Create an identity matrix of dimension n x n
-    M.matrix.identity = function(n) {
-        var x = new M.Matrix(n, m, 0);
-        for (var i = 0; i < Math.min(n, m); ++i) x[i][i] = 1;
+    M.matrix.identity = function() {
+        var x = new M.Matrix(n, n, 0);
+        for (var i = 0; i < n; ++i) x[i][i] = 1;
         return x;
     };
 
