@@ -47,7 +47,7 @@
             this.result.push(new Expression('"', [this.current]));
 
         // Handle Invalid Characters
-        } else if (('@&\?<>=~`±§').contains(x)) {
+        } else if (('@&\\?<>=~`±§').contains(x)) {
             throw new Error('Unexpected "' + x + '".');
 
         // Handle Content for CHild parsers

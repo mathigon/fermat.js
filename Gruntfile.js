@@ -96,7 +96,9 @@ module.exports = function(grunt) {
                         return m ? ['### <a name="', '"></a>[M.', '](#', ')'].join(m[1]) : line;
                     }).join('\n');
                 },
-                template: 'docs/template.jst'
+                postCompile: function(src) {
+                    return src.replace(/<h1(.*)h1>/, '');
+                }
             },
             docs: {
                 files: { 'dist/docs.html': 'dist/docs.html' }
