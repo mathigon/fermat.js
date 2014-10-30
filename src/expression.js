@@ -60,14 +60,14 @@
 
                 var completed = this.currentParser.complete();
                 if (this.currentFn) {
-                    this.result.push(new Expression(this.currentFn, completed));
+                    this.result.push(new ExpressionFn(this.currentFn, completed));
                 } else if (x === ']') {
-                    this.result.push(new Expression('[]', completed));
+                    this.result.push(new ExpressionFn('[]', completed));
                 } else if (x === '|') {
-                    this.result.push(new Expression('abs', completed));
+                    this.result.push(new ExpressionFn('abs', completed));
                 } else {
                     if (completed.length !== 1) throw new Error('Unexpected ",".');
-                    this.result.push(new Expression(completed[0]));
+                    this.result.push(new ExpressionVal(completed[0]));
                 }
                 this.current = '';
                 this.currentBracket = this.currentParser = this.currentFn = null;
@@ -107,7 +107,7 @@
     ExpressionParser.prototype.pushCurrent = function() {
         if (!this.current) return;
         var num = +this.current;
-        this.result.push(new Expression(num === num ? num : this.current));
+        this.result.push(new ExpressionVal(num === num ? num : this.current));
         this.current = '';
     };
 
@@ -120,10 +120,10 @@
         // Handle Factorials and Percentages
         for (i=0; i<this.result.length; ++i) {
             if (this.result[i] === '!') {
-                this.result.splice(i-1, 2, new Expression('!', [this.result[i-1]]));
+                this.result.splice(i-1, 2, new ExpressionFn('!', [this.result[i-1]]));
                 i -= 1;
             } else if (this.result[i] === '%') {
-                this.result.splice(i-1, 2, new Expression('/', [this.result[i-1], 100]));
+                this.result.splice(i-1, 2, new ExpressionFn('/', [this.result[i-1], 100]));
                 i -= 1;
             }
         }
@@ -131,21 +131,21 @@
         // Handle Powers
         for (i=0; i<this.result.length; ++i) {
             if (this.result[i] === '^') {
-                this.result.splice(i-1, 3, new Expression('^', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3, new ExpressionFn('^', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             }
         }
 
         // Handle Leading -
-        if (this.result[0] === '-') this.result.splice(0, 2, new Expression('-', [this.result[1]]));
+        if (this.result[0] === '-') this.result.splice(0, 2, new ExpressionFn('-', [this.result[1]]));
 
         // Handle Multiplication and Division
         for (i=0; i<this.result.length; ++i) {
             if (this.result[i] === '/') {
-                this.result.splice(i-1, 3, new Expression('/', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3, new ExpressionFn('/', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             } else if (this.result[i] === '*') {
-                this.result.splice(i-1, 3, new Expression('*', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3, new ExpressionFn('*', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             }
         }
@@ -153,10 +153,10 @@
         // Handle Addition and Subtraction
         for (i=0; i<this.result.length; ++i) {
             if (this.result[i] === '-') {
-                this.result.splice(i-1, 3, new Expression('-', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3, new ExpressionFn('-', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             } else if (this.result[i] === '+') {
-                this.result.splice(i-1, 3, new Expression('+', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3, new ExpressionFn('+', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             }
         }
@@ -168,24 +168,17 @@
     // ---------------------------------------------------------------------------------------------
     // Expressions
 
-    function Expression(fn, args) {
-        if (arguments.length === 1) {
-            this.isVal = true;
-            this.val = fn;
-        } else {
-            this.fn = fn;
-            this.args = args;
-        }
+    function ExpressionFn(fn, args) {
+        this.fn = fn;
+        this.args = args;
     }
 
-    Expression.prototype.simplify = function() {
+    ExpressionFn.prototype.simplify = function() {
         // TODO !!!
         return this;
     };
 
-    Expression.prototype.toString = function() {
-        if (this.isVal) return this.val.toString();
-
+    ExpressionFn.prototype.toString = function() {
         var newArgs = [];
         for (var i=0; i<this.args.length; ++i) newArgs.push(this.args[i].toString());
 
@@ -193,12 +186,8 @@
         return fn ? fn.apply(null, newArgs) : this.fn + '(' + this.args.join(', ') + ')';
     };
 
-    Expression.prototype.evaluate = function(vars) {
+    ExpressionFn.prototype.evaluate = function(vars) {
         if (vars == null) vars = {};
-        if (this.isVal) {
-            console.log(this.val);
-            return (vars[this.val] === undefined) ? this.val : vars[this.val];
-        }
 
         var newArgs = [];
         for (var i=0; i<this.args.length; ++i) {
@@ -208,8 +197,27 @@
         }
 
         var fn = vars[this.fn] || functions[this.fn] || Math[this.fn] || M[this.fn];
-        console.log.apply(null, newArgs);
         return (fn instanceof Function) ? fn.apply(null, newArgs) : this;
+    };
+
+
+    function ExpressionVal(val) {
+        this.isVal = true;
+        this.val = fn;
+    }
+
+    ExpressionVal.prototype.simplify = function() {
+        return this;
+    };
+
+    ExpressionVal.prototype.toString = function() {
+        return this.val.toString();
+    };
+
+    ExpressionVal.prototype.evaluate = function(vars) {
+        if (vars == null) vars = {};
+        // TODO return numbers if possible?
+        return (vars[this.val] === undefined) ? this.val : vars[this.val];
     };
 
 
