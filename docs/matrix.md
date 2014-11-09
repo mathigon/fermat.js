@@ -1,7 +1,46 @@
-## Matrix
+## Matrices
 
 
-### TODO
+### Matrix
 
-#### `M.permutations(Array x)`
-returns an array of all possible permutations of an array `x`.
+#### Construct
+
+`M.Matrix(TODO)`  
+Description
+
+#### Methods
+
+`.isSquare()`  
+Description
+
+`.row()`  
+Description
+
+`.column()`  
+Description
+
+`.transpose()`  
+Description
+
+`.determinant()`  
+Description
+
+`.scalarMultiply()`  
+Description
+
+`.inverse()`  
+Description
+
+### matrix.identity
+
+### matrix.add
+
+### matrix.rotation
+
+### matrix.shear
+
+### matrix.reflection
+
+### matrix.projection
+
+### matrix.mult

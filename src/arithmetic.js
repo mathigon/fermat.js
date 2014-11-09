@@ -107,6 +107,7 @@
 
     M.roundTowardsZero = function(x) {
         // Add 0.00001 because of floating points uncertainty
+        // TODO use x|0;
         return x < 0 ? Math.ceil(x - 0.00001) : Math.floor(x + 0.00001);
     };
 

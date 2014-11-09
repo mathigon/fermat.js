@@ -115,139 +115,229 @@
     
 <h2 id="utilities">Utilities</h2>
 <h3 id="-a-name-phi-a-m-phi-phi-"><a name="PHI"></a><a href="#PHI">M.PHI</a></h3>
-<h4 id="-m-phi-1-618033988749895-"><code>M.PHI = 1.618033988749895</code></h4>
+<p><code>M.PHI = 1.618033988749895</code>  </p>
 <h3 id="-a-name-sqrt2-a-m-sqrt2-sqrt2-"><a name="SQRT2"></a><a href="#SQRT2">M.SQRT2</a></h3>
-<h4 id="-m-sqrt2-1-4142135623730951-"><code>M.SQRT2 = 1.4142135623730951</code></h4>
+<p><code>M.SQRT2 = 1.4142135623730951</code>  </p>
 <h3 id="-a-name-setprecision-a-m-setprecision-setprecision-"><a name="setPrecision"></a><a href="#setPrecision">M.setPrecision</a></h3>
-<h4 id="-m-setprecision-number-x-"><code>M.setPrecision(Number x)</code></h4>
-<p>sets the error tolerance of all functions to x.</p>
-<h4 id="-m-setprecision-"><code>M.setPrecision()</code></h4>
-<p>updates the error tolerance of all functions to the default of 0.000001.</p>
+<p><code>M.setPrecision(<span class="code-type">Number </span><span class="code-param">x</span>)<span class="code-type"></span><span class="code-param"></span></code><br>sets the error tolerance of all functions to x.</p>
+<p><code>M.setPrecision(<span class="code-type"></span><span class="code-param"></span>)<span class="code-type"></span><span class="code-param"></span></code><br>updates the error tolerance of all functions to the default of 0.000001.</p>
 <h2 id="arithmetic">Arithmetic</h2>
 <h3 id="-a-name-nearlyequals-a-m-nearlyequals-nearlyequals-"><a name="nearlyEquals"></a><a href="#nearlyEquals">M.nearlyEquals</a></h3>
-<h4 id="-m-nearlyequals-number-a-number-b-optional-number-t-boolean-"><code>M.nearlyEquals(Number a, Number b, optional Number t) : Boolean</code></h4>
-<p>checks if two numbers <code>a</code> and <code>b</code> are almost equal. If the tolerance <code>t</code> isn&#39;t specified, the default tolerance is used.</p>
+<p><code>M.nearlyEquals(<span class="code-type">Number </span><span class="code-param">a</span>, <span class="code-type">Number </span><span class="code-param">b</span>, <span class="code-type">optional Number </span><span class="code-param">t</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Boolean</span></code><br>checks if two numbers <code>a</code> and <code>b</code> are almost equal. If the tolerance <code>t</code> isn&#39;t specified, the default tolerance is used.</p>
 <h3 id="-a-name-sign-a-m-sign-sign-"><a name="sign"></a><a href="#sign">M.sign</a></h3>
-<h4 id="-m-sign-number-x-1-0-1-"><code>M.sign(Number x) : (-1 | 0 | 1)</code></h4>
-<p>returns the sign of a number <code>x</code>.</p>
+<p><code>M.sign(<span class="code-type">Number </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">(<span class="code-type"></span><span class="code-param"></span>-1 | 0 | 1)<span class="code-type"></span><span class="code-param"></span></span></code><br>returns the sign of a number <code>x</code>.</p>
 <h3 id="-a-name-square-a-m-square-square-"><a name="square"></a><a href="#square">M.square</a></h3>
-<h4 id="-m-square-number-x-number-"><code>M.square(Number x) : Number</code></h4>
-<p>returns the square of a number <code>x</code>.</p>
+<p><code>M.square(<span class="code-type">Number </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>returns the square of a number <code>x</code>.</p>
 <h3 id="-a-name-cube-a-m-cube-cube-"><a name="cube"></a><a href="#cube">M.cube</a></h3>
-<h4 id="-m-cube-number-x-number-"><code>M.cube(Number x) : Number</code></h4>
-<p>returns the cube of a number <code>x</code>.</p>
+<p><code>M.cube(<span class="code-type">Number </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>returns the cube of a number <code>x</code>.</p>
 <h3 id="-a-name-bound-a-m-bound-bound-"><a name="bound"></a><a href="#bound">M.bound</a></h3>
-<h4 id="-m-bound-number-x-number-min-number-max-number-"><code>M.bound(Number x, Number min, Number max) : Number</code></h4>
-<p>returns <code>x</code>, bounded between two limits min and max.</p>
+<p><code>M.bound(<span class="code-type">Number </span><span class="code-param">x</span>, <span class="code-type">Number </span><span class="code-param">min</span>, <span class="code-type">Number </span><span class="code-param">max</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>returns <code>x</code>, bounded between two limits min and max.</p>
 <h3 id="-a-name-between-a-m-between-between-"><a name="between"></a><a href="#between">M.between</a></h3>
-<h4 id="-m-between-number-x-number-min-number-max-boolean-"><code>M.between(Number x, Number min, Number max) : Boolean</code></h4>
-<p>checks if <code>x</code> lies on or between the two limits min and max.</p>
+<p><code>M.between(<span class="code-type">Number </span><span class="code-param">x</span>, <span class="code-type">Number </span><span class="code-param">min</span>, <span class="code-type">Number </span><span class="code-param">max</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Boolean</span></code><br>checks if <code>x</code> lies on or between the two limits min and max.</p>
 <h3 id="-a-name-numberformat-a-m-numberformat-numberformat-"><a name="numberFormat"></a><a href="#numberFormat">M.numberFormat</a></h3>
-<h4 id="-m-numberformat-number-x-string-"><code>M.numberFormat(Number x) : String</code></h4>
-<p>formats a number <code>x</code> with thousands separators.</p>
+<p><code>M.numberFormat(<span class="code-type">Number </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">String</span></code><br>formats a number <code>x</code> with thousands separators.</p>
 <h3 id="-a-name-toordinal-a-m-toordinal-toordinal-"><a name="toOrdinal"></a><a href="#toOrdinal">M.toOrdinal</a></h3>
-<h4 id="-m-toordinal-number-x-string-"><code>M.toOrdinal(Number x) : String</code></h4>
-<p>returns the <em>ordinal</em> (1st, 2nd, ...) of a number <code>x</code>.</p>
+<p><code>M.toOrdinal(<span class="code-type">Number </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">String</span></code><br>returns the <em>ordinal</em> (1st, 2nd, ...) of a number <code>x</code>.</p>
 <h3 id="-a-name-digits-a-m-digits-digits-"><a name="digits"></a><a href="#digits">M.digits</a></h3>
-<h4 id="-m-digits-number-x-number-"><code>M.digits(Number x) : [Number, ...]</code></h4>
-<p>returns an array with the integer decimal digits of <code>x</code>, in reverse order.
+<p><code>M.digits(<span class="code-type">Number </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">[Number, <span class="code-type"></span><span class="code-param"></span>...]</span></code><br>returns an array with the integer decimal digits of <code>x</code>, in reverse order.
 For example, <code>M.digits(376) = [6, 7, 3]</code>.</p>
 <h3 id="-a-name-fractionaldigits-a-m-fractionaldigits-fractionaldigits-"><a name="fractionalDigits"></a><a href="#fractionalDigits">M.fractionalDigits</a></h3>
-<h4 id="-m-fractionaldigits-number-x-number-"><code>M.fractionalDigits(Number x) : [Number, ...]</code></h4>
-<p>returns an array with the fractional decimal digits of <code>x</code>.
+<p><code>M.fractionalDigits(<span class="code-type">Number </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">[Number, <span class="code-type"></span><span class="code-param"></span>...]</span></code><br>returns an array with the fractional decimal digits of <code>x</code>.
 For example, <code>fractionalDigits(3.456) = [4, 5, 6]</code>.</p>
 <h3 id="-a-name-decimalplaces-a-m-decimalplaces-decimalplaces-"><a name="decimalPlaces"></a><a href="#decimalPlaces">M.decimalPlaces</a></h3>
-<h4 id="-m-decimalplaces-number-x-number-"><code>M.decimalPlaces(Number x) : Number</code></h4>
-<p>returns the number of fractional decimal digits of <code>x</code>.</p>
+<p><code>M.decimalPlaces(<span class="code-type">Number </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>returns the number of fractional decimal digits of <code>x</code>.</p>
 <h3 id="-a-name-round-a-m-round-round-"><a name="round"></a><a href="#round">M.round</a></h3>
-<h4 id="-m-round-number-x-optional-number-precision-0-number-"><code>M.round(Number x, optional Number precision = 0) : Number</code></h4>
-<p>rounds <code>x</code> to have at most <code>precision</code> decimal places.</p>
+<p><code>M.round(<span class="code-type">Number </span><span class="code-param">x</span>, <span class="code-type">optional Number precision </span><span class="code-param"></span>= 0) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>rounds <code>x</code> to have at most <code>precision</code> decimal places.</p>
 <h3 id="-a-name-round-a-m-round-round-"><a name="round"></a><a href="#round">M.round</a></h3>
-<h4 id="-m-roundto-number-x-optional-number-increment-1-number-"><code>M.roundTo(Number x, optional Number increment = 1) : Number</code></h4>
-<p>rounds <code>x</code> to the nearest multiple of <code>increment</code>.</p>
+<p><code>M.roundTo(<span class="code-type">Number </span><span class="code-param">x</span>, <span class="code-type">optional Number increment </span><span class="code-param"></span>= 1) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>rounds <code>x</code> to the nearest multiple of <code>increment</code>.</p>
 <h3 id="-a-name-roundtowardszero-a-m-roundtowardszero-roundtowardszero-"><a name="roundTowardsZero"></a><a href="#roundTowardsZero">M.roundTowardsZero</a></h3>
-<h4 id="-m-roundtowardszero-number-x-number-"><code>M.roundTowardsZero(Number x) : Number</code></h4>
-<p>rounds <code>x</code> to the nearest integer towards 0;</p>
+<p><code>M.roundTowardsZero(<span class="code-type">Number </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>rounds <code>x</code> to the nearest integer towards 0;</p>
 <h3 id="-a-name-tofraction-a-m-tofraction-tofraction-"><a name="toFraction"></a><a href="#toFraction">M.toFraction</a></h3>
-<h4 id="-m-tofraction-number-x-optional-number-maxdenom-1000-number-number-"><code>M.toFraction(Number x, optional Number maxDenom = 1000) : [Number, Number]</code></h4>
-<p>uses continued fractions to find a rational representation of a decimal <code>x</code>, and returns the array <code>[numerator, denominator]</code>.
+<p><code>M.toFraction(<span class="code-type">Number </span><span class="code-param">x</span>, <span class="code-type">optional Number maxDenom </span><span class="code-param"></span>= 1000) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">[Number, <span class="code-type"></span><span class="code-param">Number]</span></span></code><br>uses continued fractions to find a rational representation of a decimal <code>x</code>, and returns the array <code>[numerator, denominator]</code>.
 If there is no rational representation with a denominator <code>&lt;= maxDenom</code>, then <code>[x, 1]</code> is returned.
 For example, <code>M.toFraction(3/6) = [1, 2]</code>, <code>M.toFraction(0.33) = [33, 100]</code> and  <code>M.toFraction(0.66, 0.01) = [2/3]</code></p>
+<h3 id="-a-name-add-a-m-add-add-"><a name="add"></a><a href="#add">M.add</a></h3>
+<h3 id="-a-name-mult-a-m-mult-mult-"><a name="mult"></a><a href="#mult">M.mult</a></h3>
+<h3 id="-a-name-subtr-a-m-subtr-subtr-"><a name="subtr"></a><a href="#subtr">M.subtr</a></h3>
+<h3 id="-a-name-div-a-m-div-div-"><a name="div"></a><a href="#div">M.div</a></h3>
+<h3 id="-a-name-mod-a-m-mod-mod-"><a name="mod"></a><a href="#mod">M.mod</a></h3>
+<h3 id="-a-name-log-a-m-log-log-"><a name="log"></a><a href="#log">M.log</a></h3>
+<h3 id="-a-name-log10-a-m-log10-log10-"><a name="log10"></a><a href="#log10">M.log10</a></h3>
+<h3 id="-a-name-log2-a-m-log2-log2-"><a name="log2"></a><a href="#log2">M.log2</a></h3>
+<h3 id="-a-name-cosh-a-m-cosh-cosh-"><a name="cosh"></a><a href="#cosh">M.cosh</a></h3>
+<h3 id="-a-name-sinh-a-m-sinh-sinh-"><a name="sinh"></a><a href="#sinh">M.sinh</a></h3>
 <h2 id="numbertheory">NumberTheory</h2>
 <h3 id="-a-name-gcd-a-m-gcd-gcd-"><a name="gcd"></a><a href="#gcd">M.gcd</a></h3>
-<h4 id="-m-gcd-integer-a-integer-b-"><code>M.gcd(Integer a, Integer b, ...)</code></h4>
-<p>finds the <em>greatest common denominator</em> or two or more integers.</p>
+<p><code>M.gcd(<span class="code-type">Integer </span><span class="code-param">a</span>, <span class="code-type">Integer </span><span class="code-param">b</span>, <span class="code-type"></span><span class="code-param"></span>...)<span class="code-type"></span><span class="code-param"></span></code><br>finds the <em>greatest common denominator</em> or two or more integers.</p>
 <h3 id="-a-name-lcm-a-m-lcm-lcm-"><a name="lcm"></a><a href="#lcm">M.lcm</a></h3>
-<h4 id="-m-lcm-integer-a-integer-b-span-class-todo-span-"><code>M.lcm(Integer a, Integer b, ...)</code> <span class="todo"></span></h4>
-<p>finds the <em>least common multiple</em> of two or more integers.</p>
+<p><code>M.lcm(<span class="code-type">Integer </span><span class="code-param">a</span>, <span class="code-type">Integer </span><span class="code-param">b</span>, <span class="code-type"></span><span class="code-param"></span>...)<span class="code-type"></span><span class="code-param"></span></code><br>finds the <em>least common multiple</em> of two or more integers.</p>
 <h3 id="-a-name-isprime-a-m-isprime-isprime-"><a name="isPrime"></a><a href="#isPrime">M.isPrime</a></h3>
-<h4 id="-m-isprime-integer-n-"><code>M.isPrime(Integer n)</code></h4>
-<p>checks if a positive integer <code>n</code> is prime and returns a Boolean.</p>
+<p><code>M.isPrime(<span class="code-type">Integer </span><span class="code-param">n</span>)<span class="code-type"></span><span class="code-param"></span></code><br>checks if a positive integer <code>n</code> is prime and returns a Boolean.</p>
 <h3 id="-a-name-isodd-a-m-isodd-isodd-"><a name="isOdd"></a><a href="#isOdd">M.isOdd</a></h3>
-<h4 id="-m-isodd-integer-n-"><code>M.isOdd(Integer n)</code></h4>
-<p>checks if a positive integer <code>n</code> is odd and returns a Boolean.</p>
+<p><code>M.isOdd(<span class="code-type">Integer </span><span class="code-param">n</span>)<span class="code-type"></span><span class="code-param"></span></code><br>checks if a positive integer <code>n</code> is odd and returns a Boolean.</p>
 <h3 id="-a-name-iseven-a-m-iseven-iseven-"><a name="isEven"></a><a href="#isEven">M.isEven</a></h3>
-<h4 id="-m-iseven-integer-n-"><code>M.isEven(Integer n)</code></h4>
-<p>checks if a positive integer <code>n</code> is even and returns a Boolean.</p>
+<p><code>M.isEven(<span class="code-type">Integer </span><span class="code-param">n</span>)<span class="code-type"></span><span class="code-param"></span></code><br>checks if a positive integer <code>n</code> is even and returns a Boolean.</p>
 <h3 id="-a-name-primefactorization-a-m-primefactorization-primefactorization-"><a name="primeFactorization"></a><a href="#primeFactorization">M.primeFactorization</a></h3>
-<h4 id="-m-primefactorization-integer-n-"><code>M.primeFactorization(Integer n)</code></h4>
-<p>returns an Array of all prime factors of a positive integer <code>n</code>, in ascending order. Repeated prime factors are included multiple times.</p>
+<p><code>M.primeFactorization(<span class="code-type">Integer </span><span class="code-param">n</span>)<span class="code-type"></span><span class="code-param"></span></code><br>returns an Array of all prime factors of a positive integer <code>n</code>, in ascending order. Repeated prime factors are included multiple times.</p>
 <h3 id="-a-name-primefactors-a-m-primefactors-primefactors-"><a name="primeFactors"></a><a href="#primeFactors">M.primeFactors</a></h3>
-<h4 id="-m-primefactors-integer-n-"><code>M.primeFactors(Integer n)</code></h4>
-<p>returns an Array of all unique prime factors of a positive integer <code>n</code>, in ascending order.</p>
+<p><code>M.primeFactors(<span class="code-type">Integer </span><span class="code-param">n</span>)<span class="code-type"></span><span class="code-param"></span></code><br>returns an Array of all unique prime factors of a positive integer <code>n</code>, in ascending order.</p>
 <h3 id="-a-name-listprimes-a-m-listprimes-listprimes-"><a name="listPrimes"></a><a href="#listPrimes">M.listPrimes</a></h3>
-<h4 id="-m-listprimes-integer-n-"><code>M.listPrimes(Integer n)</code></h4>
-<p>returns an Array of all prime numbers up to and including the integer <code>n</code>.</p>
+<p><code>M.listPrimes(<span class="code-type">Integer </span><span class="code-param">n</span>)<span class="code-type"></span><span class="code-param"></span></code><br>returns an Array of all prime numbers up to and including the integer <code>n</code>.</p>
 <h2 id="combinatorics">Combinatorics</h2>
 <h3 id="-a-name-factorial-a-m-factorial-factorial-"><a name="factorial"></a><a href="#factorial">M.factorial</a></h3>
-<h4 id="-m-factorial-number-n-"><code>M.factorial(Number n)</code></h4>
+<p><code>M.factorial(<span class="code-type">Number </span><span class="code-param">n</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code>  </p>
 <h3 id="-a-name-binomial-a-m-binomial-binomial-"><a name="binomial"></a><a href="#binomial">M.binomial</a></h3>
-<h4 id="-m-binomial-integer-n-integer-k-"><code>M.binomial(Integer n, Integer k)</code></h4>
+<p><code>M.binomial(<span class="code-type">Integer </span><span class="code-param">n</span>, <span class="code-type">Integer </span><span class="code-param">k</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>computes the binomial coefficient (n, k)</p>
 <h3 id="-a-name-permutations-a-m-permutations-permutations-"><a name="permutations"></a><a href="#permutations">M.permutations</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
+<p><code>M.permutations(<span class="code-type">Array </span><span class="code-param">x</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Array</span></code><br>returns an array of all possible permutations of an array <code>x</code>.</p>
 <h3 id="-a-name-subsets-a-m-subsets-subsets-"><a name="subsets"></a><a href="#subsets">M.subsets</a></h3>
-<h4 id="-m-subsets-array-x-optional-integer-l-"><code>M.subsets(Array x, optional Integer l)</code></h4>
-<p>returns an array of all possible subsets of an array <code>x</code>. Specifying an integer <code>l</code> as second parameter restricts the output to all subsets of length <code>l</code>.</p>
+<p><code>M.subsets(<span class="code-type">Array </span><span class="code-param">x</span>, <span class="code-type">optional Integer </span><span class="code-param">l</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Array</span></code><br>returns an array of all possible subsets of an array <code>x</code>. Specifying an integer <code>l</code> as second parameter restricts the output to all subsets of length <code>l</code>.</p>
 <h3 id="-a-name-coinflips-a-m-coinflips-coinflips-"><a name="coinFlips"></a><a href="#coinFlips">M.coinFlips</a></h3>
-<h4 id="-m-coinflips-integer-n-"><code>M.coinFlips(Integer n)</code></h4>
-<p>returns a string of <code>n</code> coin flips like &#39;HTTHTHTTHTT&#39;.</p>
+<p><code>M.coinFlips(<span class="code-type">Integer </span><span class="code-param">n</span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">String</span></code><br>returns a string of <code>n</code> coin flips like &#39;HTTHTHTTHTT&#39;.</p>
 <h2 id="probability">Probability</h2>
-<h3 id="-a-name-todo-a-m-todo-todo-"><a name="TODO"></a><a href="#TODO">M.TODO</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
+<h3 id="-a-name-shuffle-a-m-shuffle-shuffle-"><a name="shuffle"></a><a href="#shuffle">M.shuffle</a></h3>
+<h3 id="-a-name-random-integer-a-m-random-integer-random-integer-"><a name="random.integer"></a><a href="#random.integer">M.random.integer</a></h3>
+<h3 id="-a-name-random-integerarray-a-m-random-integerarray-random-integerarray-"><a name="random.integerArray"></a><a href="#random.integerArray">M.random.integerArray</a></h3>
+<h3 id="-a-name-random-weighted-a-m-random-weighted-random-weighted-"><a name="random.weighted"></a><a href="#random.weighted">M.random.weighted</a></h3>
+<h3 id="-a-name-random-bernoulli-a-m-random-bernoulli-random-bernoulli-"><a name="random.bernoulli"></a><a href="#random.bernoulli">M.random.bernoulli</a></h3>
+<h3 id="-a-name-random-binomial-a-m-random-binomial-random-binomial-"><a name="random.binomial"></a><a href="#random.binomial">M.random.binomial</a></h3>
+<h3 id="-a-name-random-poisson-a-m-random-poisson-random-poisson-"><a name="random.poisson"></a><a href="#random.poisson">M.random.poisson</a></h3>
+<h3 id="-a-name-random-uniform-a-m-random-uniform-random-uniform-"><a name="random.uniform"></a><a href="#random.uniform">M.random.uniform</a></h3>
+<h3 id="-a-name-random-normal-a-m-random-normal-random-normal-"><a name="random.normal"></a><a href="#random.normal">M.random.normal</a></h3>
+<h3 id="-a-name-random-exponential-a-m-random-exponential-random-exponential-"><a name="random.exponential"></a><a href="#random.exponential">M.random.exponential</a></h3>
+<h3 id="-a-name-random-geometric-a-m-random-geometric-random-geometric-"><a name="random.geometric"></a><a href="#random.geometric">M.random.geometric</a></h3>
+<h3 id="-a-name-random-cauchy-a-m-random-cauchy-random-cauchy-"><a name="random.cauchy"></a><a href="#random.cauchy">M.random.cauchy</a></h3>
+<h3 id="-a-name-normalpdf-a-m-normalpdf-normalpdf-"><a name="normalPDF"></a><a href="#normalPDF">M.normalPDF</a></h3>
 <h2 id="statistics">Statistics</h2>
-<h3 id="-a-name-todo-a-m-todo-todo-"><a name="TODO"></a><a href="#TODO">M.TODO</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
-<h2 id="vector">Vector</h2>
-<h3 id="-a-name-todo-a-m-todo-todo-"><a name="TODO"></a><a href="#TODO">M.TODO</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
-<h2 id="matrix">Matrix</h2>
-<h3 id="-a-name-todo-a-m-todo-todo-"><a name="TODO"></a><a href="#TODO">M.TODO</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
+<h3 id="-a-name-mean-a-m-mean-mean-"><a name="mean"></a><a href="#mean">M.mean</a></h3>
+<h3 id="-a-name-median-a-m-median-median-"><a name="median"></a><a href="#median">M.median</a></h3>
+<h3 id="-a-name-mode-a-m-mode-mode-"><a name="mode"></a><a href="#mode">M.mode</a></h3>
+<h3 id="-a-name-variance-a-m-variance-variance-"><a name="variance"></a><a href="#variance">M.variance</a></h3>
+<h3 id="-a-name-stddev-a-m-stddev-stddev-"><a name="stdDev"></a><a href="#stdDev">M.stdDev</a></h3>
+<h3 id="-a-name-covariance-a-m-covariance-covariance-"><a name="covariance"></a><a href="#covariance">M.covariance</a></h3>
+<h3 id="-a-name-correlation-a-m-correlation-correlation-"><a name="correlation"></a><a href="#correlation">M.correlation</a></h3>
+<h3 id="-a-name-rsquared-a-m-rsquared-rsquared-"><a name="rSquared"></a><a href="#rSquared">M.rSquared</a></h3>
+<h3 id="-a-name-linearregression-a-m-linearregression-linearregression-"><a name="linearRegression"></a><a href="#linearRegression">M.linearRegression</a></h3>
+<h2 id="complex-numbers">Complex Numbers</h2>
+<h3 id="-a-name-complex-a-m-complex-complex-"><a name="Complex"></a><a href="#Complex">M.Complex</a></h3>
+<h4 id="construct">Construct</h4>
+<p><code>M.Complex(<span class="code-type">Number </span><span class="code-param">re</span>, <span class="code-type">Number </span><span class="code-param">im</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h4 id="methods">Methods</h4>
+<p><code>.toString(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>TODO</p>
+<p><code>.magnitude(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>TODO</p>
+<p><code>.phase(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>TODO</p>
+<p><code>.conjugate(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>TODO</p>
+<h3 id="-a-name-complex-add-a-m-complex-add-complex-add-"><a name="complex.add"></a><a href="#complex.add">M.complex.add</a></h3>
+<h3 id="-a-name-complex-subtr-a-m-complex-subtr-complex-subtr-"><a name="complex.subtr"></a><a href="#complex.subtr">M.complex.subtr</a></h3>
+<h3 id="-a-name-complex-mult-a-m-complex-mult-complex-mult-"><a name="complex.mult"></a><a href="#complex.mult">M.complex.mult</a></h3>
+<h3 id="-a-name-complex-div-a-m-complex-div-complex-div-"><a name="complex.div"></a><a href="#complex.div">M.complex.div</a></h3>
+<h2 id="vectors">Vectors</h2>
+<h3 id="-a-name-vector-a-m-vector-vector-"><a name="Vector"></a><a href="#Vector">M.Vector</a></h3>
+<h4 id="construct">Construct</h4>
+<p><code>M.Vector(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h4 id="methods">Methods</h4>
+<p><code>.total(<span class="code-type"></span><span class="code-param"></span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>Description</p>
+<p><code>.average(<span class="code-type"></span><span class="code-param"></span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>Description</p>
+<p><code>.norm(<span class="code-type"></span><span class="code-param"></span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">Number</span></code><br>Description</p>
+<p><code>.normalize(<span class="code-type"></span><span class="code-param"></span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">M.Vector</span></code><br>Description</p>
+<p><code>.toString(<span class="code-type"></span><span class="code-param"></span>) <span class="code-type"></span><span class="code-param"></span>: <span class="code-return">String</span></code><br>Description</p>
+<h3 id="-a-name-vector-dot-a-m-vector-dot-vector-dot-"><a name="vector.dot"></a><a href="#vector.dot">M.vector.dot</a></h3>
+<h3 id="-a-name-vector-cross2d-a-m-vector-cross2d-vector-cross2d-"><a name="vector.cross2D"></a><a href="#vector.cross2D">M.vector.cross2D</a></h3>
+<h3 id="-a-name-vector-cross-a-m-vector-cross-vector-cross-"><a name="vector.cross"></a><a href="#vector.cross">M.vector.cross</a></h3>
+<h2 id="matrices">Matrices</h2>
+<h3 id="-a-name-matrix-a-m-matrix-matrix-"><a name="Matrix"></a><a href="#Matrix">M.Matrix</a></h3>
+<h4 id="construct">Construct</h4>
+<p><code>M.Matrix(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h4 id="methods">Methods</h4>
+<p><code>.isSquare(<span class="code-type"></span><span class="code-param"></span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<p><code>.row(<span class="code-type"></span><span class="code-param"></span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<p><code>.column(<span class="code-type"></span><span class="code-param"></span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<p><code>.transpose(<span class="code-type"></span><span class="code-param"></span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<p><code>.determinant(<span class="code-type"></span><span class="code-param"></span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<p><code>.scalarMultiply(<span class="code-type"></span><span class="code-param"></span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<p><code>.inverse(<span class="code-type"></span><span class="code-param"></span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h3 id="-a-name-matrix-identity-a-m-matrix-identity-matrix-identity-"><a name="matrix.identity"></a><a href="#matrix.identity">M.matrix.identity</a></h3>
+<h3 id="-a-name-matrix-add-a-m-matrix-add-matrix-add-"><a name="matrix.add"></a><a href="#matrix.add">M.matrix.add</a></h3>
+<h3 id="-a-name-matrix-rotation-a-m-matrix-rotation-matrix-rotation-"><a name="matrix.rotation"></a><a href="#matrix.rotation">M.matrix.rotation</a></h3>
+<h3 id="-a-name-matrix-shear-a-m-matrix-shear-matrix-shear-"><a name="matrix.shear"></a><a href="#matrix.shear">M.matrix.shear</a></h3>
+<h3 id="-a-name-matrix-reflection-a-m-matrix-reflection-matrix-reflection-"><a name="matrix.reflection"></a><a href="#matrix.reflection">M.matrix.reflection</a></h3>
+<h3 id="-a-name-matrix-projection-a-m-matrix-projection-matrix-projection-"><a name="matrix.projection"></a><a href="#matrix.projection">M.matrix.projection</a></h3>
+<h3 id="-a-name-matrix-mult-a-m-matrix-mult-matrix-mult-"><a name="matrix.mult"></a><a href="#matrix.mult">M.matrix.mult</a></h3>
 <h2 id="geometry">Geometry</h2>
-<h3 id="-a-name-todo-a-m-todo-todo-"><a name="TODO"></a><a href="#TODO">M.TODO</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
+<h3 id="-a-name-geo-point-a-m-geo-point-geo-point-"><a name="geo.Point"></a><a href="#geo.Point">M.geo.Point</a></h3>
+<h4 id="construct">Construct</h4>
+<p><code>M.geo.Point(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h3 id="-a-name-geo-line-a-m-geo-line-geo-line-"><a name="geo.Line"></a><a href="#geo.Line">M.geo.Line</a></h3>
+<h4 id="construct">Construct</h4>
+<p><code>M.geo.Line(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h4 id="methods">Methods</h4>
+<p><code>.contains(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<p><code>.normalVector(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<p><code>.at(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<p><code>.length(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<h3 id="-a-name-geo-curve-a-m-geo-curve-geo-curve-"><a name="geo.Curve"></a><a href="#geo.Curve">M.geo.Curve</a></h3>
+<h4 id="construct">Construct</h4>
+<p><code>M.geo.Curve(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h4 id="methods">Methods</h4>
+<p><code>.at(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<p><code>.length(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<h3 id="-a-name-geo-circle-a-m-geo-circle-geo-circle-"><a name="geo.Circle"></a><a href="#geo.Circle">M.geo.Circle</a></h3>
+<h4 id="construct">Construct</h4>
+<p><code>M.geo.Circle(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h4 id="methods">Methods</h4>
+<p><code>.circumference(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<p><code>.area(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<h3 id="-a-name-geo-rect-a-m-geo-rect-geo-rect-"><a name="geo.Rect"></a><a href="#geo.Rect">M.geo.Rect</a></h3>
+<h4 id="construct">Construct</h4>
+<p><code>M.geo.Rect(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h4 id="methods">Methods</h4>
+<p><code>.toPolygon(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<p><code>.circumference(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<p><code>.area(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<h3 id="-a-name-geo-polygon-a-m-geo-polygon-geo-polygon-"><a name="geo.Polygon"></a><a href="#geo.Polygon">M.geo.Polygon</a></h3>
+<h4 id="construct">Construct</h4>
+<p><code>M.geo.Rect(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<h4 id="methods">Methods</h4>
+<p><code>.centroid(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<p><code>.circumference(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<p><code>.area(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code>  </p>
+<h3 id="-a-name-geo-angle-a-m-geo-angle-geo-angle-"><a name="geo.angle"></a><a href="#geo.angle">M.geo.angle</a></h3>
+<h3 id="-a-name-geo-angle-a-m-geo-angle-geo-angle-"><a name="geo.angle"></a><a href="#geo.angle">M.geo.angle</a></h3>
+<h3 id="-a-name-geo-isparallel-a-m-geo-isparallel-geo-isparallel-"><a name="geo.isParallel"></a><a href="#geo.isParallel">M.geo.isParallel</a></h3>
+<h3 id="-a-name-geo-project-a-m-geo-project-geo-project-"><a name="geo.project"></a><a href="#geo.project">M.geo.project</a></h3>
+<h3 id="-a-name-geo-linetopointdistance-a-m-geo-linetopointdistance-geo-linetopointdistance-"><a name="geo.lineToPointDistance"></a><a href="#geo.lineToPointDistance">M.geo.lineToPointDistance</a></h3>
+<h3 id="-a-name-geo-distance-a-m-geo-distance-geo-distance-"><a name="geo.distance"></a><a href="#geo.distance">M.geo.distance</a></h3>
+<h3 id="-a-name-geo-manhatten-a-m-geo-manhatten-geo-manhatten-"><a name="geo.manhatten"></a><a href="#geo.manhatten">M.geo.manhatten</a></h3>
+<h3 id="-a-name-geo-same-a-m-geo-same-geo-same-"><a name="geo.same"></a><a href="#geo.same">M.geo.same</a></h3>
+<h3 id="-a-name-geo-scale-a-m-geo-scale-geo-scale-"><a name="geo.scale"></a><a href="#geo.scale">M.geo.scale</a></h3>
+<h3 id="-a-name-geo-reflection-a-m-geo-reflection-geo-reflection-"><a name="geo.reflection"></a><a href="#geo.reflection">M.geo.reflection</a></h3>
+<h3 id="-a-name-geo-rotation-a-m-geo-rotation-geo-rotation-"><a name="geo.rotation"></a><a href="#geo.rotation">M.geo.rotation</a></h3>
+<h3 id="-a-name-geo-anglebisector-a-m-geo-anglebisector-geo-anglebisector-"><a name="geo.angleBisector"></a><a href="#geo.angleBisector">M.geo.angleBisector</a></h3>
+<h3 id="-a-name-geo-perpendicular-a-m-geo-perpendicular-geo-perpendicular-"><a name="geo.perpendicular"></a><a href="#geo.perpendicular">M.geo.perpendicular</a></h3>
+<h3 id="-a-name-geo-sortvertices-a-m-geo-sortvertices-geo-sortvertices-"><a name="geo.sortVertices"></a><a href="#geo.sortVertices">M.geo.sortVertices</a></h3>
+<h3 id="-a-name-geo-convexhull-a-m-geo-convexhull-geo-convexhull-"><a name="geo.convexHull"></a><a href="#geo.convexHull">M.geo.convexHull</a></h3>
+<h3 id="-a-name-geo-travellingsalesman-a-m-geo-travellingsalesman-geo-travellingsalesman-"><a name="geo.travellingSalesman"></a><a href="#geo.travellingSalesman">M.geo.travellingSalesman</a></h3>
+<h3 id="-a-name-geo-intersect-a-m-geo-intersect-geo-intersect-"><a name="geo.intersect"></a><a href="#geo.intersect">M.geo.intersect</a></h3>
 <h2 id="cryptography">Cryptography</h2>
-<h3 id="-a-name-todo-a-m-todo-todo-"><a name="TODO"></a><a href="#TODO">M.TODO</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
-<h2 id="numeric">Numeric</h2>
-<h3 id="-a-name-todo-a-m-todo-todo-"><a name="TODO"></a><a href="#TODO">M.TODO</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
+<h3 id="-a-name-caesarcypher-a-m-caesarcypher-caesarcypher-"><a name="caesarCypher"></a><a href="#caesarCypher">M.caesarCypher</a></h3>
+<h3 id="-a-name-vigenerecypher-a-m-vigenerecypher-vigenerecypher-"><a name="vigenereCypher"></a><a href="#vigenereCypher">M.vigenereCypher</a></h3>
+<h3 id="-a-name-caesarcypher-a-m-caesarcypher-caesarcypher-"><a name="caesarCypher"></a><a href="#caesarCypher">M.caesarCypher</a></h3>
+<h3 id="-a-name-letterfreqency-a-m-letterfreqency-letterfreqency-"><a name="letterFreqency"></a><a href="#letterFreqency">M.letterFreqency</a></h3>
+<h3 id="-a-name-cipherletterfreq-a-m-cipherletterfreq-cipherletterfreq-"><a name="cipherLetterFreq"></a><a href="#cipherLetterFreq">M.cipherLetterFreq</a></h3>
+<h2 id="numeric-functions">Numeric Functions</h2>
+<h3 id="-a-name-bisect-a-m-bisect-bisect-"><a name="bisect"></a><a href="#bisect">M.bisect</a></h3>
 <h2 id="units">Units</h2>
-<h3 id="-a-name-todo-a-m-todo-todo-"><a name="TODO"></a><a href="#TODO">M.TODO</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
-<h2 id="expression-span-class-exp-experimental">Expression <span class="exp">experimental</h2>
-<h3 id="-a-name-todo-a-m-todo-todo-"><a name="TODO"></a><a href="#TODO">M.TODO</a></h3>
-<h4 id="-m-permutations-array-x-"><code>M.permutations(Array x)</code></h4>
-<p>returns an array of all possible permutations of an array <code>x</code>.</p>
+<h3 id="-a-name-unit-to-a-m-unit-to-unit-to-"><a name="unit.to"></a><a href="#unit.to">M.unit.to</a></h3>
+<h3 id="-a-name-unit-define-a-m-unit-define-unit-define-"><a name="unit.define"></a><a href="#unit.define">M.unit.define</a></h3>
+<h2 id="expressions">Expressions</h2>
+<h3 id="-a-name-expression-parse-a-m-expression-parse-expression-parse-"><a name="expression.parse"></a><a href="#expression.parse">M.expression.parse</a></h3>
+<h4 id="-m-expression-parse-todo-"><code>M.expression.parse(TODO)</code></h4>
+<p>TODO</p>
+<h3 id="-a-name-m-expression-a-m-m-expression-m-expression-"><a name="M.Expression"></a><a href="#M.Expression">M.M.Expression</a></h3>
+<h4 id="methods">Methods</h4>
+<p><code>.simplify(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<p><code>.toString(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
+<p><code>.evaluate(<span class="code-type"></span><span class="code-param">TODO</span>)<span class="code-type"></span><span class="code-param"></span></code><br>Description</p>
 
   </body>
 </html>

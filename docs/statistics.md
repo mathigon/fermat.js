@@ -1,7 +1,20 @@
 ## Statistics
 
 
-### TODO
+### mean
 
-#### `M.permutations(Array x)`
-returns an array of all possible permutations of an array `x`.
+### median
+
+### mode
+
+### variance
+
+### stdDev
+
+### covariance
+
+### correlation
+
+### rSquared
+
+### linearRegression

@@ -1,7 +1,21 @@
-## Expression <span class="exp">experimental
+## Expressions
 
 
-### TODO
+### expression.parse
 
-#### `M.permutations(Array x)`
-returns an array of all possible permutations of an array `x`.
+#### `M.expression.parse(TODO)`
+TODO
+
+
+### M.Expression
+
+#### Methods
+
+`.simplify(TODO)`
+Description
+
+`.toString(TODO)`
+Description
+
+`.evaluate(TODO)`
+Description
