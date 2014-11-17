@@ -86,8 +86,8 @@
     }
 
     // Returns all subsets of arr (of given length)
-    M.subsets = function (arr, length) {
-        var myArr = arr.clone();
+    M.subsets = function(arr, length) {
+        var myArr = _arraySlice.call(arr, 0);
         var subsets = getSubsets(myArr);
         if (length) subsets = subsets.filter(function(x) { return x.length === length; });
         return subsets;
