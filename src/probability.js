@@ -19,7 +19,7 @@
     M.random.integerArray = function(n) {
         var a = [];
         for (var i=0; i<n; ++i) a.push(i);
-        return a.shuffle();
+        return M.shuffle(a);
     };
 
     // Choses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }

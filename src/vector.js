@@ -63,7 +63,7 @@
         normalize: function() {
             var a = [], n = this.length;
             var total = this.norm();
-            for (var i = 0; i < n; ++i) a.push(a[i]/total);
+            for (var i = 0; i < n; ++i) a.push(this[i]/total);
             return M.Vector(a);
         },
 
@@ -92,6 +92,10 @@
         return M.Vector([v1[1] * v2[2] - v1[2] * v2[1],
                          v1[2] * v2[0] - v1[0] * v2[2],
                          v1[0] * v2[1] - v1[1] * v2[0]]);
+    };
+
+    M.vector.mult = function(v, s) {
+        return M.Vector(M.map(function(x) { return x * s; }, v));
     };
 
 })();

@@ -398,7 +398,7 @@ function concatArrays(a1, a2) {
         var subsets = getSubsets(arr);
         var result = [];
         for (var i=0; i<subsets.length; ++i) {
-            var a2 = subsets[i].clone();
+            var a2 = _arraySlice.call(subsets[i], 0);
             a2.push(last);
             result.push(subsets[i], a2);
         }
@@ -441,7 +441,7 @@ function concatArrays(a1, a2) {
     M.random.integerArray = function(n) {
         var a = [];
         for (var i=0; i<n; ++i) a.push(i);
-        return a.shuffle();
+        return M.shuffle(a);
     };
 
     // Choses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }
@@ -805,7 +805,7 @@ function concatArrays(a1, a2) {
         normalize: function() {
             var a = [], n = this.length;
             var total = this.norm();
-            for (var i = 0; i < n; ++i) a.push(a[i]/total);
+            for (var i = 0; i < n; ++i) a.push(this[i]/total);
             return M.Vector(a);
         },
 
@@ -834,6 +834,10 @@ function concatArrays(a1, a2) {
         return M.Vector([v1[1] * v2[2] - v1[2] * v2[1],
                          v1[2] * v2[0] - v1[0] * v2[2],
                          v1[0] * v2[1] - v1[1] * v2[0]]);
+    };
+
+    M.vector.mult = function(v, s) {
+        return M.Vector(M.map(function(x) { return x * s; }, v));
     };
 
 })();

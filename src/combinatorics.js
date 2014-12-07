@@ -78,7 +78,7 @@
         var subsets = getSubsets(arr);
         var result = [];
         for (var i=0; i<subsets.length; ++i) {
-            var a2 = subsets[i].clone();
+            var a2 = _arraySlice.call(subsets[i], 0);
             a2.push(last);
             result.push(subsets[i], a2);
         }
