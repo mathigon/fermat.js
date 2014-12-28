@@ -1434,9 +1434,9 @@ function concatArrays(a1, a2) {
 
     var lineLineIntersect = function(l1, l2) {
 
-        var d1 = M.map(M.subtr, l1.p2, l1.p1);
-        var d2 = M.map(M.subtr, l2.p2, l2.p1);
-        var d  = M.map(M.subtr, l2.p1, l1.p1);
+        var d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
+        var d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
+        var d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
 
         var denominator = M.vector.cross2D(d2, d1);
         if (denominator === 0) return;  // -> colinear
@@ -1447,7 +1447,7 @@ function concatArrays(a1, a2) {
         var x = n2 / denominator;
         var y = n1 / denominator;
 
-        if (M.bound(x,0,1) && M.bound(y,0,1)) {
+        if (M.between(x,0,1) && M.between(y,0,1)) {
             var intersectionX = l1.p1.x + x * (l1.p2.x - l1.p1.x);
             var intersectionY = l1.p1.y + y * (l1.p2.y - l1.p1.y);
             return [intersectionX, intersectionY];
