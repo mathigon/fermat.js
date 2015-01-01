@@ -16,7 +16,7 @@
 
         var isArray = M.isArray(a);
         this.rows = isArray ? a.length : a;
-        this.columns = isArray ? Math.max.call(Math, a.map(function(x) { return x.length; }))
+        this.columns = isArray ? a.each(function(x) { return x.length; }).max()
                                : (b != null) ? b : a;
 
         for (var i=0; i<this.rows; ++i) {

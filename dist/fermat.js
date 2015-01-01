@@ -854,7 +854,7 @@ function concatArrays(a1, a2) {
 
         var isArray = M.isArray(a);
         this.rows = isArray ? a.length : a;
-        this.columns = isArray ? Math.max.call(Math, a.map(function(x) { return x.length; }))
+        this.columns = isArray ? a.each(function(x) { return x.length; }).max()
                                : (b != null) ? b : a;
 
         for (var i=0; i<this.rows; ++i) {
@@ -1153,6 +1153,12 @@ function concatArrays(a1, a2) {
         return new M.geo.Point(x, y);
     };
 
+    M.geo.average = function(points) {
+        var x = points.each(function(p) { return p.x; }).total() / points.length;
+        var y = points.each(function(p) { return p.y; }).total() / points.length;
+        return new M.geo.Point(x, y);
+    };
+
 
     // ---------------------------------------------------------------------------------------------
     // Distances
@@ -1251,6 +1257,12 @@ function concatArrays(a1, a2) {
 
     // ---------------------------------------------------------------------------------------------
     // Transformations
+
+    M.geo.Point.prototype.transform = function(matrix) {
+        var x = matrix[0][0] * this.x + matrix[0][1] * this.y;
+        var y = matrix[1][0] * this.x + matrix[1][1] * this.y;
+        return new M.geo.Point(x, y);
+    };
 
     var scalePoint = function(p, sx, sy) {
         return new M.geo.Point(p.x * sx, p.y * sy);
@@ -1432,7 +1444,7 @@ function concatArrays(a1, a2) {
         // TODO
     };
 
-    var lineLineIntersect = function(l1, l2) {
+    M.geo.lineIntersect = function(l1, l2) {
 
         var d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
         var d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
@@ -1483,7 +1495,7 @@ function concatArrays(a1, a2) {
         if (y instanceof M.geo.Rect) y = y.toPolygon();
 
         switch (getGeoType(x) + '-' + getGeoType(y)) {
-            case 'line-line':       return lineLineIntersect(x, y);
+            case 'line-line':       return M.geo.lineIntersect(x, y);
             case 'line-circle':     return lineCircleIntersect(x, y);
             case 'line-polygon':    return linePolygonIntersect(x, y);
             case 'circle-line':     return lineCircleIntersect(y, x);
