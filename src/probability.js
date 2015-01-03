@@ -12,11 +12,11 @@
     // ---------------------------------------------------------------------------------------------
     // Simple Random Number Generators
 
-    M.random.integer = function(a, b) {
+    M.random.int = function(a, b) {
         return (b == null ? 0 : a) +  Math.floor((b == null ? a : b - a + 1) * Math.random());
     };
 
-    M.random.integerArray = function(n) {
+    M.random.intArray = function(n) {
         var a = [];
         for (var i=0; i<n; ++i) a.push(i);
         return M.shuffle(a);
@@ -39,6 +39,25 @@
             curr += obj[i];
             if (rand <= curr) return i;
         });
+    };
+
+
+    // ---------------------------------------------------------------------------------------------
+    // Smart Random Number Generators
+
+    var smartRandomCache = {};
+
+    // Avoids returning the same number multiple times in a row
+    M.random.smart = function(n, id) {
+        if (!smartRandomCache[id]) smartRandomCache[id] = M.tabulate(1, n);
+
+        var x = M.random.weighted(M.map(M.square, smartRandomCache[id]));
+
+        smartRandomCache[id][x] -= 1;
+        if (smartRandomCache[id][x] <= 0)
+            smartRandomCache[id] = smartRandomCache[id].each(function(x) { return x+1; });
+
+        return x;
     };
 
 

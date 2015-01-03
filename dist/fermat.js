@@ -434,11 +434,11 @@ function concatArrays(a1, a2) {
     // ---------------------------------------------------------------------------------------------
     // Simple Random Number Generators
 
-    M.random.integer = function(a, b) {
+    M.random.int = function(a, b) {
         return (b == null ? 0 : a) +  Math.floor((b == null ? a : b - a + 1) * Math.random());
     };
 
-    M.random.integerArray = function(n) {
+    M.random.intArray = function(n) {
         var a = [];
         for (var i=0; i<n; ++i) a.push(i);
         return M.shuffle(a);
@@ -461,6 +461,25 @@ function concatArrays(a1, a2) {
             curr += obj[i];
             if (rand <= curr) return i;
         });
+    };
+
+
+    // ---------------------------------------------------------------------------------------------
+    // Smart Random Number Generators
+
+    var smartRandomCache = {};
+
+    // Avoids returning the same number multiple times in a row
+    M.random.smart = function(n, id) {
+        if (!smartRandomCache[id]) smartRandomCache[id] = M.tabulate(1, n);
+
+        var x = M.random.weighted(M.map(M.square, smartRandomCache[id]));
+
+        smartRandomCache[id][x] -= 1;
+        if (smartRandomCache[id][x] <= 0)
+            smartRandomCache[id] = smartRandomCache[id].each(function(x) { return x+1; });
+
+        return x;
     };
 
 
@@ -1446,6 +1465,12 @@ function concatArrays(a1, a2) {
 
     M.geo.lineIntersect = function(l1, l2) {
 
+        var s = same.point(l1.p1, l2.p1) + same.point(l1.p1, l2.p2) +
+                same.point(l1.p2, l2.p1) + same.point(l1.p2, l2.p2);
+
+        if (s === 2) return l1.p1;  // same lines intersect
+        if (s === 1) return;        // connected lines don't intersect
+
         var d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
         var d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
         var d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
@@ -1462,7 +1487,7 @@ function concatArrays(a1, a2) {
         if (M.between(x,0,1) && M.between(y,0,1)) {
             var intersectionX = l1.p1.x + x * (l1.p2.x - l1.p1.x);
             var intersectionY = l1.p1.y + y * (l1.p2.y - l1.p1.y);
-            return [intersectionX, intersectionY];
+            return new M.geo.Point(intersectionX, intersectionY);
         }
     };
 

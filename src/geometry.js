@@ -447,6 +447,12 @@
 
     M.geo.lineIntersect = function(l1, l2) {
 
+        var s = same.point(l1.p1, l2.p1) + same.point(l1.p1, l2.p2) +
+                same.point(l1.p2, l2.p1) + same.point(l1.p2, l2.p2);
+
+        if (s === 2) return l1.p1;  // same lines intersect
+        if (s === 1) return;        // connected lines don't intersect
+
         var d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
         var d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
         var d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
@@ -463,7 +469,7 @@
         if (M.between(x,0,1) && M.between(y,0,1)) {
             var intersectionX = l1.p1.x + x * (l1.p2.x - l1.p1.x);
             var intersectionY = l1.p1.y + y * (l1.p2.y - l1.p1.y);
-            return [intersectionX, intersectionY];
+            return new M.geo.Point(intersectionX, intersectionY);
         }
     };
 
