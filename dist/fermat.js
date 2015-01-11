@@ -60,8 +60,8 @@ function concatArrays(a1, a2) {
         return Math.abs(x - y) < (tolerance || EPS);
     };
 
-    M.sign = Math.sign || function(x) {
-        return x > 0 ? 1 : x < 0 ? -1 : 0;
+    M.sign = function(x) {
+        return M.nearlyEquals(x, 0) ? 0 : (x > 0 ? 1 : -1);
     };
 
     M.square = function(x) {
@@ -821,11 +821,18 @@ function concatArrays(a1, a2) {
             return Math.sqrt(n);
         },
 
-        normalize: function() {
-            var a = [], n = this.length;
-            var total = this.norm();
-            for (var i = 0; i < n; ++i) a.push(this[i]/total);
+        scale: function(q) {
+            var a = [];
+            for (var i = 0; i < this.length; ++i) a.push(q * this[i]);
             return M.Vector(a);
+        },
+
+        normalise: function() {
+            return this.scale(1/this.norm());
+        },
+
+        negate: function() {
+            return this.scale(-1);
         },
 
         toString: function() {
@@ -837,6 +844,10 @@ function concatArrays(a1, a2) {
     // ---------------------------------------------------------------------------------------------
 
     M.vector = {};
+
+    // TODO M.vector.add
+
+    // TODO M.vector.subtract
 
     M.vector.dot = function(v1, v2) {
         var n = Math.max(v1.length, v2.length);
@@ -858,6 +869,8 @@ function concatArrays(a1, a2) {
     M.vector.mult = function(v, s) {
         return M.Vector(M.map(function(x) { return x * s; }, v));
     };
+
+    // TODO M.vector.equal
 
 })();
 

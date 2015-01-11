@@ -60,11 +60,18 @@
             return Math.sqrt(n);
         },
 
-        normalize: function() {
-            var a = [], n = this.length;
-            var total = this.norm();
-            for (var i = 0; i < n; ++i) a.push(this[i]/total);
+        scale: function(q) {
+            var a = [];
+            for (var i = 0; i < this.length; ++i) a.push(q * this[i]);
             return M.Vector(a);
+        },
+
+        normalise: function() {
+            return this.scale(1/this.norm());
+        },
+
+        negate: function() {
+            return this.scale(-1);
         },
 
         toString: function() {
@@ -76,6 +83,10 @@
     // ---------------------------------------------------------------------------------------------
 
     M.vector = {};
+
+    // TODO M.vector.add
+
+    // TODO M.vector.subtract
 
     M.vector.dot = function(v1, v2) {
         var n = Math.max(v1.length, v2.length);
@@ -97,5 +108,7 @@
     M.vector.mult = function(v, s) {
         return M.Vector(M.map(function(x) { return x * s; }, v));
     };
+
+    // TODO M.vector.equal
 
 })();
