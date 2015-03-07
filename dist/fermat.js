@@ -1,5 +1,5 @@
 // Fermat Mathematics Tools
-// (c) 2014, Mathigon / Philipp Legner
+// (c) 2015, Mathigon / Philipp Legner
 // MIT License (https://github.com/Mathigon/fermat.js/blob/master/LICENSE)
 
  (function() {

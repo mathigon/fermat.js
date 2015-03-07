@@ -1,6 +1,6 @@
 // ================================================================================================
 // Gruntfile for Mathigon's JS Libraries
-// (c) 2014 Mathigon
+// (c) 2015 Mathigon
 // ================================================================================================
 
 
@@ -25,7 +25,7 @@ module.exports = function(grunt) {
 
         project: {
             src: 'src',
-            banner: '// <%= pkg.title %>\n// (c) 2014, Mathigon / Philipp Legner\n' +
+            banner: '// <%= pkg.title %>\n// (c) 2015, Mathigon / Philipp Legner\n' +
                     '// MIT License (<%= pkg.license.url %>)\n\n'
         },
 
