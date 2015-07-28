@@ -1,56 +1,53 @@
-// =================================================================================================
-// Fermat.js | TODO
-// (c) 2015 Mathigon / Philipp Legner
-// =================================================================================================
+// ============================================================================
+// Fermat.js | Numeric Mathematics
+// (c) 2015 Mathigon
+// ============================================================================
 
 
-(function() {
 
+// bisect(function(x){ return Math.cos(x/2); }, 10) => Pi
+function bisect(fn, precision = 3, l = 0, h = null) {
 
-    // M.bisect(function(x){ return Math.cos(x/2); }, 10) => Pi
-    M.bisect = function(fn, precision, l, h) {
+    let p = Math.pow(10, -precision);
+    let q = Math.pow(10,  precision);
 
-        if (precision == null) precision = 3;
-        var p = Math.pow(10, -precision);
-        var q = Math.pow(10,  precision);
+    let lf = fn(l);
+    let ls = Math.sign(lf);
+    if (ls === 0) return l;
+    let hf, hs;
 
-        if (!l) l = 0;
-        var lf = fn(l);
-        var ls = Math.sign(lf);
-        if (ls === 0) return l;
-        var hf, hs;
+    if (h == null) {
+        h = 0.5;
+        do {
+            h *= 2;
+            hf = fn(h);
+            hs = Math.sign(hf);
+        } while (hs === ls);
+        if (hs === 0) return h;
+    }
 
-        if (h == null) {
-            h = 0.5;
-            do {
-                h *= 2;
-                hf = fn(h);
-                hs = Math.sign(hf);
-            } while (hs === ls);
-            if (hs === 0) return h;
+    let x = 0;
+    while (Math.abs(lf) > p && x < 200) {
+
+        let c = (l + h) / 2;
+        let cf = fn(c);
+        let cs = Math.sign(cf);
+        if (cs === 0) return c;
+
+        if (cs === ls) {
+            l = c;
+            lf = cf;
+        } else {
+            h = c;
+            hf = cf;
         }
 
-        var x = 0;
-        while (Math.abs(lf) > p && x < 200) {
+        ++x;
+    }
 
-            var c = (l + h) / 2;
-            var cf = fn(c);
-            var cs = Math.sign(cf);
-            if (cs === 0) return c;
-
-            if (cs === ls) {
-                l = c;
-                lf = cf;
-            } else {
-                h = c;
-                hf = cf;
-            }
-
-            ++x;
-        }
-
-        return Math.round(l*q)*p;
-    };
+    return Math.round(l * q) * p;
+}
 
 
-})();
+export default { bisect };
+

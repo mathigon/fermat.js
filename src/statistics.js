@@ -1,123 +1,126 @@
-// =================================================================================================
-// Fermat.js | TODO
-// (c) 2015 Mathigon / Philipp Legner
-// =================================================================================================
+// ============================================================================
+// Fermat.js | Statistics
+// (c) 2015 Mathigon
+// ============================================================================
 
 
-(function() {
 
-    M.mean = M.average = function(a) {
-        return a.length ? M.total(a) / a.length : 0;
-
-    };
-
-    M.median = function(values) {
-        var n = values.length;
-        if (!n) return 0;
-
-        var sorted = values.slice(0).sort();
-        return (n % 2 === 1) ? sorted[Math.floor(n/2)] : (sorted[n/2 - 1] + sorted[n/2]) / 2;
-    };
+import { square, total } from '../core.js/src/utilities.js';
 
 
-    // Returns 'null' if no mode exists (multiple values with the same largest count)
-    M.mode = function(values) {
-        var numInstances = [];
-        var modeInstances = -1;
+// -----------------------------------------------------------------------------
+// Mean, Media, Mode
 
-        var mode;
-        for (var i = 0; i < values.length; i++) {
-            if (!numInstances[values[i]]) {
-                numInstances[values[i]] = 1;
-            } else {
-                numInstances[values[i]] += 1;
-                if (numInstances[values[i]] > modeInstances) {
-                    modeInstances = numInstances[values[i]];
-                    mode = values[i];
-                }
+function mean(a) {
+    return a.length ? total(a) / a.length : null;
+}
+
+function median(values) {
+    let n = values.length;
+    if (!n) return 0;
+
+    let sorted = values.slice(0).sort();
+    return (n % 2 === 1) ? sorted[Math.floor(n/2)] : (sorted[n/2 - 1] + sorted[n/2]) / 2;
+}
+
+// Returns 'null' if no mode exists (multiple values with the same largest count)
+function mode(values) {
+    let counts = new Map();
+
+    let modeCount = -1;
+    let mode;
+
+    for (let v of values) {
+        if (!counts.has(v)) {
+            counts.set(v, 1);
+        } else {
+            let newCount = counts.get(v) + 1;
+            counts.set(v, newCount);
+            if (newCount > modeCount) {
+                modeCount = newCount;
+                mode = v;
             }
         }
+    }
 
-        // iterate again to check for 'no mode'
-        for (i = 0; i < numInstances.length; i++) {
-            if (numInstances[i]) {
-                if (i !== mode && numInstances[i] >= modeInstances) {
-                    return null;
-                }
-            }
+    // iterate again to check for 'no mode'
+    for (let i of counts.entries()) {
+        if (i[1] === modeCount && i[0] !== mode) {
+                return null;
         }
+    }
 
-        return mode;
-    };
-
-
-    M.variance = function(values) {
-        var n = values.length;
-        if (!n) return 0;
-
-        var mean = M.mean(values);
-
-        var sum = 0;
-        for (var i=0; i<n; ++i) sum += M.square(values[i] - mean);
-
-        return sum / (n - 1);
-    };
+    return mode;
+}
 
 
-    M.stdDev = function(values) {
-        return Math.sqrt(M.variance(values));
-    };
+// -----------------------------------------------------------------------------
+// Variance
+
+function variance(values) {
+    if (!values.length) return null;
+    var mean = mean(values);
+
+    var sum = 0;
+    for (v of values) sum += square(v - mean);
+    return sum / (n - 1);
+}
+
+function stdDev(values) {
+    return Math.sqrt(variance(values));
+}
+
+// Determines the covariance of the numbers in two arrays aX and aY
+function covariance(aX, aY) {
+    if (aX.length !== aY.length) throw new Error('Array length mismatch');
+    var n = aX.length;
+    var total = 0;
+    for (var i = 0; i < n; i++) total += aX[i] * aY[i];
+    return (total - total(aX) * total(aY) / n) / n;
+}
+
+function correlation(aX, aY) {
+    if (aX.length !== aY.length) throw new Error('Array length mismatch');
+    var covarXY = covariance(aX, aY);
+    var stdDevX = stdDev(aX);
+    var stdDevY = stdDev(aY);
+    return covarXY / (stdDevX * stdDevY);
+}
 
 
-    // Determines the covariance of the numbers in two arrays aX and aY
-    M.covariance = function(aX, aY) {
-        if (aX.length !== aY.length) throw new Error('Array length mismatch');
-        var n = aX.length;
-        var total = 0;
-        for (var i = 0; i < n; i++) total += aX[i] * aY[i];
-        return (total - aX.total() * aY.total() / n) / n;
-    };
+// -----------------------------------------------------------------------------
+// Regression
 
+function rSquared(source, regression) {
+    let sourceMean = mean(source);
 
-    M.correlation = function(aX, aY) {
-        if (aX.length !== aY.length) throw new Error('Array length mismatch');
-        var covarXY = M.covariance(aX, aY);
-        var stdDevX = aX.standardDev();
-        var stdDevY = aY.standardDev();
-        return covarXY / (stdDevX * stdDevY);
-    };
+    let residualSquares = source.map((d, i) => square(d - regression[i]));
+    let totalSquares = source.map(d => square(d - sourceMean));
 
+    return 1 - total(residualSquares) / total(totalSquares);
+}
 
-    M.rSquared = function(source, regression) {
+function linearRegression(aX, aY) {
+    var n = aX.length;
 
-        var residualSumOfSquares = source.each(function(d, i) {
-            return M.square(d - regression[i]);
-        }).sum();
+    var sumX = total(aX);
+    var sumY = total(aY);
+    var sumXY = total(aX.map((d, i) => d * aY[i]));
+    var sumXSquared = total(aX.map(d => d * d));
 
-        var totalSumOfSquares = source.each(function(d) {
-            return M.square(d - source.average());
-        }).sum();
+    var meanX = mean(aX);
+    var meanY = mean(aY);
 
-        return 1 - (residualSumOfSquares / totalSumOfSquares);
-    };
+    var b = (sumXY - 1 / n * sumX * sumY) / (sumXSquared - 1 / n * (sumX * sumX));
+    var a = meanY - b * meanX;
 
+    return (x) => (a + b * x);
+}
 
-    M.linearRegression = function(aX, aY) {
-        var n = aX.length;
+// -----------------------------------------------------------------------------
 
-        var sumX = aX.sum();
-        var sumY = aY.sum();
-        var sumXY = aX.each(function(d, i) { return d * aY[i]; }).sum();
-        var sumXSquared = aX.each(function(d) { return d * d; }).sum();
+export default {
+    mean, median, mode, variance, stdDev, covariance,
+    correlation, rSquared, linearRegression
+}
 
-        var meanX = aX.average();
-        var meanY = aY.average();
-
-        var b = (sumXY - 1 / n * sumX * sumY) / (sumXSquared - 1 / n * (sumX * sumX));
-        var a = meanY - b * meanX;
-
-        return function(x) { return a + b * x; };
-    };
-
-
-})();

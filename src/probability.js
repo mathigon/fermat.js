@@ -1,156 +1,150 @@
-// =================================================================================================
-// Fermat.js | TODO
+// ============================================================================
+// Fermat.js | Random
 // (c) 2015 Mathigon / Philipp Legner
-// =================================================================================================
+// ============================================================================
 
 
-(function() {
 
-    M.random = {};
-
-
-    // ---------------------------------------------------------------------------------------------
-    // Simple Random Number Generators
-
-    M.random.int = function(a, b) {
-        return (b == null ? 0 : a) +  Math.floor((b == null ? a : b - a + 1) * Math.random());
-    };
-
-    M.random.intArray = function(n) {
-        var a = [];
-        for (var i=0; i<n; ++i) a.push(i);
-        return M.shuffle(a);
-    };
-
-    // Choses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }
-    // Total is optional to specify the total of the weights, if the function is called repeatedly
-    M.random.weighted = function(obj, setTotal) {
-        var total = 0;
-        if (setTotal == null) {
-            M.each(obj, function(x) { total += (+x); });
-        } else {
-            total = setTotal;
-        }
-
-        var rand = Math.random() * total;
-        var curr = 0;
-
-        return M.some(obj, function(x, i) {
-            curr += obj[i];
-            if (rand <= curr) return i;
-        });
-    };
+import { tabulate, each, square, some } from 'utilities.js';
 
 
-    // ---------------------------------------------------------------------------------------------
-    // Smart Random Number Generators
+// -----------------------------------------------------------------------------
+// Simple Random Number Generators
 
-    var smartRandomCache = {};
+function int(a, b = null) {
+    let start = (b == null ? 0 : a);
+    let length = (b == null ? a : b - a + 1)
+    return start + Math.floor(length * Math.random());
+};
 
-    // Avoids returning the same number multiple times in a row
-    M.random.smart = function(n, id) {
-        if (!smartRandomCache[id]) smartRandomCache[id] = M.tabulate(1, n);
+function intArray(n) {
+    let a = [];
+    for (let i = 0; i < n; ++i) a.push(i);
+    return shuffle(a);
+};
 
-        var x = M.random.weighted(M.map(M.square, smartRandomCache[id]));
+// Choses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }
+// Total is optional to specify the total of the weights.
+// This is useful if the function is called repeatedly.
+function weighted(obj, setTotal = null) {
+    let total = 0;
+    if (setTotal == null) {
+        each(obj, function(x) { total += (+x); });
+    } else {
+        total = setTotal;
+    }
 
-        smartRandomCache[id][x] -= 1;
-        if (smartRandomCache[id][x] <= 0)
-            smartRandomCache[id] = smartRandomCache[id].each(function(x) { return x+1; });
+    let rand = Math.random() * total;
+    let curr = 0;
 
-        return x;
-    };
+    return some(obj, function(x, i) {
+        curr += obj[i];
+        if (rand <= curr) return i;
+    });
+};
 
 
-    // ---------------------------------------------------------------------------------------------
-    // Array Shuffle
+
+// -----------------------------------------------------------------------------
+// Smart Random Number Generators
+
+const smartRandomCache = new Map();
+
+// Avoids returning the same number multiple times in a row
+function smart(n, id) {
+    if (!smartRandomCache.has(id)) smartRandomCache.set(id, tabulate(1, n));
+
+    let cache = smartRandomCache.get(id);
+    let x = weighted(cache.map(x => x * x));
+
+    cache[x] -= 1;
+    if (cache[x] <= 0) smartRandomCache.set(id, cache.map(x => x + 1));
+
+    return x;
+}
+
+
+// -----------------------------------------------------------------------------
+// Array Shuffle
 
     // Randomly shuffles the elements in an array
-    M.shuffle = function(a) {
-        a = _arraySlice.call(a, 0); // create copy
-        var j, tmp;
-        for (var i = a.length - 1; i; --i) {
-            j = Math.floor(Math.random() * (i+1));
-            tmp = a[j];
-            a[j] = a[i];
-            a[i] = tmp;
-        }
-        return a;
-    };
+function shuffle(a) {
+    a = Array.prototype.slice.call(a, 0); // create copy
+    let j, tmp;
+    for (let i = a.length - 1; i; --i) {
+        j = Math.floor(Math.random() * (i+1));
+        tmp = a[j];
+        a[j] = a[i];
+        a[i] = tmp;
+    }
+    return a;
+}
 
 
-    // ---------------------------------------------------------------------------------------------
-    // Discrete Distribution
+// -----------------------------------------------------------------------------
+// Discrete Distribution
 
-    M.random.bernoulli = function(p) {
-        if (p == null) p = 0.5;
-        p = Math.max(0,Math.min(1,p));
-        return (Math.random() < p ? 1 : 0);
-    };
+function bernoulli(p = 0.5) {
+    p = Math.max(0,Math.min(1,p));
+    return (Math.random() < p ? 1 : 0);
+}
 
-    M.random.binomial = function(n,p) {
-        if (n == null) n = 1;
-        if (p == null) p = 0.5;
-        var t = 0;
-        for (var i=0; i<n; ++i) t += M.random.bernoulli(p);
-        return t;
-    };
+function binomial(n = 1, p = 0.5) {
+    let t = 0;
+    for (let i = 0; i < n; ++i) t += bernoulli(p);
+    return t;
+};
 
-    M.random.poisson = function(l) {
-        if (l == null) l = 1;
-        if (l <= 0) return 0;
-        var L = Math.exp(-l), p = 1;
-        for (var k = 0; p > L; ++k) p = p * Math.random();
-        return k - 1;
-    };
+function poisson(l = 1) {
+    if (l <= 0) return 0;
+    let L = Math.exp(-l), p = 1;
+    for (let k = 0; p > L; ++k) p *= Math.random();
+    return k - 1;
+}
 
 
-    // ---------------------------------------------------------------------------------------------
-    // Continuous Distribution
+// -----------------------------------------------------------------------------
+// Continuous Distribution
 
-    M.random.uniform = function(a, b) {
-        if (a == null) a = 0;
-        if (b == null) b = 1;
-        return a + (b-a) * Math.random();
-    };
+function uniform(a = 0, b = 1) {
+    return a + (b-a) * Math.random();
+}
 
-    M.random.normal = function(m, v) {
-        if (m == null) m = 0;
-        if (v == null) v = 1;
+function normal(m = 0, v = 1) {
+    let u1 = Math.random();
+    let u2 = Math.random();
+    let rand = Math.sqrt( -2 * Math.log(u1) ) * Math.cos( 2 * Math.PI * u2 );
 
-        var u1 = Math.random();
-        var u2 = Math.random();
-        var rand = Math.sqrt( -2 * Math.log(u1) ) * Math.cos( 2 * Math.PI * u2 );
+    return rand * Math.sqrt(v) + m;
+}
 
-        return rand * Math.sqrt(v) + m;
-    };
+function exponential(l = 1) {
+    return l <= 0 ? 0 : -Math.log(Math.random()) / l;
+}
 
-    M.random.exponential = function(l) {
-        if (l == null) l = 1;
-        return l <= 0 ? 0 : -Math.log(Math.random()) / l;
-    };
+function geometric(p = 0.5) {
+    if (p <= 0 || p > 1) return null;
+    return Math.floor( Math.log(Math.random()) / Math.log(1-p) );
+}
 
-    M.random.geometric = function(p) {
-        if (p == null) p = 0.5;
-        if (p <= 0 || p > 1) return null;
-        return Math.floor( Math.log(Math.random()) / Math.log(1-p) );
-    };
+function cauchy() {
+    let rr, v1, v2;
+    do {
+        v1 = 2 * Math.random() - 1;
+        v2 = 2 * Math.random() - 1;
+        rr = v1 * v1 + v2 * v2;
+    } while (rr >= 1);
+    return v1/v2;
+}
 
-    M.random.cauchy = function() {
-        var rr, v1, v2;
-        do {
-            v1 = 2 * Math.random() - 1;
-            v2 = 2 * Math.random() - 1;
-            rr = v1 * v1 + v2 * v2;
-        } while (rr >= 1);
-        return v1/v2;
-    };
+function normalPDF(x, m = 1, v = 0) {
+    return Math.exp(-square(x - m) / (2 * v)) / Math.sqrt(2 * Math.PI * v);
+}
 
+// -----------------------------------------------------------------------------
 
-    // ---------------------------------------------------------------------------------------------
-    // PDFs
+export default {
+    int, intArray, weighted, smart, shuffle, bernoulli, binomial, poisson,
+    uniform, normal, exponential, geometric, cauchy, normalPDF
+}
 
-    M.normalPDF = function(x, m, v) {
-        return Math.exp(-M.square(x - m) / (2 * v)) / Math.sqrt(2 * Math.PI * v);
-    };
-
-})();

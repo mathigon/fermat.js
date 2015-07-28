@@ -1,65 +1,97 @@
-// =================================================================================================
+// =============================================================================
 // Fermat.js | Matrix
-// (c) 2015 Mathigon / Philipp Legner
-// =================================================================================================
+// *** EXPERIMENTAL ***
+// (c) 2015 Mathigon
+// =============================================================================
 
 
-(function() {
 
-    // M.Matrix([[1,2],[3,4]]) = [[1,2],[3,4]];
-    // M.Matrix(2) = [[0,0],[0,0]];
-    // M.Matrix(2,3) = [[0,0,0],[0,0,0]]
-    // M.Matrix(2,3,1) = [[1,1,1],[1,1,1]]
+import 'vector' as Vector;
 
-    M.Matrix = function(a, b, c) {
-        if (!(this instanceof M.Matrix)) return new M.Matrix(a, b, c);
 
-        var isArray = M.isArray(a);
+export default class Matrix {
+
+    // -------------------------------------------------------------------------
+    // Contructors
+
+    // new Matrix([[1,2],[3,4]]) = [[1,2],[3,4]];
+    // new Matrix(2) = [[0,0],[0,0]];
+    // new Matrix(2,3) = [[0,0,0],[0,0,0]]
+    // new Matrix(2,3,1) = [[1,1,1],[1,1,1]]
+
+    constructor(a, b = null, c = null) {
+        if (!(this instanceof Matrix)) return new Matrix(arguments);
+
+        var isArray = Array.isArray(a);
         this.rows = isArray ? a.length : a;
-        this.columns = isArray ? a.each(function(x) { return x.length; }).max()
-                               : (b != null) ? b : a;
+        this.columns = isArray ? Math.max.apply(null, a.map(x => x.length))
+                               : (b == null) ? a : b;
 
-        for (var i=0; i<this.rows; ++i) {
+        for (var i = 0; i < this.rows; ++i) {
             this[i] = [];
-            for (var j=0; j<this.columns; ++j) {
+            for (var j = 0; j < this.columns; ++j) {
                 var val = isArray ? a[i][j] : c;
                 this[i][j] = (val != null) ? val : null;
             }
         }
-    };
+    }
 
-    // ---------------------------------------------------------------------------------------------
+    static identity(n = 2) {
+        let x = new Matrix(n, n, 0);
+        for (let i = 0; i < n; ++i) x[i][i] = 1;
+        return x;
+    }
 
-    M.Matrix.prototype.isSquare = function() {
+    static rotation(angle) {
+        // TODO
+    }
+
+    static shear(s) {
+        // TODO
+    }
+
+    static reflection() {
+        // TODO
+    }
+
+    static projection() {
+        // TODO
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Getters and Methods
+
+    get isSquare() {
         return this.rows === this.cols;
-    };
+    }
 
-    M.Matrix.prototype.row = function(i) {
-        return new M.Vector(this[i]);
-    };
+    row(i) {
+        return new Vector(this[i]);
+    }
 
-    M.Matrix.prototype.column = function(j) {
-        var c = [];
-        for (var i=0; i<this.rows; ++i) c.push(this[i][j]);
-        return new M.Vector(c);
-    };
+    column(j) {
+        let c = [];
+        for (let i = 0; i < this.rows; ++i) c.push(this[i][j]);
+        return new Vector(c);
+    }
 
-    M.Matrix.prototype.transpose = function() {
-        var newMatrix = [];
+    get transpose() {
+        let newMatrix = [];
 
-        for (var i=0; i<this.columns; ++i) {
+        for (var i = 0; i < this.columns; ++i) {
             this[i] = [];
-            for (var j=0; j<this.rows; ++j) {
+            for (let j = 0; j < this.rows; ++j) {
                 newMatrix[i][j] = this[j][i];
             }
         }
 
-        return new M.Matrix(newMatrix);
-    };
+        return new Matrix(newMatrix);
+    }
 
-    M.Matrix.prototype.determinant = function() {
+    get determinant() {
         if (!this.isSquare()) throw new Error('Not a square matrix.');
-        var n = this.rows, det = 0;
+        let n = this.rows, det = 0;
 
         if (n === 1) {
             return this[0][0];
@@ -71,18 +103,18 @@
             var diagLeft  = this[0][col];
             var diagRight = this[0][col];
 
-            for(var row=1; row < rows; ++row) {
-                diagRight *= this[row][M.mod(col + row, n)];
-                diagLeft  *= this[row][M.mod(col - row, n)];
+            for (var row=1; row < rows; ++row) {
+                diagRight *= this[row][col + row % n];
+                diagLeft  *= this[row][col - row % n];
             }
 
             det += diagRight - diagLeft;
         }
 
         return det;
-    };
+    }
 
-    M.Matrix.prototype.scalarMultiply = function(val) {
+    scalarMultiply(val) {
         var result = [];
         for (var i = 0; i < this.rows; i++) {
             result[i] = [];
@@ -90,25 +122,18 @@
                 result[i][j] = val * this[i][j];
             }
         }
-        return M.Matrix(result);
-    };
+        return new Matrix(result);
+    }
 
-    M.Matrix.prototype.inverse = function() {
+    get inverse() {
         // TODO
-    };
+    }
 
-    // ---------------------------------------------------------------------------------------------
 
-    M.matrix = {};
+    // -------------------------------------------------------------------------
+    // Static Methods
 
-    // Create an identity matrix of dimension n x n
-    M.matrix.identity = function() {
-        var x = new M.Matrix(n, n, 0);
-        for (var i = 0; i < n; ++i) x[i][i] = 1;
-        return x;
-    };
-
-    M.matrix.add = function(m1, m2) {
+    static add(m1, m2) {
         if (m1.rows !== m2.rows || m1.cols !== m2.cols) throw new Error('Matrix size mismatch');
 
         var result = [];
@@ -121,47 +146,31 @@
         }
 
         return M.Matrix(result);
-    };
+    }
 
-    M.matrix.rotation = function(angle) {
+    static productVM(v, m) {
+        return Matrix.productMV(m.transpose, v);
+    }
+
+    static productMV(m, v) {
         // TODO
-    };
+    }
 
-    M.matrix.shear = function() {
+    static productMM(m1, m2) {
         // TODO
-    };
+    }
 
-    M.matrix.reflection = function() {
-        // TODO
-    };
-
-    // Orthogonal Projection
-    M.matrix.projection = function() {
-        // TODO
-    };
-
-    var vMultM = function(v, m) {
-        return mMultV(m.transpose(), v);
-    };
-
-    var mMultV = function(m, v) {
-        // TODO
-    };
-
-    var mMultM = function(m1, m2) {
-        // TODO
-    };
-
-    M.matrix.mult = function(a, b) {
-        if (a instanceof M.Vector && b instanceof M.Matrix) {
-            return vMultM(a, b);
-        } else if (a instanceof M.Matrix && b instanceof M.Vector) {
-            return mMultV(a, b);
-        } else if (a instanceof M.Matrix && b instanceof M.Matrix) {
-            return mMultM(a, b);
+    static product(a, b) {
+        if (a instanceof Vector && b instanceof Matrix) {
+            return Matrix.productVM(a, b);
+        } else if (a instanceof Matrix && b instanceof Vector) {
+            return Matrix.productMV(a, b);
+        } else if (a instanceof Matrix && b instanceof Matrix) {
+            return Matrix.productMM(a, b);
         } else {
-            throw new Error('Can\'t multiply two vectors; use .dot or .cross instead.');
+            throw new Error('Can\'t multiply these two objects.');
         }
-    };
+    }
 
-})();
+}
+

@@ -1,114 +1,112 @@
-// =================================================================================================
+// =============================================================================
 // Fermat.js | Vector
-// (c) 2015 Mathigon / Philipp Legner
-// =================================================================================================
+// (c) 2015 Mathigon
+// =============================================================================
 
 
-(function() {
 
-    var setPrototype = Object.setPrototypeOf ||
-                       function(obj, proto) { obj.__proto__ = proto; }; // jshint ignore:line
+import { map, isInteger } from 'utilities';
 
 
-    // M.Vector([1, 2, 3]) = [1, 2, 3]
-    // M.Vector(3) = [null, null, null]
-    // M.Vector(3, 1) = [1, 1, 1]
+export default class Vector extends Array {
 
-    // M.Vector is a subclass of the native JS Array type and contains all usual Arraymethods.
-    // For very long or very large numbers of vectors, native Arrays perform significantly better.
-    // All functions in M.vector work with M.Vector objects as well as native arrays
+    // -------------------------------------------------------------------------
+    // Contructors
 
-    M.Vector = function(a, b) {
+    constructor(...args) {
+        if (!(this instanceof Vector)) return new Vector(arguments);
 
-        var array;
-
-        if (Array.isArray(a)) {
-            // Reduces performance, but we don't want to modify arguments passed in:
-            array = a.slice(0);
-        } else {
-            array = [];
-            if (b === undefined) b = null;
-            for (var i=0; i<a; ++i) array.push(b);
+        if (args.length === 1) {
+            if (Array.isArray(args[0])) {
+                args = args[0];
+            } else {
+                args = Array(args[0]).fill(0);
+            }
         }
 
-        // Reduces performance and violates JS best practices, but seems to be neccessary:
-        setPrototype(array, M.Vector.prototype);
+        super.call(this, args);
+    }
 
-        return array;
-    };
 
-    M.Vector.prototype = new Array; // jshint ignore:line
+    // -------------------------------------------------------------------------
+    // Getters and Methods
 
-    /* Alternate Array Subclass (doesn't use Object.setPrototypeOf but is slower):
-       var M.Vector = function(array) { this.push.apply(this, array); };
-       M.Vector.prototype = Object.create(Array.prototype);
-       M.Vector.prototype.constructor = M.Vector; */
+    get total() {
+        let total = 0;
+        for (let x of this) total += (+x || 0);
+        return total;
+    }
 
-    M.extend(M.Vector.prototype, {
+    get average() {
+        return this.total() / this.length;
+    }
 
-        total: function() {
-            return M.total(this);
-        },
+    get norm() {
+        let squares = 0;
+        for (let x of this) squares += x * x;
+        return Math.sqrt(squares);
+    }
 
-        average: function() {
-            return this.total() / this.length;
-        },
+    get first() { return this[0]; }
+    get last() { return this[this.length - 1]; }
+    get min() { return Math.min.apply(Math, this); }
+    get max() { return Math.max.apply(Math, this); }
+    get range() { return [this.min, this.max] },
 
-        norm: function() {
-            var n = 0;
-            for (var i=0; i<this.length; ++i) n += M.square(this[i]);
-            return Math.sqrt(n);
-        },
+    scale(q = 1) {
+        var scaled = this.map(x => q * x);
+        return new Vector(scaled);
+    }
 
-        scale: function(q) {
-            var a = [];
-            for (var i = 0; i < this.length; ++i) a.push(q * this[i]);
-            return M.Vector(a);
-        },
+    normalise() {
+        return this.scale(1 / this.norm);
+    }
 
-        normalise: function() {
-            return this.scale(1/this.norm());
-        },
+    toString() {
+        return '(' + this.join(', ') + ')';
+    }
 
-        negate: function() {
-            return this.scale(-1);
-        },
 
-        toString: function() {
-            return '(' + _arrayJoin.call(this, ', ') + ')';
-        }
+    // -------------------------------------------------------------------------
+    // Static Functions
 
-    }, true);
+    static sum(v1, v2) {
+        let a = map((a,b) => a + b, v1, v2);
+        return new Vector(a);
+    }
 
-    // ---------------------------------------------------------------------------------------------
+    static difference(v1, v2) {
+        return Vector.add(v1, v2.scale(-1));
+    }
 
-    M.vector = {};
-
-    // TODO M.vector.add
-
-    // TODO M.vector.subtract
-
-    M.vector.dot = function(v1, v2) {
-        var n = Math.max(v1.length, v2.length);
-        var d = 0;
-        for (var i=0; i<n; ++i) d += (v1[i] || 0) * (v2[i] || 0);
+    static dot(v1, v2) {
+        let n = Math.min(v1.length, v2.length);
+        let d = 0;
+        for (let i = 0; i < n; ++i) d += (v1[i] || 0) * (v2[i] || 0);
         return d;
-    };
+    }
 
-    M.vector.cross2D = function(x, y) {
+    static cross2D(x, y) {
         return x[0] * y[1] - x[1] * y[0];
-    };
+    }
 
-    M.vector.cross = function(v1, v2) {
-        return M.Vector([v1[1] * v2[2] - v1[2] * v2[1],
-                         v1[2] * v2[0] - v1[0] * v2[2],
-                         v1[0] * v2[1] - v1[1] * v2[0]]);
-    };
+    static cross(v1, v2) {
+        return new Vector([v1[1] * v2[2] - v1[2] * v2[1],
+                           v1[2] * v2[0] - v1[0] * v2[2],
+                           v1[0] * v2[1] - v1[1] * v2[0]]);
+    }
 
-    M.vector.mult = function(v, s) {
-        return M.Vector(M.map(function(x) { return x * s; }, v));
-    };
+    static product(v1, v2) {
+        let a = map((a,b) => a * b, v1, v2);
+        return new Vector(a);
+    }
 
-    // TODO M.vector.equal
+    static equals(v1, v2) {
+        let n = v1.length;
+        if (n !== v2.length) return false;
+        for (let i = 0; i < n; ++i) if (v1[i] !== v2[i]) return false;
+        return true;
+    }
 
-})();
+}
+

@@ -1,75 +1,81 @@
-// =================================================================================================
-// Fermat.js | Complex
-// (c) 2015 Mathigon / Philipp Legner
-// =================================================================================================
+// =============================================================================
+// Fermat.js | Complex Numbers
+// (c) 2015 Mathigon
+// =============================================================================
 
 
-(function() {
 
+export default class Complex {
 
-    M.Complex = function(re, im) {
-        this.re = re || 0;
-        this.im = im || 0;
-    };
+    // -------------------------------------------------------------------------
+    // Static Methods
 
+    static sum(c1, c2) {
+        if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
+        if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
 
-    M.extend(M.Complex.prototype, {
+        return new Complex(c1.re + c2.re, c1.im + c2.im);
+    }
 
-        toString: function() {
-            if (!this.real) return this.imaginary + 'i';
-            if (!this.imaginary) return this.real;
-            return this.real + ' + ' + this.imaginary + 'i';
-        },
+    static difference(c1, c2) {
+        if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
+        if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
 
-        magnitude: function () {
-            return Math.sqrt(this.re * this.re + this.im * this.im);
-        },
+        return new Complex(c1.re - c2.re, c1.im - c2.im);
+    }
 
-        phase: function () {
-            return Math.atan2(this.im, this.re);
-        },
-
-        conjugate: function() {
-            return new M.complex(this.re, -this.im);
-        }
-
-    }, true);
-
-
-    M.complex = {};
-
-    M.complex.add = function(c1, c2) {
-        if (!(c1 instanceof M.Complex)) c1 = new M.Complex(c1, 0);
-        if (!(c2 instanceof M.Complex)) c2 = new M.Complex(c2, 0);
-        return new M.Complex(c1.re + c2.re, c1.im + c2.im);
-    };
-
-    M.complex.subtr = function(c1, c2) {
-        if (!(c1 instanceof M.Complex)) c1 = new M.Complex(c1, 0);
-        if (!(c2 instanceof M.Complex)) c2 = new M.Complex(c2, 0);
-        return new M.Complex(c1.re - c2.re, c1.im - c2.im);
-    };
-
-    M.complex.mult = function(c1, c2) {
-        if (!(c1 instanceof M.Complex)) c1 = new M.Complex(c1, 0);
-        if (!(c2 instanceof M.Complex)) c2 = new M.Complex(c2, 0);
+    static product(c1, c2) {
+        if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
+        if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
         var re = c1.re * c2.re - c1.im * c2.im;
         var im = c1.im * c2.re + c1.re * c2.im;
         return new M.complex(re, im);
-    };
+    }
 
-    M.complex.div = function(c1, c2) {
-        if (!(c1 instanceof M.Complex)) c1 = new M.Complex(c1, 0);
-        if (!(c2 instanceof M.Complex)) c2 = new M.Complex(c2, 0);
+    static quotient(c1, c2) {
+        if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
+        if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
 
-        if (Math.abs(c2.re) < EPS && Math.abs(c2.im) < EPS)
-            return new M.Complex(Infinity, Infinity);
+        if (Math.abs(c2.re) < Number.EPSILON || Math.abs(c2.im) < Number.EPSILON)
+            return new Complex(Infinity, Infinity);
 
         var denominator = c2.re * c2.re + c2.im * c2.im;
         var re = (c1.re * c2.re + c1.im * c2.im) / denominator;
         var im = (c1.im * c2.re - c1.re * c2.im) / denominator;
-        return new M.Complex(re, im);
-    };
+
+        return new Complex(re, im);
+    }
 
 
-})();
+    // -------------------------------------------------------------------------
+    // Constructor
+
+    constructor(re = 0, im = 0) {
+        this.re = re || 0;
+        this.im = im || 0;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Getters and Methods
+
+    get magnitude() {
+        return Math.sqrt(this.re * this.re + this.im * this.im);
+    }
+
+    get phase() {
+        return Math.atan2(this.im, this.re);
+    }
+
+    get conjugate() {
+        return new Complex(this.re, -this.im);
+    }
+
+    toString() {
+        if (!this.re) return this.im + 'i';
+        if (!this.im) return this.re;
+        return this.re + ' + ' + this.im + 'i';
+    }
+
+}
+

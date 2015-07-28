@@ -1,27 +1,105 @@
-// =================================================================================================
+// =============================================================================
 // Fermat.js | Expressions
-// ***EXPERIMENTAL ***
-// (c) 2015 Mathigon / Philipp Legner
-// =================================================================================================
+// *** EXPERIMENTAL ***
+// (c) 2015 Mathigon
+// =============================================================================
 
 
-(function() {
+// TODO fix parser errors + test
+// TODO + and * with multiple arguments
+// TODO Simplify expressions
+// TODO More error messages: 1(1), "str"(10), %(x)
 
-    // TODO fix parser errors + test
-    // TODO + and * with multiple arguments
-    // TODO Simplify expressions
-    // TODO More error messages: 1(1), "str"(10), %(x)
 
-    // ---------------------------------------------------------------------------------------------
-    // Expression Parser
 
-    var brackets = { '(': ')', '[': ']', '{': '}', '|': '|' };
 
-    function bracketsMatch(a, b) {
-        return brackets[a] === b || brackets[b] === a;
+// ---------------------------------------------------------------------------------------------
+// Expression Functions
+
+const functions = {
+    '+': function(a, b) { return a + b; },
+    '-': function(a, b) { return (b === undefined) ? -a : a - b; },
+    '*': function(a, b) { return a * b; },
+    '/': function(a, b) { return a / b; },
+    '!': function(n) { return M.factorial(n); },  // FIXME
+    '^': function(a, b) { return Math.pow(a, b); },
+    '[]': function(...args) { return args; },
+    '"': function(str) { return '' + str; },
+    'mod': function(a, b) { return M.mod(a, b); }
+};
+
+const strings = {
+    '+': function(...args) { return args.join(' + '); },
+    '-': function(a, b) { return (b === undefined) ? '-' + a : a + ' - ' + b; },
+    '*': function(...args) { return args.join(' * '); },
+    '/': function(a, b) { return a + ' / ' + b; },
+    '!': function(n) { return n + '!'; },
+    '^': function(a, b) { return a + ' ^ ' + b; },
+    '[]': function(...args) { return '[' + args.join(', ') + ']'; },
+    '"': function(str) { return '"' + str + '"'; },
+    'mod': function(a, b) { return a + ' mod ' + b; }
+};
+
+
+class ExpressionFn {
+    constructor(fn, args) {
+        this.fn = fn;
+        this.args = args;
     }
 
-    function ExpressionParser() {
+    simplify() {
+        // TODO !!!
+        return this;
+    }
+
+    toString() {
+        var newArgs = [];
+        for (var i=0; i<this.args.length; ++i) newArgs.push(this.args[i].toString());
+
+        var fn = strings[this.fn];
+        return fn ? fn.apply(null, newArgs) : this.fn + '(' + this.args.join(', ') + ')';
+    }
+
+    evaluate(vars = {}) {
+        var newArgs = [];
+        for (var i=0; i<this.args.length; ++i) {
+            var newArg = this.args[i].evaluate();
+            if (newArg instanceof Expression) return this;
+            newArgs.push(newArg);
+        }
+
+        var fn = vars[this.fn] || functions[this.fn] || Math[this.fn] || M[this.fn];
+        return (fn instanceof Function) ? fn.apply(null, newArgs) : this;
+    }
+}
+
+
+// ExpressionVal can be numbers of strings (-> variables)
+class ExpressionVal {
+    constructor(val) { this.val = val; }
+    simplify() { return this; }
+    toString() { return '' + this.val; }
+
+    evaluate(vars = {}) {
+        if (isNumber(this.val)) return this.val;
+        if (this.val in vars) return vars[this.val];
+        return this;
+    }
+}
+
+
+// ---------------------------------------------------------------------------------------------
+// Expression Parser
+
+const brackets = { '(': ')', '[': ']', '{': '}', '|': '|' };
+
+function bracketsMatch(a, b) {
+    return brackets[a] === b || brackets[b] === a;
+}
+
+class ExpressionParser {
+
+    constructor() {
         this.current = '';
         this.result = [];
 
@@ -31,19 +109,19 @@
     }
 
     // Pushes a new letter to the expression parser
-    ExpressionParser.prototype.send = function(x) {
+    send(x) {
 
         // Handle Strings
         if (this.currentBracket === '"' && x !== '"') {
             this.current += x;
 
         // Closing Strings
-    } else if (!this.currentBracket && x === '"') {
+        } else if (!this.currentBracket && x === '"') {
             this.pushCurrent();
             this.currentBracket = '"';
 
         // Opening Strings
-    } else if (this.currentBracket === '"' && x === '"') {
+        } else if (this.currentBracket === '"' && x === '"') {
             this.result.push(new Expression('"', [this.current]));
 
         // Handle Invalid Characters
@@ -97,22 +175,22 @@
         } else {
             this.current += x.trim();
         }
-    };
+    }
 
-    ExpressionParser.prototype.isReady = function() {
+    isReady() {
         return this.currentParser == null;
-    };
+    }
 
     // Adds a new letter, number or expression to the results object
-    ExpressionParser.prototype.pushCurrent = function() {
+    pushCurrent() {
         if (!this.current) return;
         var num = +this.current;
         this.result.push(new ExpressionVal(num === num ? num : this.current));
         this.current = '';
-    };
+    }
 
     // Completes the expression and returns a new expression
-    ExpressionParser.prototype.complete = function(x) {
+    complete(x) {
 
         this.pushCurrent();
         var i;
@@ -162,105 +240,33 @@
         }
 
         return this.result;
-    };
+    }
+}
 
 
-    // ---------------------------------------------------------------------------------------------
-    // Expressions
+// ---------------------------------------------------------------------------------------------
+// Expressions Class
 
-    function ExpressionFn(fn, args) {
-        this.fn = fn;
-        this.args = args;
+export default class Expression {
+
+    constructor(str) {
+        let parser = new ExpressionParser();
+        for (let x of str) parser.send(x);
+        this.expr = parser.complete()[0].simplify();
     }
 
-    ExpressionFn.prototype.simplify = function() {
-        // TODO !!!
+    simplify() {
         return this;
-    };
-
-    ExpressionFn.prototype.toString = function() {
-        var newArgs = [];
-        for (var i=0; i<this.args.length; ++i) newArgs.push(this.args[i].toString());
-
-        var fn = strings[this.fn];
-        return fn ? fn.apply(null, newArgs) : this.fn + '(' + this.args.join(', ') + ')';
-    };
-
-    ExpressionFn.prototype.evaluate = function(vars) {
-        if (vars == null) vars = {};
-
-        var newArgs = [];
-        for (var i=0; i<this.args.length; ++i) {
-            var newArg = this.args[i].evaluate();
-            if (newArg instanceof Expression) return this;
-            newArgs.push(newArg);
-        }
-
-        var fn = vars[this.fn] || functions[this.fn] || Math[this.fn] || M[this.fn];
-        return (fn instanceof Function) ? fn.apply(null, newArgs) : this;
-    };
-
-
-    function ExpressionVal(val) {
-        this.val = val;
     }
 
-    ExpressionVal.prototype.simplify = function() {
-        return this;
-    };
-
-    ExpressionVal.prototype.toString = function() {
+    toString() {
         return this.val.toString();
-    };
+    }
 
-    ExpressionVal.prototype.evaluate = function(vars) {
+    evaluate(vars) {
         if (vars == null) vars = {};
         // TODO return numbers if possible?
         return (vars[this.val] === undefined) ? this.val : vars[this.val];
-    };
+    }
+}
 
-
-    // ---------------------------------------------------------------------------------------------
-    // Expression Functions
-
-    var functions = {
-        '+': function(a, b) { return a + b; },
-        '-': function(a, b) { return (b === undefined) ? -a : a - b; },
-        '*': function(a, b) { return a * b; },
-        '/': function(a, b) { return a / b; },
-        '!': function(n) { return M.factorial(n); },
-        '^': function(a, b) { return Math.pow(a, b); },
-        '[]': function() { return arguments; },
-        '"': function(str) { return '' + str; },
-        'mod': function(a, b) { return M.mod(a, b); }
-    };
-
-    var strings = {
-        '+': function() { return M.toArray(arguments).join(' + '); },
-        '-': function(a, b) { return (b === undefined) ? '-' + a : a + ' - ' + b; },
-        '*': function() { return M.toArray(arguments).join(' * '); },
-        '/': function(a, b) { return a + ' / ' + b; },
-        '!': function(n) { return n + '!'; },
-        '^': function(a, b) { return a + ' ^ ' + b; },
-        '[]': function() { return '[' + M.toArray(arguments).join(', ') + ']'; },
-        '"': function(str) { return '"' + str + '"'; },
-        'mod': function(a, b) { return a + ' mod ' + b; }
-    };
-
-
-    // ---------------------------------------------------------------------------------------------
-    // Public Interface
-
-    M.expression = {};
-
-    M.expression.parse = function(str) {
-
-        var parser = new ExpressionParser();
-
-        var n = str.length;
-        for (var i=0; i<n; ++i) parser.send(str[i]);
-
-        return parser.complete()[0].simplify();
-    };
-
-})();

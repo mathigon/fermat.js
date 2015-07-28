@@ -1,10 +1,6 @@
-# Contributing to core.js
+# Contributing to fermat.js
 
-Mathigon JS was created to simplify web development, to share code between Mathigon websites, and to reduce the need for a large number of external JavaScript libraries and frameworks.
-
-While most of the code was written for specific Mathigon uses, rather than to build a generic and universal library, we hope that you will find it useful for animation and computation heavy projects. 
-
-We welcome any community suggestions and contributions.
+TODO
 
 
 ## Bug Reports and Feature Requests
@@ -16,7 +12,7 @@ To contribute code or to fix bugs, please fork our GitHub repository and send us
 
 ## Testing
 
-We use [nodeunit](https://github.com/caolan/nodeunit/) for testing. Tests are located in `tests/` and are run automatically when you build using Grunt. Every new function needs its own test located in the appropriate `*.tests.js` file. Nodeunit supports a variety of different tests:
+We use [nodeunit](https://github.com/caolan/nodeunit/) for testing. Tests are located in `tests/` and can be run using `npm run test`. Every new function needs its own test located in the appropriate `*.tests.js` file. Nodeunit supports a variety of different tests:
 
 * `ok(value, [message])` tests if value is truthy;
 * `equal(actual, expected, [message])` tests shallow, coercive equality using `==`;
@@ -41,11 +37,9 @@ Mathigon JS largely follows the [Airbnb JavaScript Style Guide](https://github.c
 
 ## Pull requests
 
-Run `grunt` before committing to check jshint and unit tests, and to build production files. Make sure that your code follows our coding guidelines.
-
 All pull requests should focus on specific patches and improvements, and not contain unrelated work. Please [email us](mailto:dev@mathigon.org) first before starting work on significant new features.
 
 
 ## License
 
-By contributing your code, you agree to license your contribution under the [MIT license](https://github.com/mathigon/kepler.js/blob/master/LICENSE).
+By contributing your code, you agree to license your contribution under the [MIT license](https://github.com/mathigon/fermat.js/blob/master/LICENSE).

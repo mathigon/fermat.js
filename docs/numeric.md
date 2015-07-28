@@ -1,4 +1,0 @@
-## Numeric Functions
-
-
-### bisect
