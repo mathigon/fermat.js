@@ -5,7 +5,8 @@
 
 
 
-import { square, total } from '../core.js/src/utilities.js';
+import { total } from 'arrays';
+import { square } from 'arithmetic';
 
 
 // -----------------------------------------------------------------------------
@@ -28,7 +29,7 @@ function mode(values) {
     let counts = new Map();
 
     let modeCount = -1;
-    let mode;
+    let result;
 
     for (let v of values) {
         if (!counts.has(v)) {
@@ -38,19 +39,19 @@ function mode(values) {
             counts.set(v, newCount);
             if (newCount > modeCount) {
                 modeCount = newCount;
-                mode = v;
+                result = v;
             }
         }
     }
 
     // iterate again to check for 'no mode'
     for (let i of counts.entries()) {
-        if (i[1] === modeCount && i[0] !== mode) {
+        if (i[1] === modeCount && i[0] !== result) {
                 return null;
         }
     }
 
-    return mode;
+    return result;
 }
 
 
@@ -59,10 +60,10 @@ function mode(values) {
 
 function variance(values) {
     if (!values.length) return null;
-    var mean = mean(values);
+    let mean = mean(values);
 
-    var sum = 0;
-    for (v of values) sum += square(v - mean);
+    let sum = 0;
+    for (let v of values) sum += square(v - mean);
     return sum / (n - 1);
 }
 
@@ -122,5 +123,5 @@ function linearRegression(aX, aY) {
 export default {
     mean, median, mode, variance, stdDev, covariance,
     correlation, rSquared, linearRegression
-}
+};
 

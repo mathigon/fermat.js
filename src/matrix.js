@@ -6,7 +6,7 @@
 
 
 
-import 'vector' as Vector;
+import Vector from 'vector';
 
 
 export default class Matrix {
@@ -24,7 +24,7 @@ export default class Matrix {
 
         var isArray = Array.isArray(a);
         this.rows = isArray ? a.length : a;
-        this.columns = isArray ? Math.max.apply(null, a.map(x => x.length))
+        this.columns = isArray ? Math.max(...a.map(x => x.length))
                                : (b == null) ? a : b;
 
         for (var i = 0; i < this.rows; ++i) {

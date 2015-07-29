@@ -5,23 +5,42 @@
 
 
 
-import { tabulate, each, square, some } from 'utilities.js';
+import { each, some } from 'utilities';
+import { tabulate } from 'arrays';
+import { square } from 'arithmetic';
+
+
+// -----------------------------------------------------------------------------
+// Array Shuffle
+
+// Randomly shuffles the elements in an array
+function shuffle(a) {
+    a = a.slice(0); // create copy
+    let j, tmp;
+    for (let i = a.length - 1; i; --i) {
+        j = Math.floor(Math.random() * (i+1));
+        tmp = a[j];
+        a[j] = a[i];
+        a[i] = tmp;
+    }
+    return a;
+}
 
 
 // -----------------------------------------------------------------------------
 // Simple Random Number Generators
 
-function int(a, b = null) {
+function integer(a, b = null) {
     let start = (b == null ? 0 : a);
-    let length = (b == null ? a : b - a + 1)
+    let length = (b == null ? a : b - a + 1);
     return start + Math.floor(length * Math.random());
-};
+}
 
 function intArray(n) {
     let a = [];
     for (let i = 0; i < n; ++i) a.push(i);
     return shuffle(a);
-};
+}
 
 // Choses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }
 // Total is optional to specify the total of the weights.
@@ -41,7 +60,7 @@ function weighted(obj, setTotal = null) {
         curr += obj[i];
         if (rand <= curr) return i;
     });
-};
+}
 
 
 
@@ -65,23 +84,6 @@ function smart(n, id) {
 
 
 // -----------------------------------------------------------------------------
-// Array Shuffle
-
-    // Randomly shuffles the elements in an array
-function shuffle(a) {
-    a = Array.prototype.slice.call(a, 0); // create copy
-    let j, tmp;
-    for (let i = a.length - 1; i; --i) {
-        j = Math.floor(Math.random() * (i+1));
-        tmp = a[j];
-        a[j] = a[i];
-        a[i] = tmp;
-    }
-    return a;
-}
-
-
-// -----------------------------------------------------------------------------
 // Discrete Distribution
 
 function bernoulli(p = 0.5) {
@@ -93,7 +95,7 @@ function binomial(n = 1, p = 0.5) {
     let t = 0;
     for (let i = 0; i < n; ++i) t += bernoulli(p);
     return t;
-};
+}
 
 function poisson(l = 1) {
     if (l <= 0) return 0;
@@ -144,7 +146,7 @@ function normalPDF(x, m = 1, v = 0) {
 // -----------------------------------------------------------------------------
 
 export default {
-    int, intArray, weighted, smart, shuffle, bernoulli, binomial, poisson,
+    integer, intArray, weighted, smart, shuffle, bernoulli, binomial, poisson,
     uniform, normal, exponential, geometric, cauchy, normalPDF
-}
+};
 

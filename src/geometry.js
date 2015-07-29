@@ -6,15 +6,11 @@
 
 
 
-import { square, cube, between, almost } from 'utilities'
-import 'vector' as Vector
-import { list, permutations } from 'combinatorics'
-
-function square(x) { return x * x; }
-function cube(x) { return x * x * x; }
-function between(x, a, b) { return x >= a && x <= b; }
-function almost(a, b) { return Math.abs(a, b) < 0.000001; }
-function total(a) { var t = 0; for (x of a) t += a; return a; }
+import { clamp } from 'utilities';
+import { total } from 'array';
+import { nearlyEquals, square, cube } from 'arithmetic';
+import { list, permutations } from 'combinatorics';
+import Vector from 'vector';
 
 
 // -----------------------------------------------------------------------------
@@ -127,7 +123,7 @@ class Line {
         var x2 = l2.p2.x - l2.p1.x;
         var y2 = l2.p2.y - l2.p1.y;
 
-        return (x1 === 0 && x2 === 0) || (y1 === 0 && y2 === 0) || almost(y1/x1, y2/x2);
+        return (x1 === 0 && x2 === 0) || (y1 === 0 && y2 === 0) || nearlyEquals(y1/x1, y2/x2);
     }
 
     static isPerpendicular(l1, l2) {
@@ -175,7 +171,7 @@ class Line {
     contains(p) {
         var grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
         var grad2 = (p.y - this.p1.y) / (p - this.p1.x);
-        return almost(grad1, grad2);
+        return nearlyEquals(grad1, grad2);
     }
 
     at(t = 0) {
@@ -232,10 +228,10 @@ class Bezier {
         // TODO
     }
 
-    function contains(p) {
+    contains(p) {
     }
 
-    function at(t = 0) {
+    at(t = 0) {
         var x = cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*this.q1.x + 3*t*t*(1-t)*this.q2.x + cube(t)*this.p2.x;
         var y = cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*this.q1.y + 3*t*t*(1-t)*this.q2.y + cube(t)*this.p2.y;
         return new Point(x, y);
@@ -253,7 +249,8 @@ class Ellipse extends Base {
 }
 
 class Circle extends Ellipse {
-    constructor function(c = new Point(0,0), r = 1) {
+    constructor(c = origin, r = 1) {
+        super();  // TODO
         this.c = c;
         this.r = r;
     }
@@ -270,11 +267,11 @@ class Circle extends Ellipse {
         return Math.PI * square(this.r);
     }
 
-    function contains(p) {
+    contains(p) {
         // TODO
     }
 
-    function at(t = 0) {
+    at(t = 0) {
         // TODO
     }
 
@@ -287,6 +284,7 @@ class Circle extends Ellipse {
 
 class Rect extends Base {
     constructor(x = 0, y = 0, w = 1, h = 1) {
+        super();  // TODO
         this.x = x;
         this.y = y;
         this.w = w;
@@ -313,10 +311,10 @@ class Rect extends Base {
         return new Polygon(a, b, c, d);
     }
 
-    function contains(p) {
+    contains(p) {
     }
 
-    function at(t = 0) {
+    at(t = 0) {
     }
 
     // TODO toString, transform, rotate, reflect, scale, shift
@@ -374,6 +372,7 @@ class Polygon {
 
 class Triangle extends Polygon {
     constructor(...points) {
+        super();  // TODO
         if (points.length !== 3) throw new Error('Triangles need exactly 3 vertices.');
         this.points = points;
     }
@@ -406,7 +405,7 @@ function angle(a, b, c) {
 
 let isSame = {
     point: function(p1, p2) {
-        return almost(p1.x, p2.x) && almost(p1.y, p2.y);
+        return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
     },
 
     line: function(l1, l2, unoriented) {
@@ -479,7 +478,7 @@ function lineLineIntersect(l1, l2) {
     var x = n2 / denominator;
     var y = n1 / denominator;
 
-    if (between(x,0,1) && between(y,0,1)) {
+    if (clamp(x,0,1) && clamp(y,0,1)) {
         var intersectionX = l1.p1.x + x * (l1.p2.x - l1.p1.x);
         var intersectionY = l1.p1.y + y * (l1.p2.y - l1.p1.y);
         return new Point(intersectionX, intersectionY);
@@ -505,8 +504,8 @@ function polygonPolygonIntersect() {
 function intersect(x, y) {
 
     if (arguments.length > 2) {
-        var rest = _arraySlice.call(arguments, 1);
-        return intersect(x, intersect.apply(null, rest));
+        var rest = _arraySlice.call(arguments, 1); // TODO fix
+        return intersect(x, intersect(...rest));
     }
 
     // Handle Rectangles

@@ -5,7 +5,8 @@
 
 
 
-import { map, isInteger } from 'utilities';
+import { isInteger } from 'types';
+import { map } from 'arrays';
 
 
 export default class Vector extends Array {
@@ -14,7 +15,8 @@ export default class Vector extends Array {
     // Contructors
 
     constructor(...args) {
-        if (!(this instanceof Vector)) return new Vector(arguments);
+        // TODO: this is not allowed before super()
+        // if (!(this instanceof Vector)) return new Vector(arguments);
 
         if (args.length === 1) {
             if (Array.isArray(args[0])) {
@@ -24,7 +26,7 @@ export default class Vector extends Array {
             }
         }
 
-        super.call(this, args);
+        super(...args);
     }
 
 
@@ -49,9 +51,9 @@ export default class Vector extends Array {
 
     get first() { return this[0]; }
     get last() { return this[this.length - 1]; }
-    get min() { return Math.min.apply(Math, this); }
-    get max() { return Math.max.apply(Math, this); }
-    get range() { return [this.min, this.max] },
+    get min() { return Math.min(...this); }
+    get max() { return Math.max(...this); }
+    get range() { return [this.min, this.max]; }
 
     scale(q = 1) {
         var scaled = this.map(x => q * x);

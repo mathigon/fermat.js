@@ -16,12 +16,12 @@ function sign(x) {
     return nearlyEquals(x, 0) ? 0 : (x > 0 ? 1 : -1);
 }
 
-function bound(x, min = -Infinity, max = Infinity) {
-    return Math.min(max, Math.max(min, x));
+function square(x) {
+    return x * x;
 }
 
-function between(x, a, b) {
-    return x >= a && x <= b;
+function cube(x) {
+    return x * x * x;
 }
 
 
@@ -127,8 +127,8 @@ function log(x, b = null) {
 // -----------------------------------------------------------------------------
 
 export default {
-    nearlyEquals, sign, bound, between, numberFormat, toOrdinal
-    digits, fractionalDigits, decimalPlaces, round, roundTo, roundTowardsZero,
-    toFraction, mod, log
+    nearlyEquals, sign, square, cube,
+    numberFormat, toOrdinal, digits, fractionalDigits,
+    decimalPlaces, round, roundTo, roundTowardsZero, toFraction, mod, log
 };
 

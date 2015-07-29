@@ -1,24 +1,22 @@
 {
+    "maxerr": 100,
+
     "camelcase": true,
-    "eqeqeq": true,
-    "forin": true,
-    "freeze": true,
     "immed": true,
     "indent": 4,
     "latedef": true,
     "newcap": true,
-    "noarg": true,
-    "nonbsp": true,
     "nonew": true,
     "quotmark": "single",
     "maxdepth": 5,
-    "maxlen": 120,
+    "maxlen": 100,
 
     "eqnull": true,
-    "maxerr": 100,
+    "esnext": true,
+
+    "browser": false,
 
     "globals": {
-        "M": true,
         "Math": true
     }
 }

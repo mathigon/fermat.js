@@ -20,4 +20,4 @@ TODO
 
 ## Copyright and license
 
-Code and documentation are copyright (c) 2014 Mathigon. Code is released under the [MIT license](LICENSE).
+Code and documentation are copyright (c) 2015 Mathigon. Released under the [MIT license](LICENSE).

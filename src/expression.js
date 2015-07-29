@@ -5,15 +5,14 @@
 // =============================================================================
 
 
+
 // TODO fix parser errors + test
 // TODO + and * with multiple arguments
 // TODO Simplify expressions
 // TODO More error messages: 1(1), "str"(10), %(x)
 
 
-
-
-// ---------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Expression Functions
 
 const functions = {
@@ -57,7 +56,7 @@ class ExpressionFn {
         for (var i=0; i<this.args.length; ++i) newArgs.push(this.args[i].toString());
 
         var fn = strings[this.fn];
-        return fn ? fn.apply(null, newArgs) : this.fn + '(' + this.args.join(', ') + ')';
+        return fn ? fn(...newArgs) : this.fn + '(' + this.args.join(', ') + ')';
     }
 
     evaluate(vars = {}) {
@@ -69,7 +68,7 @@ class ExpressionFn {
         }
 
         var fn = vars[this.fn] || functions[this.fn] || Math[this.fn] || M[this.fn];
-        return (fn instanceof Function) ? fn.apply(null, newArgs) : this;
+        return (fn instanceof Function) ? fn(...newArgs) : this;
     }
 }
 
@@ -88,7 +87,7 @@ class ExpressionVal {
 }
 
 
-// ---------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Expression Parser
 
 const brackets = { '(': ')', '[': ']', '{': '}', '|': '|' };
@@ -209,21 +208,25 @@ class ExpressionParser {
         // Handle Powers
         for (i=0; i<this.result.length; ++i) {
             if (this.result[i] === '^') {
-                this.result.splice(i-1, 3, new ExpressionFn('^', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3,
+                    new ExpressionFn('^', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             }
         }
 
         // Handle Leading -
-        if (this.result[0] === '-') this.result.splice(0, 2, new ExpressionFn('-', [this.result[1]]));
+        if (this.result[0] === '-')
+            this.result.splice(0, 2, new ExpressionFn('-', [this.result[1]]));
 
         // Handle Multiplication and Division
         for (i=0; i<this.result.length; ++i) {
             if (this.result[i] === '/') {
-                this.result.splice(i-1, 3, new ExpressionFn('/', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3,
+                    new ExpressionFn('/', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             } else if (this.result[i] === '*') {
-                this.result.splice(i-1, 3, new ExpressionFn('*', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3,
+                    new ExpressionFn('*', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             }
         }
@@ -231,10 +234,12 @@ class ExpressionParser {
         // Handle Addition and Subtraction
         for (i=0; i<this.result.length; ++i) {
             if (this.result[i] === '-') {
-                this.result.splice(i-1, 3, new ExpressionFn('-', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3,
+                    new ExpressionFn('-', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             } else if (this.result[i] === '+') {
-                this.result.splice(i-1, 3, new ExpressionFn('+', [this.result[i-1], this.result[i+1]]));
+                this.result.splice(i-1, 3,
+                    new ExpressionFn('+', [this.result[i-1], this.result[i+1]]));
                 i -= 2;
             }
         }
@@ -244,7 +249,7 @@ class ExpressionParser {
 }
 
 
-// ---------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Expressions Class
 
 export default class Expression {

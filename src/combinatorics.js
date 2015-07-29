@@ -5,7 +5,7 @@
 
 
 
-import cache from 'utilities.js'
+import { cache } from 'utilities';
 
 
 const factorial = cache(function(x) {
@@ -67,10 +67,10 @@ function _getSubsets(arr) {
 
 function subsets(arr, length = 0) {
     let myArr = arr.slice(0);
-    let subsets = _getSubsets(myArr);
-    if (length) subsets = subsets.filter(x => x.length === length);
+    let results = _getSubsets(myArr);
+    if (length) results = results.filter(x => x.length === length);
     // FUTURE Sorting of Subsets Results
-    return subsets;
+    return results;
 }
 
 // Returns a string of n coin flips like 'HTTHTHTTHTT'
