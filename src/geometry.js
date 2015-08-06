@@ -7,7 +7,7 @@
 
 
 import { clamp } from 'utilities';
-import { total } from 'array';
+import { total } from 'arrays';
 import { nearlyEquals, square, cube } from 'arithmetic';
 import { list, permutations } from 'combinatorics';
 import Vector from 'vector';
@@ -53,13 +53,13 @@ class Point {
 
     constructor(x = 0, y = 0) {
         this.x = x;
-        this.y = y
+        this.y = y;
     }
 
     get center() { return this; }
 
     toString() {
-        return '(' + this.x + ', ' + this.y + ')'
+        return '(' + this.x + ', ' + this.y + ')';
     }
 
     project(l = xAxis) {
@@ -232,8 +232,10 @@ class Bezier {
     }
 
     at(t = 0) {
-        var x = cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*this.q1.x + 3*t*t*(1-t)*this.q2.x + cube(t)*this.p2.x;
-        var y = cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*this.q1.y + 3*t*t*(1-t)*this.q2.y + cube(t)*this.p2.y;
+        var x = cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*this.q1.x +
+                3*t*t*(1-t)*this.q2.x + cube(t)*this.p2.x;
+        var y = cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*this.q1.y +
+                3*t*t*(1-t)*this.q2.y + cube(t)*this.p2.y;
         return new Point(x, y);
     }
 
@@ -557,7 +559,6 @@ function travellingSalesman(dist) {
 // -------------------------------------------------------------------------
 
 export default {
-    Point, Line, Bezier, Ellipse, Circle, Rect, Square, Polygon,
-    angle, same, intersect, convexHull, travellingSalesman
-};
+    Point, Line, Bezier, Ellipse, Circle, Rect, Square, Polygon, Triangle,
+    angle, same, intersect, convexHull, travellingSalesman };
 

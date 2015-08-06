@@ -147,6 +147,5 @@ function normalPDF(x, m = 1, v = 0) {
 
 export default {
     integer, intArray, weighted, smart, shuffle, bernoulli, binomial, poisson,
-    uniform, normal, exponential, geometric, cauchy, normalPDF
-};
+    uniform, normal, exponential, geometric, cauchy, normalPDF };
 

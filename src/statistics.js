@@ -122,6 +122,5 @@ function linearRegression(aX, aY) {
 
 export default {
     mean, median, mode, variance, stdDev, covariance,
-    correlation, rSquared, linearRegression
-};
+    correlation, rSquared, linearRegression };
 

@@ -129,6 +129,5 @@ function log(x, b = null) {
 export default {
     nearlyEquals, sign, square, cube,
     numberFormat, toOrdinal, digits, fractionalDigits,
-    decimalPlaces, round, roundTo, roundTowardsZero, toFraction, mod, log
-};
+    decimalPlaces, round, roundTo, roundTowardsZero, toFraction, mod, log };
 

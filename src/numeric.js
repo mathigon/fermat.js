@@ -50,4 +50,3 @@ function bisect(fn, precision = 3, l = 0, h = null) {
 
 
 export default { bisect };
-

@@ -109,6 +109,5 @@ export default class Vector extends Array {
         for (let i = 0; i < n; ++i) if (v1[i] !== v2[i]) return false;
         return true;
     }
-
 }
 

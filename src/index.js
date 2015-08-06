@@ -21,5 +21,4 @@ import Vector from 'vector';
 
 global.Fermat = {
     Arithmetic, Bignum, Combinatorics, Complex, Expression, Geometry, Matrix,
-    NumberTheory, Numeric, Probability, Statistics, Units, Vector
-}
+    NumberTheory, Numeric, Probability, Statistics, Units, Vector };

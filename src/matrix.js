@@ -171,6 +171,5 @@ export default class Matrix {
             throw new Error('Can\'t multiply these two objects.');
         }
     }
-
 }
 

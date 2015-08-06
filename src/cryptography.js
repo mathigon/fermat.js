@@ -86,6 +86,5 @@ function cipherLetterFreq(cipher) {
 // -----------------------------------------------------------------------------
 
 export default {
-    caesarCipher, vigenereCipher, letterFreqency, cipherLetterFreq
-};
+    caesarCipher, vigenereCipher, letterFreqency, cipherLetterFreq };
 
