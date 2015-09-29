@@ -16,9 +16,6 @@ import Vector from 'vector';
 // -----------------------------------------------------------------------------
 // Points
 
-const origin = new Point(0,0);
-const identity = [[1, 0], [0, 1]];
-
 class Point {
 
     static average(...points) {
@@ -124,12 +121,16 @@ class Point {
     }
 }
 
+const origin = new Point(0,0);
+const identity = [[1, 0], [0, 1]];
+
+
+export default { Point };
+
+/*
 
 // -----------------------------------------------------------------------------
 // Lines and Beziers
-
-const xAxis = new Line(origin, new Point(1, 0));
-const yAxis = new Line(origin, new Point(0, 1));
 
 class Line {
 
@@ -227,6 +228,9 @@ class Line {
     // TODO toString, transform, rotate, reflect, scale, shift
 }
 
+const xAxis = new Line(origin, new Point(1, 0));
+const yAxis = new Line(origin, new Point(0, 1));
+
 class Bezier {
 
     constructor(p1, p2, q1 = p1, q2 = p2) {
@@ -262,11 +266,12 @@ class Bezier {
 // -------------------------------------------------------------------------
 // Ellipses and Circles
 
-class Ellipse extends Base {
+class Ellipse {
     // TODO
 }
 
 class Circle extends Ellipse {
+
     constructor(c = origin, r = 1) {
         super();  // TODO
         this.c = c;
@@ -300,7 +305,8 @@ class Circle extends Ellipse {
 // -------------------------------------------------------------------------
 // Rectangles and Squares
 
-class Rect extends Base {
+class Rectangle {
+
     constructor(x = 0, y = 0, w = 1, h = 1) {
         super();  // TODO
         this.x = x;
@@ -347,6 +353,7 @@ class Square extends Rect {
 // Polygons and Triangles
 
 class Polygon {
+
     constructor(...points) {
         this.points = points;
     }
@@ -552,15 +559,15 @@ function convexHull() {
 }
 
 function travellingSalesman(dist) {
-    var n = dist.length;
-    var cities = M.list(n);
+    let n = dist.length;
+    let cities = M.list(n);
 
-    var minLength = Infinity;
-    var minPath = null;
+    let minLength = Infinity;
+    let minPath = null;
 
-    M.permutations(cities).each(function(path) {
-        var length = 0;
-        for (var i=0; i<n-1; ++i) {
+    permutations(cities).each(function(path) {
+        let length = 0;
+        for (let i=0; i<n-1; ++i) {
             length += dist[path[i]][path[i+1]];
             if (length > minLength) return;
         }
@@ -573,10 +580,39 @@ function travellingSalesman(dist) {
 
 
 // -------------------------------------------------------------------------
+// Graph Colouring
+
+const COLOURS = [1,2,3,4];
+
+function canColour(adjMatrix, colours, index, colour) {
+    for (let i=0; i<index; ++i) {
+        if (adjMatrix[i][index] && colours[i] === colours[index]) return false;
+    }
+    return true;
+}
+
+function colourMe(adjMatrix, colours, index) {
+    for (let c of COLOURS) {
+        if (canColour(adjMatrix, colours, index, colour)) {
+            colours[index] = colour;
+            if (colourMe(adjMayrix, colours, index + 1)) return true;
+        }
+    }
+    return false;
+}
+
+function graphColouring(adjMatrix) {
+    let colours = tabulate(0, adjMatrix.length);
+    let result = colourMe(adjMatrix, colours, 0);
+    return result ? colours : undefined;
+}
+
+
+// -------------------------------------------------------------------------
 
 export default {
     Point, Line, Bezier, Ellipse, Circle, Rect, Square, Polygon, Triangle,
-    angle, same, intersect, convexHull, travellingSalesman };
+    angle, same, intersect, convexHull, travellingSalesman, graphColouring };
 
 
 

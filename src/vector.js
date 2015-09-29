@@ -5,18 +5,17 @@
 
 
 
+import { square } from 'utilities';
 import { isInteger } from 'types';
 import { map } from 'arrays';
 
 
-export default class Vector extends Array {
+export default class Vector {
 
     // -------------------------------------------------------------------------
     // Contructors
 
     constructor(...args) {
-        // TODO: this is not allowed before super()
-        // if (!(this instanceof Vector)) return new Vector(arguments);
 
         if (args.length === 1) {
             if (Array.isArray(args[0])) {
@@ -26,7 +25,8 @@ export default class Vector extends Array {
             }
         }
 
-        super(...args);
+        this.length = args.length;
+        for (let i = 0; i < args.length; ++i) this[i] = args[i];
     }
 
 
@@ -35,7 +35,7 @@ export default class Vector extends Array {
 
     get total() {
         let total = 0;
-        for (let x of this) total += (+x || 0);
+        for (let i = 0; i < this.length; ++i) total += (+this[i] || 0);
         return total;
     }
 
@@ -45,7 +45,7 @@ export default class Vector extends Array {
 
     get norm() {
         let squares = 0;
-        for (let x of this) squares += x * x;
+        for (let i = 0; i < this.length; ++i) squares += square(this[i]);
         return Math.sqrt(squares);
     }
 
@@ -55,17 +55,25 @@ export default class Vector extends Array {
     get max() { return Math.max(...this); }
     get range() { return [this.min, this.max]; }
 
-    scale(q = 1) {
-        var scaled = this.map(x => q * x);
-        return new Vector(scaled);
+    map(fn) {
+        let array = [];
+        for (let i = 0; i < this.length; ++i) array.push(fn(this[i], i));
+        return new Vector(array);
+    }
+
+    scaled(q = 1) {
+        return this.map(x => q * x);
     }
 
     normalise() {
-        return this.scale(1 / this.norm);
+        return this.scaled(1 / this.norm);
     }
 
     toString() {
-        return '(' + this.join(', ') + ')';
+        let html = '(';
+        for (let i = 0; i < this.length - 1; ++i) html += this[i] + ', ';
+        html += this[this.length - 1] + ')';
+        return html;  // '(' + this.join(', ') + ')';
     }
 
 
@@ -73,15 +81,18 @@ export default class Vector extends Array {
     // Static Functions
 
     static sum(v1, v2) {
+        // TODO multidimensional vectors
         let a = map((a,b) => a + b, v1, v2);
         return new Vector(a);
     }
 
     static difference(v1, v2) {
-        return Vector.add(v1, v2.scale(-1));
+        // TODO multidimensional vectors
+        return Vector.sum(v1, v2.scaled(-1));
     }
 
     static dot(v1, v2) {
+        // TODO multidimensional vectors
         let n = Math.min(v1.length, v2.length);
         let d = 0;
         for (let i = 0; i < n; ++i) d += (v1[i] || 0) * (v2[i] || 0);
@@ -99,11 +110,13 @@ export default class Vector extends Array {
     }
 
     static product(v1, v2) {
+        // TODO multidimensional vectors
         let a = map((a,b) => a * b, v1, v2);
         return new Vector(a);
     }
 
     static equals(v1, v2) {
+        // TODO multidimensional vectors
         let n = v1.length;
         if (n !== v2.length) return false;
         for (let i = 0; i < n; ++i) if (v1[i] !== v2[i]) return false;
