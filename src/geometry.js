@@ -9,7 +9,8 @@
 import { clamp } from 'utilities';
 import { total } from 'arrays';
 import { nearlyEquals, square, cube } from 'arithmetic';
-import { list, permutations } from 'combinatorics';
+import { list } from 'arrays';
+import { permutations } from 'combinatorics';
 import Vector from 'vector';
 
 
@@ -124,8 +125,6 @@ class Point {
 const origin = new Point(0,0);
 const identity = [[1, 0], [0, 1]];
 
-
-export default { Point };
 
 /*
 
@@ -550,6 +549,7 @@ function intersect(x, y) {
     throw new Error('Can\'t intersect ' + getGeoType(x) + 's and ' + getGeoType(y) + '.');
 }
 
+*/
 
 // -------------------------------------------------------------------------
 // Computational Geometry
@@ -560,24 +560,27 @@ function convexHull() {
 
 function travellingSalesman(dist) {
     let n = dist.length;
-    let cities = M.list(n);
+    let cities = list(n);
 
     let minLength = Infinity;
     let minPath = null;
 
-    permutations(cities).each(function(path) {
+    permutations(cities).forEach(function(path) {
         let length = 0;
-        for (let i=0; i<n-1; ++i) {
+        for (let i = 0; i < n - 1; ++i) {
             length += dist[path[i]][path[i+1]];
             if (length > minLength) return;
         }
-        if (length < minLength) minLength = length;
-        minPath = path;
+        if (length < minLength) {
+            minLength = length;
+            minPath = path;
+        }
     });
 
     return { path: minPath, length: minLength };
 }
 
+/*
 
 // -------------------------------------------------------------------------
 // Graph Colouring
@@ -945,3 +948,6 @@ function equal(line1, line2, tolerance) {
 }
 
 */
+
+export default { Point, travellingSalesman };
+

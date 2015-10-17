@@ -55,7 +55,7 @@ function permutations(arr) {
 function _getSubsets(arr) {
     if (arr.length === 1) return [[], arr];
     let last = arr.pop();
-    let subsets = getSubsets(arr);
+    let subsets = _getSubsets(arr);
     let result = [];
     for (let s of subsets) {
         let a2 = s.slice(0);
