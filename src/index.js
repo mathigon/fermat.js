@@ -5,20 +5,17 @@
 
 
 
-import Arithmetic from 'arithmetic';
-import Bignum from 'bignum';
-import Combinatorics from 'combinatorics';
-import Complex from 'complex';
-import Expression from 'expression';
-import Geometry from 'geometry';
-import Matrix from 'matrix';
-import NumberTheory from 'number-theory';
-import Numeric from 'numeric';
-import Probability from 'probability';
-import Statistics from 'statistics';
-import Units from 'units';
-import Vector from 'vector';
-
-global.Fermat = {
-    Arithmetic, Bignum, Combinatorics, Complex, Expression, Geometry, Matrix,
-    NumberTheory, Numeric, Probability, Statistics, Units, Vector };
+export * from 'arithmetic';
+export * from 'combinatorics';
+export * from 'complex';
+export * from 'cryptography';
+export * from 'expression';
+export * from 'geometry';
+export * from 'integer';
+export * from 'matrix';
+export * from 'number-theory';
+export * from 'numeric';
+export * from 'probability';
+export * from 'statistics';
+export * from 'units';
+export * from 'vector';
