@@ -12,7 +12,7 @@ import Vector from 'vector';
 export default class Matrix {
 
     // -------------------------------------------------------------------------
-    // Contructors
+    // Constructors
 
     // new Matrix([[1,2],[3,4]]) = [[1,2],[3,4]];
     // new Matrix(2) = [[0,0],[0,0]];
@@ -172,4 +172,3 @@ export default class Matrix {
         }
     }
 }
-

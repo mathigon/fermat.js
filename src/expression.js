@@ -274,4 +274,3 @@ export default class Expression {
         return (vars[this.val] === undefined) ? this.val : vars[this.val];
     }
 }
-

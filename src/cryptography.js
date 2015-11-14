@@ -16,13 +16,11 @@ const ENGLISH_FREQUENCY = {
     y: 0.01974, z: 0.00074
 };
 
-const ZEROS = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-
 
 // -----------------------------------------------------------------------------
-// CIPHER
+// Cipher
 
-function caesarCipher(msg, shift = 0) {
+export function caesarCipher(msg, shift = 0) {
     let cipher = '';
 
     for (let l of msg) {
@@ -38,7 +36,7 @@ function caesarCipher(msg, shift = 0) {
     return cipher;
 }
 
-function vigenereCipher(msg, key = '') {
+export function vigenereCipher(msg, key = '') {
     let cipher = '';
     let count = 0;
     let keyLength = key.length;
@@ -66,13 +64,13 @@ function vigenereCipher(msg, key = '') {
 // -----------------------------------------------------------------------------
 // FREQUENCY UTILITIES
 
-function letterFreqency(letter) {
+export function letterFrequency(letter) {
     return ENGLISH_FREQUENCY[letter.toLowerCase()];
 }
 
-function cipherLetterFreq(cipher) {
+export function cipherLetterFreq(cipher) {
     let msg = cipher.toLowerCase();
-    let freq = ZEROS.slice(0);
+    let freq = new Array(26).fill(0);
 
     for (let l of msg) {
         if (l >= 'a' && l <= 'z') {
@@ -82,9 +80,3 @@ function cipherLetterFreq(cipher) {
 
     return freq;
 }
-
-// -----------------------------------------------------------------------------
-
-export default {
-    caesarCipher, vigenereCipher, letterFreqency, cipherLetterFreq };
-

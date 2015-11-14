@@ -10,13 +10,13 @@ import { square } from 'arithmetic';
 
 
 // -----------------------------------------------------------------------------
-// Mean, Media, Mode
+// Mean, Media and Mode
 
-function mean(a) {
+export function mean(a) {
     return a.length ? total(a) / a.length : null;
 }
 
-function median(values) {
+export function median(values) {
     let n = values.length;
     if (!n) return 0;
 
@@ -25,7 +25,7 @@ function median(values) {
 }
 
 // Returns 'null' if no mode exists (multiple values with the same largest count)
-function mode(values) {
+export function mode(values) {
     let counts = new Map();
 
     let modeCount = -1;
@@ -58,7 +58,7 @@ function mode(values) {
 // -----------------------------------------------------------------------------
 // Variance
 
-function variance(values) {
+export function variance(values) {
     if (!values.length) return null;
     let mean = mean(values);
 
@@ -67,12 +67,12 @@ function variance(values) {
     return sum / (n - 1);
 }
 
-function stdDev(values) {
+export function stdDev(values) {
     return Math.sqrt(variance(values));
 }
 
 // Determines the covariance of the numbers in two arrays aX and aY
-function covariance(aX, aY) {
+export function covariance(aX, aY) {
     if (aX.length !== aY.length) throw new Error('Array length mismatch');
     var n = aX.length;
     var total = 0;
@@ -80,7 +80,7 @@ function covariance(aX, aY) {
     return (total - total(aX) * total(aY) / n) / n;
 }
 
-function correlation(aX, aY) {
+export function correlation(aX, aY) {
     if (aX.length !== aY.length) throw new Error('Array length mismatch');
     var covarXY = covariance(aX, aY);
     var stdDevX = stdDev(aX);
@@ -92,7 +92,7 @@ function correlation(aX, aY) {
 // -----------------------------------------------------------------------------
 // Regression
 
-function rSquared(source, regression) {
+export function rSquared(source, regression) {
     let sourceMean = mean(source);
 
     let residualSquares = source.map((d, i) => square(d - regression[i]));
@@ -101,7 +101,7 @@ function rSquared(source, regression) {
     return 1 - total(residualSquares) / total(totalSquares);
 }
 
-function linearRegression(aX, aY) {
+export function linearRegression(aX, aY) {
     var n = aX.length;
 
     var sumX = total(aX);
@@ -117,10 +117,3 @@ function linearRegression(aX, aY) {
 
     return (x) => (a + b * x);
 }
-
-// -----------------------------------------------------------------------------
-
-export default {
-    mean, median, mode, variance, stdDev, covariance,
-    correlation, rSquared, linearRegression };
-

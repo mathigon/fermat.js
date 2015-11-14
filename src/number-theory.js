@@ -6,14 +6,14 @@
 
 
 import { isInteger } from 'types';
-import { unique, concat } from 'arrays';
+import { unique } from 'arrays';
 
 
 const smallPrimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,
     73,79,83,89,97];
 
 
-function gcd(first, ...rest) {
+export function gcd(first, ...rest) {
     if (rest.length > 1) {
         return gcd(first, gcd(...rest));
     }
@@ -31,7 +31,7 @@ function gcd(first, ...rest) {
     return a;
 }
 
-function lcm(first, ...rest) {
+export function lcm(first, ...rest) {
     if (rest.length > 1) {
         return lcm(first, lcm(...rest));
     }
@@ -55,21 +55,21 @@ function isPrime(n) {
     return true;
 }
 
-function primeFactorisation(n) {
+export function primeFactorisation(n) {
     if (n === 1) return [];
     if (isPrime(n)) return [n];
 
     var maxf = Math.sqrt(n);
     for (let f = 2; f <= maxf; ++f) {
-        if (n % f === 0) return concat(primeFactorisation(f), primeFactorisation(n / f));
+        if (n % f === 0) return primeFactorisation(f).concat(primeFactorisation(n / f));
     }
 }
 
-function primeFactors(n) {
+export function primeFactors(n) {
     return unique(primeFactorisation(n));
 }
 
-function listPrimes(n = 100) {
+export function listPrimes(n = 100) {
     if (n < 2) return [];
     let result = [2];
 
@@ -83,7 +83,3 @@ function listPrimes(n = 100) {
 
     return result;
 }
-
-
-export default { gcd, lcm, isPrime, primeFactorisation, primeFactors, listPrimes };
-

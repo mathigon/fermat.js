@@ -125,7 +125,7 @@ const regexp = new RegExp('^(' + prefixRegexp + ')?(' + unitRegexp + ')$');
 // ---------------------------------------------------------------------------------------------
 // Exports
 
-function to(val, fromUnit, toUnit = null) {
+export function to(val, fromUnit, toUnit = null) {
 
     let f = fromUnit.match(regexp);
     let prefix = f[1];
@@ -149,14 +149,9 @@ function to(val, fromUnit, toUnit = null) {
     return (newVal / prefixValue - unitOffset) / unitValue;
 }
 
-function define(unit) {
+export function define(unit) {
     unit = unit.match(regexp);
     let prefix = unit[1] ? prefixes[unit[1]].name : '';
     let name = units[unit[2]].name;
     return prefix + name;
 }
-
-// ---------------------------------------------------------------------------------------------
-
-export default { to, define };
-

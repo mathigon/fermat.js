@@ -6,7 +6,7 @@
 
 
 // bisect(function(x){ return Math.cos(x/2); }, 10) => Pi
-function bisect(fn, precision = 3, l = 0, h = null) {
+export function bisect(fn, precision = 3, l = 0, h = null) {
 
     let p = Math.pow(10, -precision);
     let q = Math.pow(10,  precision);
@@ -28,7 +28,6 @@ function bisect(fn, precision = 3, l = 0, h = null) {
 
     let x = 0;
     while (Math.abs(lf) > p && x < 200) {
-
         let c = (l + h) / 2;
         let cf = fn(c);
         let cs = Math.sign(cf);
@@ -47,6 +46,3 @@ function bisect(fn, precision = 3, l = 0, h = null) {
 
     return Math.round(l * q) * p;
 }
-
-
-export default { bisect };

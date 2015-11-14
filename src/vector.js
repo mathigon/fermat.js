@@ -21,7 +21,7 @@ export default class Vector {
             if (Array.isArray(args[0])) {
                 args = args[0];
             } else {
-                args = Array(args[0]).fill(0);
+                args = new Array(args[0]).fill(0);
             }
         }
 

@@ -8,7 +8,7 @@
 import { cache } from 'utilities';
 
 
-const factorial = cache(function(x) {
+export const factorial = cache(function(x) {
     if (x < 0) return NaN;
     if (x === 0) return 1;
     if (x <= 1) return x;
@@ -16,7 +16,7 @@ const factorial = cache(function(x) {
 });
 
 
-const binomial = cache(function(n, k) {  // n choose k
+export const binomial = cache(function(n, k) {  // n choose k
     if (k === 0) {
         return 1;
     } else if (2 * k > n) {
@@ -33,7 +33,7 @@ const binomial = cache(function(n, k) {  // n choose k
 
 // permutations(arr)[0] == arr
 // http://stackoverflow.com/questions/9960908/permutations-in-javascript
-function permutations(arr) {
+export function permutations(arr) {
     let permArr = [];
     let usedChars = [];
     function permute(input) {
@@ -65,7 +65,7 @@ function _getSubsets(arr) {
     return result;
 }
 
-function subsets(arr, length = 0) {
+export function subsets(arr, length = 0) {
     let myArr = arr.slice(0);
     let results = _getSubsets(myArr);
     if (length) results = results.filter(x => x.length === length);
@@ -74,14 +74,11 @@ function subsets(arr, length = 0) {
 }
 
 // Returns a string of n coin flips like 'HTTHTHTTHTT'
-function coinFlips(n = 10) {
+export function coinFlips(n = 10) {
     let str = '';
     for (let i = 0; i < n; ++i) {
         str += (Math.random() >= 0.5) ? 'H' : 'T';
     }
     return str;
 }
-
-
-export default { factorial, binomial, permutations, subsets, coinFlips };
 

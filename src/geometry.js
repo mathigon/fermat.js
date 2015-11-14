@@ -7,9 +7,8 @@
 
 
 import { clamp } from 'utilities';
-import { total } from 'arrays';
+import { tabulate, total, list } from 'arrays';
 import { nearlyEquals, square, cube } from 'arithmetic';
-import { list } from 'arrays';
 import { permutations } from 'combinatorics';
 import Vector from 'vector';
 
@@ -17,7 +16,7 @@ import Vector from 'vector';
 // -----------------------------------------------------------------------------
 // Points
 
-class Point {
+export class Point {
 
     static average(...points) {
         var x = total(points.map(p => p.x)) / points.length;
@@ -126,12 +125,10 @@ const origin = new Point(0,0);
 const identity = [[1, 0], [0, 1]];
 
 
-/*
-
 // -----------------------------------------------------------------------------
-// Lines and Beziers
+// Straight Lines
 
-class Line {
+export class Line {
 
     static isParallel(l1, l2) {
         var x1 = l1.p2.x - l1.p1.x;
@@ -230,7 +227,11 @@ class Line {
 const xAxis = new Line(origin, new Point(1, 0));
 const yAxis = new Line(origin, new Point(0, 1));
 
-class Bezier {
+
+// -----------------------------------------------------------------------------
+// Beziers
+
+export class Bezier {
 
     constructor(p1, p2, q1 = p1, q2 = p2) {
         this.p1 = p1;
@@ -265,11 +266,11 @@ class Bezier {
 // -------------------------------------------------------------------------
 // Ellipses and Circles
 
-class Ellipse {
+export class Ellipse {
     // TODO
 }
 
-class Circle extends Ellipse {
+export class Circle extends Ellipse {
 
     constructor(c = origin, r = 1) {
         super();  // TODO
@@ -304,10 +305,9 @@ class Circle extends Ellipse {
 // -------------------------------------------------------------------------
 // Rectangles and Squares
 
-class Rectangle {
+export class Rectangle {
 
     constructor(x = 0, y = 0, w = 1, h = 1) {
-        super();  // TODO
         this.x = x;
         this.y = y;
         this.w = w;
@@ -343,15 +343,17 @@ class Rectangle {
     // TODO toString, transform, rotate, reflect, scale, shift
 }
 
-class Square extends Rect {
-    // TODO
+export class Square extends Rectangle {
+    constructor(x = 0, y = 0, w = 1) {
+        super(x, y, w, w)
+    }
 }
 
 
 // -------------------------------------------------------------------------
-// Polygons and Triangles
+// Polygons
 
-class Polygon {
+export class Polygon {
 
     constructor(...points) {
         this.points = points;
@@ -394,11 +396,14 @@ class Polygon {
     // TODO toString, transform, rotate, reflect, scale, shift
 }
 
-class Triangle extends Polygon {
+
+// -------------------------------------------------------------------------
+// Triangles
+
+export class Triangle extends Polygon {
     constructor(...points) {
-        super();  // TODO
         if (points.length !== 3) throw new Error('Triangles need exactly 3 vertices.');
-        this.points = points;
+        super(points);
     }
 
     get circumcircle() {
@@ -414,7 +419,7 @@ class Triangle extends Polygon {
 // -------------------------------------------------------------------------
 // Angles
 
-function angle(a, b, c) {
+export function angle(a, b, c) {
     var phiA = Math.atan2(a.y - b.y, a.x - b.x);
     var phiC = Math.atan2(c.y - b.y, c.x - b.x);
     var phi = phiC - phiA;
@@ -426,6 +431,8 @@ function angle(a, b, c) {
 
 // -------------------------------------------------------------------------
 // Equality Checking
+
+/*
 
 let isSame = {
     point: function(p1, p2) {
@@ -450,7 +457,7 @@ let isSame = {
     }
 };
 
-function same(a, b, unOriented) {
+export function same(a, b, unOriented) {
     var type = getGeoType(a);
     if (type !== getGeoType(b)) return false;
     var sameFn = isSame[type];
@@ -525,7 +532,7 @@ function polygonPolygonIntersect() {
     // TODO
 }
 
-function intersect(x, y) {
+export function intersect(x, y) {
 
     if (arguments.length > 2) {
         var rest = _arraySlice.call(arguments, 1); // TODO fix
@@ -548,17 +555,17 @@ function intersect(x, y) {
 
     throw new Error('Can\'t intersect ' + getGeoType(x) + 's and ' + getGeoType(y) + '.');
 }
-
 */
+
 
 // -------------------------------------------------------------------------
 // Computational Geometry
 
-function convexHull() {
+export function convexHull() {
     // TODO
 }
 
-function travellingSalesman(dist) {
+export function travellingSalesman(dist) {
     let n = dist.length;
     let cities = list(n);
 
@@ -580,7 +587,6 @@ function travellingSalesman(dist) {
     return { path: minPath, length: minLength };
 }
 
-/*
 
 // -------------------------------------------------------------------------
 // Graph Colouring
@@ -589,38 +595,30 @@ const COLOURS = [1,2,3,4];
 
 function canColour(adjMatrix, colours, index, colour) {
     for (let i=0; i<index; ++i) {
-        if (adjMatrix[i][index] && colours[i] === colours[index]) return false;
+        if (adjMatrix[i][index] && colours[i][index] === colour) return false;
     }
     return true;
 }
 
 function colourMe(adjMatrix, colours, index) {
     for (let c of COLOURS) {
-        if (canColour(adjMatrix, colours, index, colour)) {
-            colours[index] = colour;
-            if (colourMe(adjMayrix, colours, index + 1)) return true;
+        if (canColour(adjMatrix, colours, index, c)) {
+            colours[index] = c;
+            if (colourMe(adjMatrix, colours, index + 1)) return true;
         }
     }
     return false;
 }
 
-function graphColouring(adjMatrix) {
+export function graphColouring(adjMatrix) {
     let colours = tabulate(0, adjMatrix.length);
     let result = colourMe(adjMatrix, colours, 0);
     return result ? colours : undefined;
 }
 
 
-// -------------------------------------------------------------------------
-
-export default {
-    Point, Line, Bezier, Ellipse, Circle, Rect, Square, Polygon, Triangle,
-    angle, same, intersect, convexHull, travellingSalesman, graphColouring };
-
-
 
 /*
-
 // Calculates the center of the circumcircle of the three given points.
 // @param {JXG.Point} point1 Point
 // @param {JXG.Point} point2 Point
@@ -904,7 +902,7 @@ reflectOverLine: function(point, line) {
 
 // Compares two points, returning -1, 0, or 1, for use with
 // Array.prototype.sort
-// 
+//
 // Note: This technically doesn't satisfy the total-ordering
 // requirements of Array.prototype.sort unless equalityTolerance
 // is 0. In some cases very close points that compare within a
@@ -946,8 +944,4 @@ function equal(line1, line2, tolerance) {
     var line1ToLine2Vector = kvector.subtract(line2[0], line1[0]);
     return kvector.collinear(v1, line1ToLine2Vector, tolerance);
 }
-
 */
-
-export default { Point, travellingSalesman };
-
