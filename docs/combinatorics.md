@@ -1,11 +1,16 @@
-## Combinatorics
+# Combinatorics
 
-### `factorial(x: Number) => Number`
+### factorial
+`Number factorial(Number x)`
 
-### `binomial(n: Int, k: Int) => Int`
+### binomial
+`Integer binomial(Integer n, Integer k)`
 
-### `permutations(a: Array) => Array[]`
+### permutations
+`Array[] permutations(Array a)`
 
-### `subsets(a: Array, length: 0) => Array[]`
+### subsets
+`Array[] subsets(Array a)`
 
-### `coinFlips(n: Int)`
+### coinFlips
+`String coinFlips([Integer n])`

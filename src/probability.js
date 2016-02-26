@@ -1,6 +1,6 @@
 // ============================================================================
-// Fermat.js | Random
-// (c) 2015 Mathigon / Philipp Legner
+// Fermat.js | Probability
+// (c) 2016 Mathigon
 // ============================================================================
 
 
@@ -36,21 +36,35 @@ export function integer(a, b = null) {
     return start + Math.floor(length * Math.random());
 }
 
+/* TODO better random int implementation
+var MAX_RANDOM = Math.pow(2, 30);
+
+export function integer(n) {
+    var limit = (MAX_RANDOM - (MAX_RANDOM % n)) / MAX_RANDOM;
+
+    var rand = Math.random();
+    while (rand >= limit) rand = Math.random();
+
+    return Math.floor(rand * n);
+} */
+
 export function intArray(n) {
     let a = [];
     for (let i = 0; i < n; ++i) a.push(i);
     return shuffle(a);
 }
 
-// Choses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }
-// Total is optional to specify the total of the weights.
-// This is useful if the function is called repeatedly.
-export function weighted(obj, setTotal = null) {
+const totalCache = new Map();
+
+// Chooses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }
+export function weighted(obj) {
     let total = 0;
-    if (setTotal == null) {
+
+    if (totalCache.has(obj)) {
         each(obj, function(x) { total += (+x); });
+        totalCache.set(obj, total);
     } else {
-        total = setTotal;
+        total = totalCache.get(obj);
     }
 
     let rand = Math.random() * total;
@@ -61,7 +75,6 @@ export function weighted(obj, setTotal = null) {
         if (rand <= curr) return i;
     });
 }
-
 
 
 // -----------------------------------------------------------------------------

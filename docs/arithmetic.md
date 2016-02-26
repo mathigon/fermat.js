@@ -1,31 +1,46 @@
-## Arithmetic
+# Arithmetic
 
-### `nearlyEquals(x: Number, y: Number, tolerance: Number) => Boolean`
+### nearlyEquals
+`Boolean nearlyEquals(Number x, Number y, [Number tolerance])`
 
-### `sign(x: Number)`
+### sign
+`Integer sign(Number x)`
 
-### `square(x: Number)`
+### square
+`Number square(Number x)`
 
-### `cube(x: Number)`
+### cube
+`Number cube(Number x)`
 
-### `numberFormat(x: Number)`
+### numberFormat
+`String numberFormat(Number x)`
 
-### `toOrdinal(x: Number)`
+### toOrdinal
+`String toOrdinal(Number x)`
 
-### `digits(x: Int)`
+### digits
+`Integer[] digits(Integer n)`
 
-### `fractionalDigits(x: Number)`
+### fractionalDigits
+`Integer[] fractionalDigits(Number n)`
 
-### `decimalPlaces(x: Number)`
+### decimalPlaces
+`Integer decimalPlaces(Number n)`
 
-### `round(x: Number, precision: Number)`
+### round
+`Number round(Number n, [Integer precision])`
 
-### `roundTo(x: Number, increment: Number)`
+### roundTo
+`Number roundTo(Number n, [Number increment])`
 
-### `roundTowardsZero(x: Number)`
+### roundTowardsZero
+`Integer roundTowardsZero(Number n)`
 
-### `toFraction(decimal, precision)`
+### toFraction
+`[Number numerator, Integer denominator] toFraction(Number n, [Number precision])`
 
-### `mod(a, m)`
+### mod
+`Number mod(Number a, Number m)`
 
-### `log(x, base)`
+### log
+`Number log(Number x, [Number b])`

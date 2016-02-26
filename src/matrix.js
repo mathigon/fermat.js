@@ -1,7 +1,6 @@
 // =============================================================================
 // Fermat.js | Matrix
-// *** EXPERIMENTAL ***
-// (c) 2015 Mathigon
+// (c) 2016 Mathigon
 // =============================================================================
 
 
@@ -20,9 +19,7 @@ export default class Matrix {
     // new Matrix(2,3,1) = [[1,1,1],[1,1,1]]
 
     constructor(a, b = null, c = null) {
-        if (!(this instanceof Matrix)) return new Matrix(arguments);
-
-        var isArray = Array.isArray(a);
+        let isArray = Array.isArray(a);
         this.rows = isArray ? a.length : a;
         this.columns = isArray ? Math.max(...a.map(x => x.length))
                                : (b == null) ? a : b;

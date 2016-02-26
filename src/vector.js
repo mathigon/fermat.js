@@ -61,12 +61,16 @@ export default class Vector {
         return new Vector(array);
     }
 
-    scaled(q = 1) {
+    shift(q = 0) {
+        return this.map(x => q + x);
+    }
+
+    scale(q = 1) {
         return this.map(x => q * x);
     }
 
     normalise() {
-        return this.scaled(1 / this.norm);
+        return this.scale(1 / this.norm);
     }
 
     toString() {

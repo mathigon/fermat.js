@@ -125,7 +125,7 @@ const regexp = new RegExp('^(' + prefixRegexp + ')?(' + unitRegexp + ')$');
 // ---------------------------------------------------------------------------------------------
 // Exports
 
-export function to(val, fromUnit, toUnit = null) {
+export function convert(val, fromUnit, toUnit = null) {
 
     let f = fromUnit.match(regexp);
     let prefix = f[1];
