@@ -6,7 +6,6 @@
 
 
 import { square } from 'utilities';
-import { isInteger } from 'types';
 import { map } from 'arrays';
 
 

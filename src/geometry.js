@@ -5,7 +5,7 @@
 
 
 
-import { clamp } from 'utilities';
+import { isBetween } from 'utilities';
 import { tabulate, total, list } from 'arrays';
 import { nearlyEquals, square, cube } from 'arithmetic';
 import { permutations } from 'combinatorics';
@@ -431,43 +431,39 @@ export function angle(a, b, c) {
 // -------------------------------------------------------------------------
 // Equality Checking
 
-/*
-
-let isSame = {
-    point: function(p1, p2) {
-        return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
-    },
-
-    line: function(l1, l2, unoriented) {
-        return (same.point(l1.p1, l2.p1) && same.point(l1.p2, l2.p2)) ||
-               (unoriented && same.point(l1.p1, l2.p2) && same.point(l1.p2, l2.p1));
-    },
-
-    rect: function(r1, r2, unoriented) {
-        // TODO
-    },
-
-    circle: function(c1, c2, unoriented) {
-        // TODO
-    },
-
-    polygon: function(p1, p2, unoriented) {
-        // TODO
-    }
-};
-
-export function same(a, b, unOriented) {
-    var type = getGeoType(a);
-    if (type !== getGeoType(b)) return false;
-    var sameFn = isSame[type];
-    if (sameFn) return sameFn(a, b, unOriented);
+function samePoint(p1, p2) {
+    return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
 }
+
+function sameLine(l1, l2, unoriented) {
+    return (samePoint(l1.p1, l2.p1) && samePoint(l1.p2, l2.p2)) ||
+           (unoriented && samePoint(l1.p1, l2.p2) && samePoint(l1.p2, l2.p1));
+}
+
+function sameRect(r1, r2, unoriented) {
+    // TODO
+}
+
+function sameEllipse(c1, c2) {
+    // TODO
+}
+
+function samePolygon(p1, p2, unoriented) {
+    // TODO
+}
+
+/* TODO export function same(a, b, unOriented) {
+    let type = getGeoType(a);
+    if (type !== getGeoType(b)) return false;
+    let sameFn = isSame[type];
+    if (sameFn) return sameFn(a, b, unOriented);
+} */
 
 
 // -------------------------------------------------------------------------
 // Intersections and Overlaps
 
-function pointPointIntersect(p1, p2) {
+/* function pointPointIntersect(p1, p2) {
     return same(p1, p2) ? [new Point(p1.x, p2.x)] : [];
 }
 
@@ -485,37 +481,34 @@ function pointCircleIntersect(p, c) {
 
 function pointPolygonIntersect(p1, p2) {
     // TODO
-}
+} */
 
-function lineLineIntersect(l1, l2) {
+export function lineLineIntersect(l1, l2) {
 
-    var s = same.point(l1.p1, l2.p1) + same.point(l1.p1, l2.p2) +
-            same.point(l1.p2, l2.p1) + same.point(l1.p2, l2.p2);
+    let s = samePoint(l1.p1, l2.p1) + samePoint(l1.p1, l2.p2) +
+        samePoint(l1.p2, l2.p1) + samePoint(l1.p2, l2.p2);
 
     if (s === 2) return l1.p1;  // same lines intersect
     if (s === 1) return;        // connected lines don't intersect
 
-    var d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
-    var d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
-    var d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
+    let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
+    let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
 
     var denominator = Vector.cross2D(d2, d1);
-    if (denominator === 0) return;  // -> colinear
+    if (nearlyEquals(denominator, 0)) return;  // -> colinear
 
-    var n1 = M.vector.cross2D(d1, d);
-    var n2 = M.vector.cross2D(d2, d);
+    let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
+    let x = Vector.cross2D(d1, d) / denominator;
+    let y = Vector.cross2D(d2, d) / denominator;
 
-    var x = n2 / denominator;
-    var y = n1 / denominator;
-
-    if (clamp(x,0,1) && clamp(y,0,1)) {
-        var intersectionX = l1.p1.x + x * (l1.p2.x - l1.p1.x);
-        var intersectionY = l1.p1.y + y * (l1.p2.y - l1.p1.y);
+    if (isBetween(x,0,1) && isBetween(y,0,1)) {
+        let intersectionX = l1.p1.x + x * d[0];
+        let intersectionY = l1.p1.y + y * d[1];
         return new Point(intersectionX, intersectionY);
     }
 }
 
-function lineCircleIntersect(l, c) {
+/* function lineCircleIntersect(l, c) {
     // TODO
 }
 

@@ -16,12 +16,9 @@ import { square } from 'arithmetic';
 // Randomly shuffles the elements in an array
 export function shuffle(a) {
     a = a.slice(0); // create copy
-    let j, tmp;
-    for (let i = a.length - 1; i; --i) {
-        j = Math.floor(Math.random() * (i+1));
-        tmp = a[j];
-        a[j] = a[i];
-        a[i] = tmp;
+    for (let i = a.length - 1; i > 0; --i) {
+        let j = Math.floor(Math.random() * (i+1));
+        [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
 }
@@ -54,17 +51,17 @@ export function intArray(n) {
     return shuffle(a);
 }
 
-const totalCache = new Map();
+const totalCache = new WeakMap();
 
 // Chooses a random value from weights [2, 5, 3] or { a: 2, b: 5, c: 3 }
 export function weighted(obj) {
     let total = 0;
 
     if (totalCache.has(obj)) {
+        total = totalCache.get(obj);
+    } else {
         each(obj, function(x) { total += (+x); });
         totalCache.set(obj, total);
-    } else {
-        total = totalCache.get(obj);
     }
 
     let rand = Math.random() * total;
