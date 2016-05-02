@@ -546,8 +546,33 @@ export function intersect(x, y) {
     }
 
     throw new Error('Can\'t intersect ' + getGeoType(x) + 's and ' + getGeoType(y) + '.');
+} */
+
+export function projectPointOnRect(point, rect) {
+    let rect1 = { x: rect.x + rect.w, y: rect.y + rect.h };  // bottom right corner of rect
+    let center = { x: rect.x + rect.w/2, y: rect.y + rect.h/2 };
+    let m = (center.y - point.y) / (center.x - point.x);
+
+    if (point.x <= center.x) {  // check left side
+        let y = m * (rect.x - point.x) + point.y;
+        if (rect.y < y && y < rect1.y) return { x: rect.x, y };
+    }
+
+    if (point.x >= center.x) {  // check right side
+        let y = m * (rect1.x - point.x) + point.y;
+        if (rect.y < y && y < rect1.y) return { x: rect1.x, y };
+    }
+
+    if (point.y <= center.y) {  // check top side
+        let x = (rect.y - point.y) / m + point.x;
+        if (rect.x < x && x < rect1.x) return { x, y: rect.y };
+    }
+
+    if (point.y >= center.y) {  // check bottom side
+        let x = (rect1.y - point.y) / m + point.x;
+        if (rect.x < x && x < rect1.x) return { x, y: rect1.y };
+    }
 }
-*/
 
 
 // -------------------------------------------------------------------------

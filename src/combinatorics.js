@@ -8,13 +8,16 @@
 import { cache } from 'utilities';
 
 
-export const factorial = cache(function(x) {
-    if (x < 0) return NaN;
-    if (x === 0) return 1;
+function facRec(x, acc) {
     if (x <= 1) return x;
-    return x * factorial(x - 1);
-});
+    return x * facRec(x - 1, acc);
+}
 
+export function factorial(x) {
+    if (x === 0) return 1;
+    if (x < 0) return NaN;
+    return facRec(x, 1);
+}
 
 export const binomial = cache(function(n, k) {  // n choose k
     if (k === 0) {
