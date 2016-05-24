@@ -43,7 +43,7 @@ export class Point {
         return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
     }
 
-    static interpolate(p1, p2, t) {
+    static interpolate(p1, p2, t=0.5) {
         return { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
     }
 
