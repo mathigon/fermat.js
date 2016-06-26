@@ -46,3 +46,12 @@ export function bisect(fn, precision = 3, l = 0, h = null) {
 
     return Math.round(l * q) * p;
 }
+
+
+export function integrate(fn, xMin, xMax, dx = 1) {
+    let result = 0;
+    for (let x = xMin; x < xMax; x += dx) {
+        result += (fn(x) * dx || 0);
+    }
+    return result;
+}

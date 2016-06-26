@@ -8,6 +8,7 @@
 import { each, some } from 'utilities';
 import { tabulate } from 'arrays';
 import { square } from 'arithmetic';
+import { integrate } from 'numeric';
 
 
 // -----------------------------------------------------------------------------
@@ -149,6 +150,40 @@ export function cauchy() {
     return v1/v2;
 }
 
+
+// -----------------------------------------------------------------------------
+// PDFs and CDFs
+
 export function normalPDF(x, m = 1, v = 0) {
     return Math.exp(-square(x - m) / (2 * v)) / Math.sqrt(2 * Math.PI * v);
 }
+
+const G = 7;
+const P = [
+    0.99999999999980993,
+    676.5203681218851,
+    -1259.1392167224028,
+    771.32342877765313,
+    -176.61502916214059,
+    12.507343278686905,
+    -0.13857109526572012,
+    9.9843695780195716e-6,
+    1.5056327351493116e-7
+];
+
+function gamma (z) {
+    if (z < 0.5) return Math.PI / (Math.sin(Math.PI * z) * gamma(1 - z));
+
+    z -= 1;
+    let x = P[0];
+    for (let i = 1; i < G + 2; i++) x += P[i] / (z + i);
+    let t = z + G + 0.5;
+
+    return Math.sqrt(2 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
+}
+
+export function chiCDF(chi, deg) {
+    let int = integrate(t => Math.pow(t, (deg-2)/2) * Math.exp(-t/2), 0, chi);
+    return 1 - int / Math.pow(2, deg/2) / gamma(deg/2);
+}
+
