@@ -39,7 +39,7 @@ export class Point {
         return Math.sqrt(square(p1.x - p2.x) + square(p1.y - p2.y));
     }
 
-    static manhatten(p1, p2) {
+    static manhattan(p1, p2) {
         return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
     }
 
