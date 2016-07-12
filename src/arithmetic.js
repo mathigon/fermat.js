@@ -52,6 +52,42 @@ export function toOrdinal(x) {
     }
 }
 
+const ones = [
+    '', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+    'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'
+];
+const tens = ['', '', 'twenty', 'thirty', 'fourty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+const multipliers = ['', 'thousand', 'million', 'billion', 'trillion', 'quadrillion', 'quintillion', 'sextillion'];
+
+function fmt(n) {
+    let [h, t, o] = ('00' + n).substr(-3);
+    return [
+        Number(h) === 0 ? '' : ones[h] + ' hundred ',
+        Number(o) === 0 ? tens[t] : tens[t] && tens[t] + '-' || '',
+        ones[t+o] || ones[o]
+    ].join('');
+}
+
+function cons(xs, x, g) {
+    return x ? [x, g && ' ' + g || '', ' ', xs].join('') : xs;
+}
+
+export function toWord(n) {
+    if (!n) return 'zero';
+
+    let str = '';
+    let i = 0;
+
+    while (n) {
+        str = cons(str, fmt(n % 1000), multipliers[i]);
+        i += 1;
+        n = n / 1000 | 0;
+    }
+
+    return str.trim();
+}
+
+
 
 // -----------------------------------------------------------------------------
 // Rounding, Decimals and Decimals
