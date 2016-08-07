@@ -108,6 +108,8 @@ export function goldbach(x) {
         return true;
     }
 
+    if (x == 4) return [2, 2];
+
     let a = x / 2;
     let b = x / 2;
 
