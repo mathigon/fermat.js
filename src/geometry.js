@@ -1,14 +1,14 @@
 // =============================================================================
 // Fermat.js | Geometry
-// (c) 2016 Mathigon
+// (c) 2017 Mathigon
 // =============================================================================
 
 
 
-import { isBetween } from 'utilities';
-import { tabulate, total, list } from 'arrays';
 import { nearlyEquals, square, cube } from 'arithmetic';
+import { tabulate, total, list } from 'arrays';
 import { permutations } from 'combinatorics';
+import { isBetween } from 'utilities';
 import Vector from 'vector';
 
 
@@ -17,111 +17,111 @@ import Vector from 'vector';
 
 export class Point {
 
-    static average(...points) {
-        var x = total(points.map(p => p.x)) / points.length;
-        var y = total(points.map(p => p.y)) / points.length;
-        return new Point(x, y);
-    }
+  static average(...points) {
+    let x = total(points.map(p => p.x)) / points.length;
+    let y = total(points.map(p => p.y)) / points.length;
+    return new Point(x, y);
+  }
 
-    static dot(p1, p2) {
-        return p1.x * p2.x + p1.y * p2.y;
-    }
+  static dot(p1, p2) {
+    return p1.x * p2.x + p1.y * p2.y;
+  }
 
-    static sum(p1, p2) {
-        return new Point(p1.x + p2.x, p1.y + p2.y);
-    }
+  static sum(p1, p2) {
+    return new Point(p1.x + p2.x, p1.y + p2.y);
+  }
 
-    static difference(p1, p2) {
-        return new Point(p1.x - p2.x, p1.y - p2.y);
-    }
+  static difference(p1, p2) {
+    return new Point(p1.x - p2.x, p1.y - p2.y);
+  }
 
-    static distance(p1, p2) {
-        return Math.sqrt(square(p1.x - p2.x) + square(p1.y - p2.y));
-    }
+  static distance(p1, p2) {
+    return Math.sqrt(square(p1.x - p2.x) + square(p1.y - p2.y));
+  }
 
-    static manhattan(p1, p2) {
-        return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
-    }
+  static manhattan(p1, p2) {
+    return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+  }
 
-    static interpolate(p1, p2, t=0.5) {
-        return { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
-    }
+  static interpolate(p1, p2, t=0.5) {
+    return { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
+  }
 
-    constructor(x = 0, y = 0) {
-        this.x = x;
-        this.y = y;
-    }
+  constructor(x = 0, y = 0) {
+    this.x = x;
+    this.y = y;
+  }
 
-    get center() { return this; }
+  get center() { return this; }
 
-    get distance() {
-        return Math.sqrt(square(this.x) + square(this.y));
-    }
+  get distance() {
+    return Math.sqrt(square(this.x) + square(this.y));
+  }
 
-    toString() {
-        return '(' + this.x + ', ' + this.y + ')';
-    }
+  toString() {
+    return '(' + this.x + ', ' + this.y + ')';
+  }
 
-    get polar() {
-        let th = Math.atan2(this.y, this.x);
-        if (th < 0) th += 2 * Math.PI;
-        return { r: this.distance, th };
-    }
+  get polar() {
+    let th = Math.atan2(this.y, this.x);
+    if (th < 0) th += 2 * Math.PI;
+    return { r: this.distance, th };
+  }
 
-    static fromPolar(polar) {
-        let x = polar.r * Math.cos(polar.th);
-        let y = polar.r * Math.sin(polar.th);
-        return new Point(x, y);
-    }
+  static fromPolar(polar) {
+    let x = polar.r * Math.cos(polar.th);
+    let y = polar.r * Math.sin(polar.th);
+    return new Point(x, y);
+  }
 
-    project(l = xAxis) {
-        let k = Point.dot(Point.difference(this, l.p1), l.normalVector);
-        return Point.add(l.p1, k);  // TODO wrong?
-    }
+  project(l = xAxis) {
+    let k = Point.dot(Point.difference(this, l.p1), l.normalVector);
+    return Point.add(l.p1, k);  // TODO check this!
+  }
 
-    transform(m = identity) {
-        let x = m[0][0] * this.x + m[0][1] * this.y;
-        let y = m[1][0] * this.x + m[1][1] * this.y;
-        return new Point(x, y);
-    }
+  transform(m = identity) {
+    let x = m[0][0] * this.x + m[0][1] * this.y;
+    let y = m[1][0] * this.x + m[1][1] * this.y;
+    return new Point(x, y);
+  }
 
-    rotate(phi = 0, p = origin) {
-        var x0 = this.x - p.x;
-        var y0 = this.y - p.y;
+  rotate(phi = 0, p = origin) {
+    let x0 = this.x - p.x;
+    let y0 = this.y - p.y;
 
-        var cos = Math.cos(phi);
-        var sin = Math.sin(phi);
+    let cos = Math.cos(phi);
+    let sin = Math.sin(phi);
 
-        var x = x0 * cos - y0 * sin + p.x;
-        var y = x0 * sin + y0 * cos + p.y;
-        return new Point(x, y);
-    }
+    let x = x0 * cos - y0 * sin + p.x;
+    let y = x0 * sin + y0 * cos + p.y;
+    return new Point(x, y);
+  }
 
-    reflect(l = yAxis) {
-        var v = l.p2.x - l.p1.x;
-        var w = l.p2.y - l.p1.y;
+  reflect(l = yAxis) {
+    let v = l.p2.x - l.p1.x;
+    let w = l.p2.y - l.p1.y;
 
-        var x0 = this.x - l.p1.x;
-        var y0 = this.y - l.p1.y;
+    let x0 = this.x - l.p1.x;
+    let y0 = this.y - l.p1.y;
 
-        var mu = (v * y0 - w * x0) / (v * v + w * w);
+    let mu = (v * y0 - w * x0) / (v * v + w * w);
 
-        var x = this.x + 2 * mu * w;
-        var y = this.y - 2 * mu * v;
-        return new Point(x, y);
-    }
+    let x = this.x + 2 * mu * w;
+    let y = this.y - 2 * mu * v;
+    return new Point(x, y);
+  }
 
-    scale(sx = 1, sy = sx) {
-        return new Point(this.x * sx, this.y * sy);
-    }
+  scale(sx = 1, sy = sx) {
+    return new Point(this.x * sx, this.y * sy);
+  }
 
-    shift(x = 0, y = 0) {
-        return new Point(this.x + x, this.y + y);
-    }
+  shift(x = 0, y = 0) {
+    return new Point(this.x + x, this.y + y);
+  }
 
-    distanceFromLine(l) {
-        return Point.distance(this, this.project(l));  // TODO wrong?
-    }
+  distanceFromLine(l) {
+    return Point.distance(this, this.project(l));  // TODO check this!
+  }
 }
 
 const origin = new Point(0,0);
@@ -133,98 +133,98 @@ const identity = [[1, 0], [0, 1]];
 
 export class Line {
 
-    static isParallel(l1, l2) {
-        var x1 = l1.p2.x - l1.p1.x;
-        var y1 = l1.p2.y - l1.p1.y;
-        var x2 = l2.p2.x - l2.p1.x;
-        var y2 = l2.p2.y - l2.p1.y;
+  static isParallel(l1, l2) {
+    let x1 = l1.p2.x - l1.p1.x;
+    let y1 = l1.p2.y - l1.p1.y;
+    let x2 = l2.p2.x - l2.p1.x;
+    let y2 = l2.p2.y - l2.p1.y;
 
-        return (x1 === 0 && x2 === 0) || (y1 === 0 && y2 === 0) || nearlyEquals(y1/x1, y2/x2);
+    return (x1 == 0 && x2 == 0) || (y1 == 0 && y2 == 0) ||
+      nearlyEquals(y1 / x1, y2 / x2);
+  }
+
+  static isPerpendicular(l1, l2) {
+    // TODO
+  }
+
+  static angleBetween(l1, l2) {
+    // TODO
+  }
+
+  // Calculates the angle bisector of the angle a, b, c.
+  static angleBisector(a, b, c) {
+    let phiA =  Math.atan2(a.y - b.y, a.x - b.x);
+    let phiC =  Math.atan2(c.y - b.y, c.x - b.x);
+    let phi = (phiA + phiC) / 2;
+
+    if (phiA > phiC) phi += Math.PI;
+
+    let x = Math.cos(phi) + b.x;
+    let y = Math.sin(phi) + b.y;
+
+    return new Line(b, new Point(x, y));
+  }
+
+  constructor(p1, p2) {
+    this.p1 = p1;
+    this.p2 = p2;
+  }
+
+  get length() {
+    return Point.distance(this.p1, this.p2);
+  }
+
+  get center() {
+    return Point.average(this.p1, this.p2);
+  }
+
+  get normalVector() {
+    let l = this.length;
+    let x = (this.p2.x - this.p1.x) / l;
+    let y = (this.p2.y - this.p1.y) / l;
+    return new Point(x, y);
+  }
+
+  contains(p) {
+    let grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
+    let grad2 = (p.y - this.p1.y) / (p - this.p1.x);
+    return nearlyEquals(grad1, grad2);
+  }
+
+  at(t = 0) {
+    let x = t * this.p1.x + (1-t) * this.p2.x;
+    let y = t * this.p1.y + (1-t) * this.p2.y;
+    return new Point(x, y);
+  }
+
+  perpendicular(p = origin) {
+    // Special case: point is the first point of the line.
+    if (same(p, this.p1)) {
+      let dx = this.p2.y - this.p1.y;
+      let dy = this.p1.x - this.p2.x;
+      return new Line(p, p.shift(dx, dy));
     }
 
-    static isPerpendicular(l1, l2) {
-        // TODO
+    // Special case: point is the second point of the line.
+    if (same(p, this.p2)) {
+      let dx = this.p1.y - this.p2.y;
+      let dy = this.p2.x - this.p1.x;
+      return new Line(p, p.shift(dx, dy));
     }
 
-    static angleBetween(l1, l2) {
-        // TODO
+    // Special case: point lies somewhere else on the line.
+    if (this.contains(p)) {
+      let dx = this.p1.y - p.y;
+      let dy = p.x - this.p1.x;
+      return new Line(p, p.shift(dx, dy));
     }
 
-    // Calculates the angle bisector of the angle a, b, c.
-    static angleBisector(a, b, c) {
-        var phiA =  Math.atan2(a.y - b.y, a.x - b.x);
-        var phiC =  Math.atan2(c.y - b.y, c.x - b.x);
-        var phi = (phiA + phiC) / 2;
+    // General case: point does not lie on the line.
+    let q = p.project(this);
+    return new Line(p, p.shift(q.x, q.y));
+  }
 
-        if (phiA > phiC) phi += Math.PI;
-
-        var x = Math.cos(phi) + b.x;
-        var y = Math.sin(phi) + b.y;
-
-        return new Line(b, new Point(x, y));
-    }
-
-    constructor(p1, p2) {
-        this.p1 = p1;
-        this.p2 = p2;
-    }
-
-    get length() {
-        return Point.distance(this.p1, this.p2);
-    }
-
-    get center() {
-        return Point.average(this.p1, this.p2);
-    }
-
-    get normalVector() {
-        var l = this.length;
-        var x = (this.p2.x - this.p1.x) / l;
-        var y = (this.p2.y - this.p1.y) / l;
-        return new Point(x, y);
-    }
-
-    contains(p) {
-        var grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
-        var grad2 = (p.y - this.p1.y) / (p - this.p1.x);
-        return nearlyEquals(grad1, grad2);
-    }
-
-    at(t = 0) {
-        var x = t * this.p1.x + (1-t) * this.p2.x;
-        var y = t * this.p1.y + (1-t) * this.p2.y;
-        return new Point(x, y);
-    }
-
-    perpendicular(p = origin) {
-        var dx, dy;
-
-        // Special case: point is the first point of the line
-        if (same(p, this.p1)) {
-            dx = this.p2.y - this.p1.y;
-            dy = this.p1.x - this.p2.x;
-
-        // Special case: point is the second point of the line
-        } else if (same(p, this.p2)) {
-            dx = this.p1.y - this.p2.y;
-            dy = this.p2.x - this.p1.x;
-
-        // special case: point lies somewhere else on the line
-        } else if (this.contains(p)) {
-            dx = this.p1.y - p.y;
-            dy = p.x - this.p1.x;
-
-        // general case: point does not lie on the line
-        } else {
-            var b = p.project(l);
-            dx = b.x;
-            dy = b.y;
-        }
-
-        return new Line(p, p.shift(dx, dy));
-    }
-
-    // TODO toString, transform, rotate, reflect, scale, shift
+  // TODO toString, transform, rotate, reflect, scale, shift
 }
 
 const xAxis = new Line(origin, new Point(1, 0));
@@ -236,33 +236,33 @@ const yAxis = new Line(origin, new Point(0, 1));
 
 export class Bezier {
 
-    constructor(p1, p2, q1 = p1, q2 = p2) {
-        this.p1 = p1;
-        this.p2 = p2;
-        this.q1 = q1;
-        this.q2 = q2;
-    }
+  constructor(p1, p2, q1 = p1, q2 = p2) {
+    this.p1 = p1;
+    this.p2 = p2;
+    this.q1 = q1;
+    this.q2 = q2;
+  }
 
-    get length() {
-        // TODO
-    }
+  get length() {
+    // TODO
+  }
 
-    get center() {
-        // TODO
-    }
+  get center() {
+    // TODO
+  }
 
-    contains(p) {
-    }
+  contains(p) {
+  }
 
-    at(t = 0) {
-        var x = cube(1-t)*this.p1.x + 3*t*(1-t)*(1-t)*this.q1.x +
-                3*t*t*(1-t)*this.q2.x + cube(t)*this.p2.x;
-        var y = cube(1-t)*this.p1.y + 3*t*(1-t)*(1-t)*this.q1.y +
-                3*t*t*(1-t)*this.q2.y + cube(t)*this.p2.y;
-        return new Point(x, y);
-    }
+  at(t = 0) {
+    let x = cube(1 - t) * this.p1.x + 3 * t * (1 - t) * (1 - t) * this.q1.x +
+      3 * t * t * (1 - t) * this.q2.x + cube(t) * this.p2.x;
+    let y = cube(1 - t) * this.p1.y + 3 * t * (1 - t) * (1 - t) * this.q1.y +
+      3 * t * t * (1 - t) * this.q2.y + cube(t) * this.p2.y;
+    return new Point(x, y);
+  }
 
-    // TODO toString, transform, rotate, reflect, scale, shift
+  // TODO toString, transform, rotate, reflect, scale, shift
 }
 
 
@@ -270,38 +270,38 @@ export class Bezier {
 // Ellipses and Circles
 
 export class Ellipse {
-    // TODO
+  // TODO
 }
 
 export class Circle extends Ellipse {
 
-    constructor(c = origin, r = 1) {
-        super();  // TODO
-        this.c = c;
-        this.r = r;
-    }
+  constructor(c = origin, r = 1) {
+    super();  // TODO
+    this.c = c;
+    this.r = r;
+  }
 
-    get center() {
-        return this.c;
-    }
+  get center() {
+    return this.c;
+  }
 
-    get circumference() {
-        return 2 * Math.PI * this.r;
-    }
+  get circumference() {
+    return 2 * Math.PI * this.r;
+  }
 
-    get area() {
-        return Math.PI * square(this.r);
-    }
+  get area() {
+    return Math.PI * square(this.r);
+  }
 
-    contains(p) {
-        // TODO
-    }
+  contains(p) {
+    // TODO
+  }
 
-    at(t = 0) {
-        // TODO
-    }
+  at(t = 0) {
+    // TODO
+  }
 
-    // TODO toString, transform, rotate, reflect, scale, shift
+  // TODO toString, transform, rotate, reflect, scale, shift
 }
 
 
@@ -310,46 +310,48 @@ export class Circle extends Ellipse {
 
 export class Rectangle {
 
-    constructor(x = 0, y = 0, w = 1, h = 1) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-    }
+  constructor(x = 0, y = 0, w = 1, h = 1) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+  }
 
-    get center() {
-        // TODO
-    }
+  get center() {
+    return new Point(this.x + this.w / 2, this.y + this.h / 2);
+  }
 
-    get circumference() {
-        return 2 * this.w + 2 * this.h;
-    }
+  get circumference() {
+    return 2 * this.w + 2 * this.h;
+  }
 
-    get area() {
-        return Math.abs(this.w * this.h);
-    }
+  get area() {
+    return Math.abs(this.w * this.h);
+  }
 
-    get polygon() {
-        var a = new Point(this.x, this.y);
-        var b = new Point(this.x + this.w, this.y);
-        var c = new Point(this.x + this.w, this.y + this.h);
-        var d = new Point(this.x, this.y + this.h);
-        return new Polygon(a, b, c, d);
-    }
+  get polygon() {
+    let a = new Point(this.x, this.y);
+    let b = new Point(this.x + this.w, this.y);
+    let c = new Point(this.x + this.w, this.y + this.h);
+    let d = new Point(this.x, this.y + this.h);
+    return new Polygon(a, b, c, d);
+  }
 
-    contains(p) {
-    }
+  contains(p) {
+  }
 
-    at(t = 0) {
-    }
+  at(t = 0) {
+  }
 
-    // TODO toString, transform, rotate, reflect, scale, shift
+  // TODO toString, transform, rotate, reflect, scale, shift
 }
 
 export class Square extends Rectangle {
-    constructor(x = 0, y = 0, w = 1) {
-        super(x, y, w, w);
-    }
+
+  constructor(x = 0, y = 0, w = 1) {
+    super(x, y, w, w);
+  }
+
 }
 
 
@@ -358,64 +360,68 @@ export class Square extends Rectangle {
 
 export class Polygon {
 
-    constructor(...points) {
-        this.points = points;
+  constructor(...points) {
+    this.points = points;
+  }
+
+  get circumference() {
+    let C = 0;
+    for (let i = 1; i < this.points.length; ++i) {
+      C += distance(this.points[i - 1], this.points[i]);
+    }
+    return C;
+  }
+
+  get area() {
+    let p = this.points;
+    let n = p.length;
+    let A = p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
+
+    for (let i = 1; i < n; ++i) {
+      A += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y;
     }
 
-    get circumference() {
-        let C = 0;
-        this.points.each(function() { C += distance(p[i - 1], p[i]); });
-        C += distance(p[n-1], p[0]);
-        return C;
-    }
+    return Math.abs(A/2);
+  }
 
-    get area() {
-        var p = this.points;
-        var n = p.length;
-        var A = p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
+  get center() {
+    // TODO
+  }
 
-        for (var i = 1; i < n; ++i)
-            A += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y;
+  get centroid() {
+    // TODO
+  }
 
-        return Math.abs(A/2);
-    }
+  contains(p) {
+    // TODO
+  }
 
-    get center() {
-        // TODO
-    }
+  at(t = 0) {
+    // TODO
+  }
 
-    get centroid() {
-        // TODO
-    }
+  get convexHull() {
+    // TODO
+  }
 
-    contains(p) {
-        // TODO
-    }
-
-    at(t = 0) {
-        // TODO
-    }
-
-    // TODO toString, transform, rotate, reflect, scale, shift
+  // TODO toString, transform, rotate, reflect, scale, shift
 }
 
-
-// -------------------------------------------------------------------------
-// Triangles
-
 export class Triangle extends Polygon {
-    constructor(...points) {
-        if (points.length !== 3) throw new Error('Triangles need exactly 3 vertices.');
-        super(points);
+  constructor(...points) {
+    if (points.length !== 3) {
+      throw new Error('Triangles need exactly 3 vertices.');
     }
+    super(points);
+  }
 
-    get circumcircle() {
-        // TODO
-    }
+  get circumcircle() {
+    // TODO
+  }
 
-    get incircle() {
-        // TODO
-    }
+  get incircle() {
+    // TODO
+  }
 }
 
 
@@ -423,12 +429,12 @@ export class Triangle extends Polygon {
 // Angles
 
 export function angle(a, b, c) {
-    var phiA = Math.atan2(a.y - b.y, a.x - b.x);
-    var phiC = Math.atan2(c.y - b.y, c.x - b.x);
-    var phi = phiC - phiA;
+  let phiA = Math.atan2(a.y - b.y, a.x - b.x);
+  let phiC = Math.atan2(c.y - b.y, c.x - b.x);
+  let phi = phiC - phiA;
 
-    if (phi < 0) phi += 2 * Math.PI;
-    return phi;
+  if (phi < 0) phi += 2 * Math.PI;
+  return phi;
 }
 
 
@@ -436,121 +442,92 @@ export function angle(a, b, c) {
 // Equality Checking
 
 function samePoint(p1, p2) {
-    return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
+  return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
 }
 
-function sameLine(l1, l2, unoriented) {
-    return (samePoint(l1.p1, l2.p1) && samePoint(l1.p2, l2.p2)) ||
-           (unoriented && samePoint(l1.p1, l2.p2) && samePoint(l1.p2, l2.p1));
+function sameLine(l1, l2, oriented=false) {
+  return (samePoint(l1.p1, l2.p1) && samePoint(l1.p2, l2.p2)) ||
+    (!oriented && samePoint(l1.p1, l2.p2) && samePoint(l1.p2, l2.p1));
 }
 
-function sameRect(r1, r2, unoriented) {
-    // TODO
+function sameRect(r1, r2, oriented=false) {
+  // TODO
 }
 
 function sameEllipse(c1, c2) {
-    // TODO
+  // TODO
 }
 
-function samePolygon(p1, p2, unoriented) {
-    // TODO
+function samePolygon(p1, p2, oriented=false) {
+  // TODO
 }
 
-/* TODO export function same(a, b, unOriented) {
-    let type = getGeoType(a);
-    if (type !== getGeoType(b)) return false;
-    let sameFn = isSame[type];
-    if (sameFn) return sameFn(a, b, unOriented);
-} */
+export function same(a, b, oriented=false) {
+  // TODO Handle Circle (Ellipse) and Rectangle + Square + Triangle (Polygon).
+  let type = a.constructor.name;
+  if (type !== b.constructor.name) return false;
+
+  switch (type) {
+    case 'Point': return samePoint(a, b, oriented);
+    case 'Line': return sameLine(a, b, oriented);
+    case 'Rect': return sameRect(a, b, oriented);
+    case 'Ellipse': return sameEllipse(a, b, oriented);
+    case 'Polygon': return samePolygon(a, b, oriented);
+  }
+  return false;
+}
 
 
 // -------------------------------------------------------------------------
 // Intersections and Overlaps
 
-/* function pointPointIntersect(p1, p2) {
-    return same(p1, p2) ? [new Point(p1.x, p2.x)] : [];
+function pointPointIntersect(p1, p2) {
+  return same(p1, p2) ? [new Point(p1.x, p1.y)] : [];
 }
-
-function pointLineIntersect(p, l) {
-    // TODO check that p lies on l
-}
-
-function pointRectIntersect(p, r) {
-    // TODO
-}
-
-function pointCircleIntersect(p, c) {
-    // TODO
-}
-
-function pointPolygonIntersect(p1, p2) {
-    // TODO
-} */
 
 export function lineLineIntersect(l1, l2) {
+  let s = samePoint(l1.p1, l2.p1) + samePoint(l1.p1, l2.p2) +
+    samePoint(l1.p2, l2.p1) + samePoint(l1.p2, l2.p2);
 
-    let s = samePoint(l1.p1, l2.p1) + samePoint(l1.p1, l2.p2) +
-        samePoint(l1.p2, l2.p1) + samePoint(l1.p2, l2.p2);
+  if (s === 2) return l1.p1;  // same lines intersect
+  if (s === 1) return;        // connected lines don't intersect
 
-    if (s === 2) return l1.p1;  // same lines intersect
-    if (s === 1) return;        // connected lines don't intersect
+  let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
+  let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
 
-    let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
-    let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
+  let denominator = Vector.cross2D(d2, d1);
+  if (nearlyEquals(denominator, 0)) return;  // -> colinear
 
-    var denominator = Vector.cross2D(d2, d1);
-    if (nearlyEquals(denominator, 0)) return;  // -> colinear
+  let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
+  let x = Vector.cross2D(d1, d) / denominator;
+  let y = Vector.cross2D(d2, d) / denominator;
 
-    let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
-    let x = Vector.cross2D(d1, d) / denominator;
-    let y = Vector.cross2D(d2, d) / denominator;
-
-    if (isBetween(x,0,1) && isBetween(y,0,1)) {
-        let intersectionX = l1.p1.x + x * d[0];
-        let intersectionY = l1.p1.y + y * d[1];
-        return new Point(intersectionX, intersectionY);
-    }
+  if (isBetween(x, 0, 1) && isBetween(y, 0, 1)) {
+    let intersectionX = l1.p1.x + x * d[0];
+    let intersectionY = l1.p1.y + y * d[1];
+    return new Point(intersectionX, intersectionY);
+  }
 }
 
-/* function lineCircleIntersect(l, c) {
-    // TODO
+export function intersect(x, ...rest) {
+  // TODO Handle Circle (Ellipse) and Rectangle + Square + Triangle (Polygon).
+  if (rest.length > 1) return intersect(x, intersect(...rest));
+  let y = rest[0];
+
+  let typeX = x.constructor.name;
+  let typeY = y.constructor.name;
+
+  switch (typeX + '-' + typeY) {
+    case 'Point-Point': return pointPointIntersect(x, y);
+    case 'Line-Line':   return lineLineIntersect(x, y);
+  }
+
+  throw new Error('Can\'t intersect ' + getGeoType(x) + 's and ' + getGeoType(y) + '.');
 }
 
-function linePolygonIntersect(l, c) {
-    // TODO
-}
 
-function rectRectIntersect() {
-    // TODO
-}
-
-function polygonPolygonIntersect() {
-    // TODO
-}
-
-export function intersect(x, y) {
-
-    if (arguments.length > 2) {
-        var rest = _arraySlice.call(arguments, 1); // TODO fix
-        return intersect(x, intersect(...rest));
-    }
-
-    // Handle Rectangles
-    if (x instanceof Rect && y instanceof Rect) return rectRectIntersect(x, y);
-    if (x instanceof Rect) x = x.toPolygon();
-    if (y instanceof Rect) y = y.toPolygon();
-
-    switch (getGeoType(x) + '-' + getGeoType(y)) {
-        case 'line-line':       return lineIntersect(x, y);
-        case 'line-circle':     return lineCircleIntersect(x, y);
-        case 'line-polygon':    return linePolygonIntersect(x, y);
-        case 'circle-line':     return lineCircleIntersect(y, x);
-        case 'polygon-line':    return linePolygonIntersect(y, x);
-        case 'polygon-polygon': return polygonPolygonIntersect(x, y);
-    }
-
-    throw new Error('Can\'t intersect ' + getGeoType(x) + 's and ' + getGeoType(y) + '.');
-} */
+// -------------------------------------------------------------------------
+// Projections
 
 export function projectPointOnRect(point, rect) {
     let rect1 = { x: rect.x + rect.w, y: rect.y + rect.h };  // bottom right corner of rect
@@ -582,30 +559,26 @@ export function projectPointOnRect(point, rect) {
 // -------------------------------------------------------------------------
 // Computational Geometry
 
-export function convexHull() {
-    // TODO
-}
-
 export function travellingSalesman(dist) {
-    let n = dist.length;
-    let cities = list(n);
+  let n = dist.length;
+  let cities = list(n);
 
-    let minLength = Infinity;
-    let minPath = null;
+  let minLength = Infinity;
+  let minPath = null;
 
-    permutations(cities).forEach(function(path) {
-        let length = 0;
-        for (let i = 0; i < n - 1; ++i) {
-            length += dist[path[i]][path[i+1]];
-            if (length > minLength) return;
-        }
-        if (length < minLength) {
-            minLength = length;
-            minPath = path;
-        }
-    });
+  permutations(cities).forEach(function(path) {
+    let length = 0;
+    for (let i = 0; i < n - 1; ++i) {
+      length += dist[path[i]][path[i+1]];
+      if (length > minLength) return;
+    }
+    if (length < minLength) {
+      minLength = length;
+      minPath = path;
+    }
+  });
 
-    return { path: minPath, length: minLength };
+  return { path: minPath, length: minLength };
 }
 
 
@@ -615,24 +588,24 @@ export function travellingSalesman(dist) {
 const COLOURS = [1,2,3,4];
 
 function canColour(adjMatrix, colours, index, colour) {
-    for (let i=0; i<index; ++i) {
-        if (adjMatrix[i][index] && colours[i][index] === colour) return false;
-    }
-    return true;
+  for (let i=0; i<index; ++i) {
+    if (adjMatrix[i][index] && colours[i][index] === colour) return false;
+  }
+  return true;
 }
 
 function colourMe(adjMatrix, colours, index) {
-    for (let c of COLOURS) {
-        if (canColour(adjMatrix, colours, index, c)) {
-            colours[index] = c;
-            if (colourMe(adjMatrix, colours, index + 1)) return true;
-        }
+  for (let c of COLOURS) {
+    if (canColour(adjMatrix, colours, index, c)) {
+      colours[index] = c;
+      if (colourMe(adjMatrix, colours, index + 1)) return true;
     }
-    return false;
+  }
+  return false;
 }
 
 export function graphColouring(adjMatrix) {
-    let colours = tabulate(0, adjMatrix.length);
-    let result = colourMe(adjMatrix, colours, 0);
-    return result ? colours : undefined;
+  let colours = tabulate(0, adjMatrix.length);
+  let result = colourMe(adjMatrix, colours, 0);
+  return result ? colours : undefined;
 }
