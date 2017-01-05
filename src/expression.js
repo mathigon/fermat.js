@@ -1,254 +1,321 @@
 // =============================================================================
 // Fermat.js | Expressions
 // (c) 2017 Mathigon
-// *** EXPERIMENTAL ***
 // =============================================================================
 
 
 
-import { mod } from 'arithmetic'
-import { factorial } from 'combinatorics'
-
-// TODO fix parser errors + test
-// TODO + and * with multiple arguments
-// TODO Simplify expressions
-// TODO More error messages: 1(1), "str"(10), %(x)
+import { factorial, permutations } from 'combinatorics'
 
 
 // -----------------------------------------------------------------------------
-// Expression Functions
+// Expression Equality Checking
 
-const functions = {
-  '+': (a, b) => a + b,
-  '-': (a, b) => (b === undefined) ? -a : a - b,
-  '*': (a, b) => a * b,
-  '/': (a, b) => a / b,
-  '!': n => factorial(n),
-  '^': (a, b) => Math.pow(a, b),
-  '[]': (...args) => args,
-  '"': str => '' + str,
-  'mod': (a, b) => mod(a, b)
-};
+function equals(expr1, expr2) {
+  // Handle numbers and variables.
+  if (expr1 === expr2) return true;
 
-const strings = {
-  '+': function(...args) { return args.join(' + '); },
-  '-': function(a, b) { return (b === undefined) ? '-' + a : a + ' - ' + b; },
-  '*': function(...args) { return args.join(' * '); },
-  '/': function(a, b) { return a + ' / ' + b; },
-  '!': function(n) { return n + '!'; },
-  '^': function(a, b) { return a + ' ^ ' + b; },
-  '[]': function(...args) { return '[' + args.join(', ') + ']'; },
-  '"': function(str) { return '"' + str + '"'; },
-  'mod': function(a, b) { return a + ' mod ' + b; }
-};
+  // Different functions are always unequal (we assume already simplified).
+  if (expr1[0] != expr2[0]) return false;
 
+  let [fn, args1] = expr1;
+  let args2 = expr2.slice(1);
 
-class ExpressionFn {
-  constructor(fn, args) {
-    this.fn = fn;
-    this.args = args;
-  }
-
-  simplify() {
-    // TODO !!!
-    return this;
-  }
-
-  toString() {
-    var newArgs = [];
-    for (var i=0; i<this.args.length; ++i) newArgs.push(this.args[i].toString());
-
-    var fn = strings[this.fn];
-    return fn ? fn(...newArgs) : this.fn + '(' + this.args.join(', ') + ')';
-  }
-
-  evaluate(vars = {}) {
-    var newArgs = [];
-    for (var i=0; i<this.args.length; ++i) {
-      var newArg = this.args[i].evaluate();
-      if (newArg instanceof Expression) return this;
-      newArgs.push(newArg);
-    }
-
-    var fn = vars[this.fn] || functions[this.fn] || Math[this.fn] || M[this.fn];
-    return (fn instanceof Function) ? fn(...newArgs) : this;
+  if (fn == '+' || fn == '*') {
+    // Addition and multiplication are commutative.
+    let orders = permutations(args1);
+    return orders.some(p => p.every((a, i) => equals(a, args2[i])));
+  } else {
+    return args1.every((a, i) => equals(a, args2[i]))
   }
 }
 
 
-// ExpressionVal can be numbers of strings (-> variables)
-class ExpressionVal {
-  constructor(val) { this.val = val; }
-  simplify() { return this; }
-  toString() { return '' + this.val; }
+// -----------------------------------------------------------------------------
+// Expression Simplification
+// TODO more and better simplification rules
+// TODO exact decimals / don't simplify
 
-  evaluate(vars = {}) {
-    if (isNumber(this.val)) return this.val;
-    if (this.val in vars) return vars[this.val];
-    return this;
+const FN_SIMPLIFY = {
+  '+': function(...args) {
+    let newArgs = [];
+    for (let a of args) {
+      newArgs.push(...(a[0] == '+' ? a.slice(1) : [a]))
+    }
+
+    let numbers = newArgs.filter(a => typeof a == 'number');
+    let others = newArgs.filter(a => typeof a != 'number');
+
+    let constant = FN_EVALUATE['+'](...numbers);
+    if (!others.length) return constant;
+
+    // TODO remove constant 0 if others.length
+    // TODO _a + _a = 2*a
+    // TODO _1+_2*_1 == (1+_2)*_1
+    // TODO nice ordering
+    // TODO (_1*_2)+(_3*_2) == (_1+_3)*_2
+
+    if (constant) return ['+', constant, ...others];
+    return ['+', constant, ...others];
+  },
+  '-': function(a, b) {
+    // TODO remove 0s
+    // TODO _a - _a = 0
+  },
+  '*': function(...args) {
+    // Remove zeros.
+    for (let a of args) if (a === 0) return 0;
+
+    let newArgs = [];
+    for (let a of args) {
+      newArgs.push(...(a[0] == '*' ? a.slice(1) : [a]))
+    }
+
+    let numbers = newArgs.filter(a => typeof a == 'number');
+    let others = newArgs.filter(a => typeof a != 'number');
+
+    let constant = FN_EVALUATE['*'](...numbers);
+    if (!others.length) return constant;
+
+    // TODO remove constant 1 of others.length
+    // TODO _a * _a = a^2
+    // TODO nice ordering
+    // TODO _a^_b * _a^_c == _a^(_b + _c)   (+ sqrt)
+    // TODO _a^_b * _c^_b == (_a*_b)^_c   (+ sqrt)
+    // TODO a * (b/c) * (d/e) == (a*b*d)/(c*e)
+    // TODO (x + y)*(x - y) == x^2 - y^2
+
+    if (constant != 1) return ['*', constant, ...others];
+    return ['*', ...others];
+  },
+  '/': function(a, b) {
+    // TODO _a / _a = 1
+    // TODO (_1*_2)/_1 == _1
+    if (b === 1) return a
+  },
+  '^': function(a, b) {
+    if (b === 0) return 1;
+    if (a === 0) return 0;
+    if (a === 1) return 1;
+    if (b === 1) return a;
+
+    // (a^b)^c == a^(b*c)
+    if (a[0] == '^') {
+      return ['^', a[1], simplify(['*', a[2], b])]
+    }
+
+    // TODO Bionomial expansions
+
+    if (b === -1) return ['/', 1, a];
+    if (b === 1/2) return ['sqrt', a];
+  },
+  'log': function(a, b) {
+    // TODO ln(_1*_2) == ln(_1)+ln(_2)
+    // TODO ln(_1/_2) == ln(_1)-ln(_2)
+  }
+};
+
+function simplify(expr) {
+  if (typeof expr === 'number' || typeof expr === 'string') {
+    return expr;
+
+  } else {
+    let [fn, ...args] = expr;
+    args = args.map(a => simplify(a));
+
+    // If possible, evaluate this function.
+    if (args.every(a => typeof a == 'number' || a in CONSTANTS)) {
+      return evaluate([fn, ...args]);
+    }
+
+    if (fn in FN_SIMPLIFY) return FN_SIMPLIFY[fn](...args) || [fn, ...args];
+    return [fn, ...args];
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+// Expression Stringify
+
+const FN_STRINGIFY = {
+  '+': (...args) => args.join(' + '),
+  '-': (a, b) => (b === undefined) ? '-' + a : a + ' - ' + b,
+  '±': (a, b) => (b === undefined) ? '±' + a : a + ' ± ' + b,
+  '*': (...args) => args.join('*'),
+  '/': (a, b) => a + '/' + b,
+  '!': x => x + '!',
+  '%': x => x + '%',
+  '^': (a, b) => a + '^' + b
+};
+
+function stringify(expr) {
+  if (typeof expr === 'number' || typeof expr === 'string') {
+    return expr;
+  } else {
+    let [fn, ...args] = expr;
+    args = args.map(a => stringify(a));
+    if (fn in FN_STRINGIFY) return FN_STRINGIFY[fn](...args);
+    return fn + '(' + args.join(', ') + ')';
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+// Expression Evaluation
+
+const FN_EVALUATE = {
+  '+': (...args) => args.reduce((a, b) => a + b, 0),
+  '-': (a, b) => (b === undefined) ? -a : a - b,
+  '*': (...args) => args.reduce((a, b) => a * b, 1),
+  '/': (a, b) => a / b,
+  '!': n => factorial(n),
+  '%': x => x / 100,
+  '^': (a, b) => Math.pow(a, b),
+  'log': (x, b) => (b === undefined) ? Math.log(x) : Math.log(x) / Math.log(b)
+};
+
+const CONSTANTS = {
+  'pi': Math.PI,
+  'e': Math.E
+};
+
+function evaluate(expr, vars={}) {
+  if (typeof expr === 'number') {
+    return expr;
+
+  } else if (typeof expr === 'string') {
+    if (expr in vars) return vars[expr];
+    let exprLower = expr.toLowerCase();
+    if (exprLower in CONSTANTS) return CONSTANTS[exprLower];
+    throw new Error(`Undefined variable "${expr}".`)
+
+  } else {
+    let [fn, ...args] = expr;
+    args = args.map(a => evaluate(a));
+    if (fn in FN_EVALUATE) return FN_EVALUATE[fn](...args);
+    if (fn in Math) return Math[fn](...args);
+    throw new Error(`Undefined function "${fn}".`)
   }
 }
 
 
 // -----------------------------------------------------------------------------
 // Expression Parser
+// TODO handle implicit multiplication (consecutive expressions without +/-)
+// TODO handle functions with multiple arguments
 
-const brackets = { '(': ')', '[': ']', '{': '}', '|': '|' };
+const TOKEN_REGEX = /\b[0-9]+(.[0-9]*)?\b|\b\.[0-9]+\b|\b\w+\b|\+|-|–|±|\*|×|\/|÷|\^|%|!|\(|\)|\[|\]|\{|\}|\||,/g;
+const BRACKETS = { '(': ')', '[': ']', '{': '}', '|': '|' };
 
-function bracketsMatch(a, b) {
-  return brackets[a] === b || brackets[b] === a;
+function parseMaths(tokens) {
+
+  // Handle Numbers
+  for (let i=0; i<tokens.length; ++i) {
+    let t = tokens[i];
+    if (t ==  +t) tokens[i] = +t;
+  }
+
+  // Handle Factorials and Percentages
+  for (let i=0; i<tokens.length; ++i) {
+    if (tokens[i] == '!') {
+      tokens.splice(i-1, 2, ['!', tokens[i-1]]);
+      i -= 1;
+    } else if (tokens[i] == '%') {
+      tokens.splice(i-1, 2, ['%', tokens[i-1]]);
+      i -= 1;
+    }
+  }
+
+  // Handle Powers
+  for (let i=0; i<tokens.length; ++i) {
+    if (tokens[i] == '^') {
+      tokens.splice(i-1, 3, ['^', tokens[i-1], tokens[i+1]]);
+      i -= 2;
+    }
+  }
+
+  // Handle Multiplication and Division
+  for (let i=0; i<tokens.length; ++i) {
+    if ('/÷'.includes(tokens[i])) {
+      tokens.splice(i - 1, 3, ['/', tokens[i-1], tokens[i+1]]);
+      i -= 2;
+    } else if ('*×'.includes(tokens[i])) {
+      tokens.splice(i - 1, 3, ['*', tokens[i-1], tokens[i+1]]);
+      i -= 2;
+    }
+  }
+
+  // TODO handle implicit multiplication (consecutive expressions without +/-)
+
+  // Handle leading minus.
+  if ('-–'.includes(tokens[0])) tokens.splice(0, 2, ['-', this.result[1]]);
+  if (tokens[0] == '±') tokens.splice(0, 2, ['±', this.result[1]]);
+
+  // Handle addition and subtraction.
+  for (let i=0; i<tokens.length; ++i) {
+    if ('-–'.includes(tokens[i])) {
+      tokens.splice(i-1, 3, ['-', tokens[i-1], tokens[i+1]]);
+      i -= 2;
+    } else if (tokens[i] === '+') {
+      tokens.splice(i-1, 3, ['+', tokens[i-1], tokens[i+1]]);
+      i -= 2;
+    } else if (tokens[i] === '±') {
+      tokens.splice(i-1, 3, ['±', tokens[i-1], tokens[i+1]]);
+      i -= 2;
+    }
+  }
+
+  return tokens;
 }
 
-class ExpressionParser {
+function matchBrackets(tokens) {
+  let newTokens = [];
 
-  constructor() {
-    this.current = '';
-    this.result = [];
+  for (let i=0; i<tokens.length; ++i) {
+    let t = tokens[i];
+    if (')]}|'.includes(t)) {
+      return [parseMaths(newTokens), tokens.slice(i)]
 
-    this.currentParser = null;
-    this.currentBracket = null;
-    this.currentFn = null;
-  }
+    } else if ('([{|'.includes(t)) {
+      let last = newTokens.pop();
+      if ('%!'.includes(last)) throw new Error(`A "${last}" cannot be followed by a "${t}".`);
 
-  // Pushes a new letter to the expression parser
-  send(x) {
+      let [inside, [close, ...rest]] = matchBrackets(tokens.slice(i + 1));
+      if (close != BRACKETS[t]) throw new Error(`Non-matching brackets "${t}" and "${close}".`);
 
-    // Handle Strings
-    if (this.currentBracket === '"' && x !== '"') {
-      this.current += x;
+      // Vertical lines are automatically converted into abs.
+      if (t == '|') inside = ['abs', inside];
 
-      // Closing Strings
-    } else if (!this.currentBracket && x === '"') {
-      this.pushCurrent();
-      this.currentBracket = '"';
-
-      // Opening Strings
-    } else if (this.currentBracket === '"' && x === '"') {
-      this.result.push(new Expression('"', [this.current]));
-
-      // Handle Invalid Characters
-    } else if (('@&\\?<>=~`±§').contains(x)) {
-      throw new Error('Unexpected "' + x + '".');
-
-      // Handle Content for CHild parsers
-    } else if (this.currentParser) {
-
-      if ((')]}|').contains(x) && this.currentParser.isReady()) {
-
-        if (!bracketsMatch(x,this.currentBracket))
-          throw new Error('Unexpected "' + x + '".');
-
-        var completed = this.currentParser.complete();
-        if (this.currentFn) {
-          this.result.push(new ExpressionFn(this.currentFn, completed));
-        } else if (x === ']') {
-          this.result.push(new ExpressionFn('[]', completed));
-        } else if (x === '|') {
-          this.result.push(new ExpressionFn('abs', completed));
-        } else {
-          if (completed.length !== 1) throw new Error('Unexpected ",".');
-          this.result.push(new ExpressionVal(completed[0]));
-        }
-        this.current = '';
-        this.currentBracket = this.currentParser = this.currentFn = null;
-
+      // Check last value of newTokens for possible function call.
+      if (last.match(/^\w+$/)) {
+        newTokens.push([last, inside]);
       } else {
-        this.currentParser.send(x);
+        newTokens.push(last, inside);
       }
 
-      // Handle Open Brackets
-    } else if (('([{|').contains(x)) {
-      if (x === '(' && isNaN(+this.current) && !('+-*/!^%,').contains(this.current)) {
-        this.currentFn = this.current;
-        this.current = '';
-      } else {
-        this.pushCurrent();
-      }
-      this.currentParser = new ExpressionParser();
-      this.currentBracket = x;
-
-    } else if (('+-*/!^%,').contains(x)) {
-      this.pushCurrent();
-      if (x !== ',') this.result.push(x);
-
-    } else if (x.match(/\s\n\t/)) {
-      this.pushCurrent();
+      // Update the for-loop parameters.
+      tokens = rest;
+      i=-1;
 
     } else {
-      this.current += x.trim();
+      newTokens.push(t);
     }
   }
 
-  isReady() {
-    return this.currentParser == null;
-  }
+  return [parseMaths(newTokens), []]
+}
 
-  // Adds a new letter, number or expression to the results object
-  pushCurrent() {
-    if (!this.current) return;
-    var num = +this.current;
-    this.result.push(new ExpressionVal(num === num ? num : this.current));
-    this.current = '';
-  }
+function parseString(str) {
+  let invalidChars = str.replace(TOKEN_REGEX, '').trim();
+  if (invalidChars) throw new Error(`Invalid character "${invalidChars[0]}".`);
 
-  // Completes the expression and returns a new expression
-  complete(x) {
+  let tokens = str.match(TOKEN_REGEX);
 
-    this.pushCurrent();
-    var i;
+  let [ast, rest] = matchBrackets(tokens);
+  if (rest.length) throw new Error(`Unexpected character "${rest[0][0]}".`);
+  if (ast.length  != 1) throw new Error(`Unknown parser error.`);
 
-    // Handle Factorials and Percentages
-    for (i=0; i<this.result.length; ++i) {
-      if (this.result[i] === '!') {
-        this.result.splice(i-1, 2, new ExpressionFn('!', [this.result[i-1]]));
-        i -= 1;
-      } else if (this.result[i] === '%') {
-        this.result.splice(i-1, 2, new ExpressionFn('/', [this.result[i-1], 100]));
-        i -= 1;
-      }
-    }
-
-    // Handle Powers
-    for (i=0; i<this.result.length; ++i) {
-      if (this.result[i] === '^') {
-        this.result.splice(i-1, 3,
-          new ExpressionFn('^', [this.result[i-1], this.result[i+1]]));
-        i -= 2;
-      }
-    }
-
-    // Handle Leading -
-    if (this.result[0] === '-')
-      this.result.splice(0, 2, new ExpressionFn('-', [this.result[1]]));
-
-    // Handle Multiplication and Division
-    for (i=0; i<this.result.length; ++i) {
-      if (this.result[i] === '/') {
-        this.result.splice(i-1, 3,
-          new ExpressionFn('/', [this.result[i-1], this.result[i+1]]));
-        i -= 2;
-      } else if (this.result[i] === '*') {
-        this.result.splice(i-1, 3,
-          new ExpressionFn('*', [this.result[i-1], this.result[i+1]]));
-        i -= 2;
-      }
-    }
-
-    // Handle Addition and Subtraction
-    for (i=0; i<this.result.length; ++i) {
-      if (this.result[i] === '-') {
-        this.result.splice(i-1, 3,
-          new ExpressionFn('-', [this.result[i-1], this.result[i+1]]));
-        i -= 2;
-      } else if (this.result[i] === '+') {
-        this.result.splice(i-1, 3,
-          new ExpressionFn('+', [this.result[i-1], this.result[i+1]]));
-        i -= 2;
-      }
-    }
-
-    return this.result;
-  }
+  return ast[0];
 }
 
 
@@ -256,24 +323,8 @@ class ExpressionParser {
 // Expressions Class
 
 export default class Expression {
-
-  constructor(str) {
-    let parser = new ExpressionParser();
-    for (let x of str) parser.send(x);
-    this.expr = parser.complete()[0].simplify();
-  }
-
-  simplify() {
-    return this;
-  }
-
-  toString() {
-    return this.val.toString();
-  }
-
-  evaluate(vars) {
-    if (vars == null) vars = {};
-    // TODO return numbers if possible?
-    return (vars[this.val] === undefined) ? this.val : vars[this.val];
-  }
+  constructor(str) { this.expr = simplify(parseString(str)); }
+  equals(other) { return equals(this.expr, other.expr); }
+  toString() { return stringify(this.expr); }
+  evaluate(vars={}) { return evaluate(this.expr, vars); }
 }

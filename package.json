@@ -13,12 +13,16 @@
     "url": "https://github.com/Mathigon/fermat.js/blob/master/LICENSE"
   },
   "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-nodeunit": "^1.0.0",
     "jshint-stylish": "~0.4.0",
+    "nodeunit": "^0.10.2",
     "rollup": "^0.21.1"
   },
   "scripts": {
     "start": "node_modules/.bin/rollup -i src/index.js -o fermat.js",
     "lint": "jshint src/**/*.js",
-    "test": ""
+    "test": "grunt test"
   }
 }
