@@ -30,7 +30,7 @@ function equals(expr1, expr2) {
   // Different functions are always unequal (we assume already simplified).
   if (expr1[0] != expr2[0]) return false;
 
-  let [fn, args1] = expr1;
+  let [fn, ...args1] = expr1;
   let args2 = expr2.slice(1);
 
   if (fn == '+' || fn == '*') {
@@ -246,7 +246,8 @@ function stringify(expr) {
 
 
 // -----------------------------------------------------------------------------
-// Expression Evaluation
+// Substitution and Evaluation
+// TODO recursive substitutions
 
 const FN_EVALUATE = {
   '+': (...args) => args.reduce((a, b) => a + b, 0),
@@ -265,13 +266,15 @@ const CONSTANTS = {
   'e': Math.E
 };
 
-function evaluate(expr, vars={}) {
+function evaluate(expr, vars) {
+  // Note that we explicitly set vars=null when using this
+  // internally as part of the simplify function.
+
   if (isNumber(expr)) return expr;
 
   if (isString(expr)) {
-    let exprLower = expr.toLowerCase();
-    if (vars && exprLower in vars) return vars[expr];
-    if (exprLower in CONSTANTS) return CONSTANTS[exprLower];
+    if (vars && expr in vars) return vars[expr];
+    if (expr in CONSTANTS) return CONSTANTS[expr];
     if (vars) throw new ExprError('EvalError', `The variable "${expr}" doesn’t exist.`);
     return expr;
   }
@@ -279,13 +282,22 @@ function evaluate(expr, vars={}) {
   let [fn, ...args] = expr;
   args = args.map(a => evaluate(a, vars));
 
-  if (vars || args.every(a => isNumber(a))) {
+  if (args.every(a => isNumber(a))) {
     if (vars && fn in vars) return vars[fn](...args);
     if (fn in FN_EVALUATE) return FN_EVALUATE[fn](...args);
     if (fn in Math) return Math[fn](...args);
   }
 
   if (vars) throw new ExprError('EvalError', `The function "${fn}" doesn’t exist.`);
+  return [fn, ...args];
+}
+
+function substitute(expr, vars) {
+  if (isNumber(expr)) return expr;
+  if (isString(expr)) return (expr in vars) ? parseString(vars[expr]) : expr;
+
+  let [fn, ...args] = expr;
+  args = args.map(a => substitute(a, vars));
   return [fn, ...args];
 }
 
@@ -332,6 +344,7 @@ function findBinaryFunction(tokens, chars) {
     if (chars.includes(tokens[i])) {
       let a = tokens[i-1];
       let b = tokens[i+1];
+      if (!b) throw new ExprError('SyntaxError', `An expression cannot end with a "${tokens[i]}".`);
       if ('+-*/^%!'.includes(a)) throw new ExprError('SyntaxError', `A "${a}" cannot be followed by a "${tokens[i]}".`);
       if ('+-*/^%!'.includes(b)) throw new ExprError('SyntaxError', `A "${tokens[i]}" cannot be followed by a "${b}".`);
       tokens.splice(i - 1, 3, [tokens[i], a, b]);
@@ -362,7 +375,7 @@ function parseMaths(tokens) {
 
   // Implicit multiplication (consecutive expressions)
   for (let i=0; i<tokens.length-1; ++i) {
-    if (!'+*/^%!'.includes(tokens[i]) && !'+*/^%!'.includes(tokens[i+1])) {
+    if (!'+-*/^%!'.includes(tokens[i]) && !'+-*/^%!'.includes(tokens[i+1])) {
       tokens.splice(i, 2, ['*', tokens[i], tokens[i+1]]);
       i -= 1;
     }
@@ -407,7 +420,7 @@ function matchBrackets(tokens) {
 
       // Update the for-loop parameters.
       tokens = rest;
-      i=-1;
+      i = -1;
 
     } else {
       newTokens.push(t);
@@ -442,7 +455,11 @@ export default class Expression {
   get functions() { return functions(this.expr); }
   get variables() { return variables(this.expr); }
 
-  equals(other) { return equals(this.simplified.expr, other.simplified.expr); }
-  toString() { return stringify(this.expr); }
   evaluate(vars={}) { return evaluate(this.expr, vars); }
+  substitute(vars) { return new Expression(substitute(this.expr, vars), false); }
+
+  equals(other) { return equals(this.simplified.expr, other.simplified.expr); }
+  same(other) { return equals(this.expr, other.expr); }
+
+  toString() { return stringify(this.expr); }
 }
