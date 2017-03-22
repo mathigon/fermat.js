@@ -5,8 +5,10 @@
 
 
 
-import { isNumber, isString } from 'types';
-import { factorial, permutations } from 'combinatorics';
+import { isNumber, isString, isArray } from 'types';
+import { difference, flatten, list, tabulate } from 'arrays';
+import { factorial, permutations, subsets } from 'combinatorics';
+import { nearlyEquals } from 'arithmetic';
 
 
 // -----------------------------------------------------------------------------
@@ -21,202 +23,290 @@ class ExprError extends Error {
 
 
 // -----------------------------------------------------------------------------
-// Expression Equality Checking
+// Expression Simplification Utilities
 
-function equals(expr1, expr2) {
+function substitute(expr, vars) {
+  if (isNumber(expr)) return expr;
+  if (isString(expr)) return (expr in vars) ? vars[expr] : expr;
+
+  let [fn, ...args] = expr;
+  args = args.map(a => substitute(a, vars));
+  return [fn, ...args];
+}
+
+function same(expr1, expr2) {
   // Handle numbers and variables.
   if (expr1 === expr2) return true;
 
   // Different functions are always unequal (we assume already simplified).
+  if (!isArray(expr1) || !isArray(expr2)) return false;
   if (expr1[0] != expr2[0]) return false;
 
   let [fn, ...args1] = expr1;
   let args2 = expr2.slice(1);
 
-  if (fn == '+' || fn == '*') {
+  if ('+*'.includes(fn)) {
     // Addition and multiplication are commutative.
     let orders = permutations(args1);
-    return orders.some(p => p.every((a, i) => equals(a, args2[i])));
+    return orders.some(p => p.every((a, i) => same(a, args2[i])));
   } else {
-    return args1.every((a, i) => equals(a, args2[i]))
+    return args1.every((a, i) => same(a, args2[i]))
   }
+}
+
+function flattenAssociative(expr) {
+  if (isString(expr) || isNumber(expr)) return expr;
+  let [fn, ...args] = expr;
+
+  args = args.map(a => flattenAssociative(a));
+  if (!'+*'.includes(fn)) return [fn, ...args];
+
+  let newArgs = [];
+  for (let a of args) {
+    if (isArray(a) && a[0] == fn) {
+      newArgs.push(...a.slice(1))
+    } else {
+      newArgs.push(a);
+    }
+  }
+  return [fn, ...newArgs];
+}
+
+// argPlaceholders = [[{arg1v1}, {arg1v2}], [{arg2v1}], [{arg3v1}]]
+// argPlaceholders = [{combinedv1}, {combinedv2}]
+function mergePlaceholders(argPlaceholders) {
+  if (!argPlaceholders.length) return [];
+  for (let arg of argPlaceholders) if (!arg.length) return [];
+
+  let possibilities = tabulate(function(...indices) {
+    let placeholders = indices.map((v, i) => argPlaceholders[i][v]);
+    let combined = {};
+
+    for (let p of placeholders) {
+      if (!p) return null;
+      for (let key of Object.keys(p)) {
+        if (key in combined) {
+          if (!same(combined[key], p[key])) return null;
+        } else {
+          combined[key] = p[key]
+        }
+      }
+    }
+
+    return combined;
+  }, ...argPlaceholders.map(a => a.length));
+
+  return flatten(possibilities).filter(p => !!p);
+}
+
+// Returns an array of possible target substitutions to create a match.
+function match(expr, target) {
+  // Both expression and target are a number.
+  if (isNumber(target)) {
+    return (expr === target) ? [{}] : [];
+  }
+
+  if (isString(target)) {
+    // Matches any constants (numbers)
+    if (target[0] == 'c') {
+      return isNumber(expr) ? [{[target]: expr}] : [];
+    }
+
+    // Matches any variables (strings)
+    if (target[0] == 'v') {
+      return isString(expr) ? [{[target]: expr}] : [];
+    }
+
+    // Match any other expressions
+    return [{[target]: expr}];
+  }
+
+  // Check if functions are the same
+  if (!isArray(expr)) return [];
+  let [fn, ...args] = expr;
+  if (fn != target[0]) return [];
+  if (expr.length != target.length) return [];
+
+  // Match all arguments of a function. Addition and multiplication can
+  // match arguments in any order.
+  if ('+*'.includes(expr[0])) {
+    for (let a of permutations(args)) {
+      let placeholders = mergePlaceholders(a.map((a, i) => match(a, target[i+1])));
+      if (placeholders.length) return placeholders;
+    }
+    return [];
+  }
+
+  return mergePlaceholders(args.map((a, i) => match(a, target[i+1])));
+}
+
+function rewrite(expr, rule) {
+  if (isString(expr) || isNumber(expr)) return expr;
+
+  let [fn, ...args] = expr;
+  args = args.map(a => rewrite(a, rule));
+
+  // For addition and multiplications we need to match subsets of arguments, e.g.
+  // `a + b + c` should match the rule `a + b`.
+  let [ruleFn, ...ruleArgs] = rule[0];
+  if ('+*'.includes(fn) && '+*'.includes(ruleFn) && args.length > ruleArgs.length) {
+    for (let p of subsets(list(args.length), ruleArgs.length)) {
+      let argsSubset = p.map(i => args[i]);  // The subset of args that match the rule.
+      let argsOthers = args.filter((x, i) => !p.includes(i));  // All other args.
+
+      let placeholders = match([fn, ...argsSubset], rule[0])[0];
+      if (placeholders) {
+        let argsReplaced = substitute(rule[1], placeholders);
+        return flattenAssociative([fn, argsReplaced, ...argsOthers]);
+      }
+    }
+    return [fn, ...args];
+  }
+
+  let placeholders = match([fn,...args], rule[0])[0];
+  return placeholders ? substitute(rule[1], placeholders) : [fn, ...args];
 }
 
 
 // -----------------------------------------------------------------------------
 // Expression Simplification
-// TODO improved simplification rules
-// TODO exact decimals
+// TODO copy rewrite rules
 
-let EXPAND_RULES = [
-  // Ordering
-  ['a-(b-c)', '(a+c)-b'],
-  ['(a-b)-c', 'a-(b+c)'],
-  ['a/(b/c)', '(a*c)/b'],
-  ['(a/b)/c', 'a/(b*c)'],
-  ['-(-a)', 'a'],
+let HAS_GENERATED_RULES = false;
+let REWRITE_RULES = [
+  ['x^0', '1'],
+  ['0*x', '0'],
+  ['x/x', '1'],
+  ['x^1', 'x'],
+  ['x-(-y)', 'x+y'],
 
-  // Distributive laws
-  ['(a+b)*c', 'a*c+b*c'],
-  ['(a-b)*c', 'a*c-b*c'],
-  ['(a+b)/c', 'a/c+b/c'],
-  ['(a-b)/c', 'a/c-b/c'],
-  ['a*(b+c)', 'a*b+a*c'],
-  ['a*(b-c)', 'a*b-a*c'],
+  // Temporary rules
+  ['sqrt(x)', 'x^0.5'],
+  ['x-y', 'x+(-y)'], // Replace 'subtract' so we can flatten addition
+  ['-V', '(-1) * V'],
+  ['x/(y^z)', 'x*(y^(-z))'], // Replace 'divide' so we can flatten multiplication
+  ['x/y', 'x*(y^(-1))'],
 
-  // Expansions
-  ['(a+b)^2', 'a^2+2*a*b+b^2'],
-  ['(a-b)^2', 'a^2-2*a*b+b^2'],
-  ['(a+b)*(c+d)', 'a*c+a*d+b*c+b*d'],
-  ['(a+b)*(c-d)', 'a*c-a*d+b*c-b*d'],
-  ['(a-b)*(c+d)', 'a*c+a*d-b*c-b*d'],
-  ['(a-b)*(c-d)', 'a*c-a*d-b*c+b*d'],
-
-  // Power laws
-  ['(a*b)^c', 'a^c*b^c'],
-  ['(a/b)^c', 'a^c/b^c'],
+  // Power and log laws
+  ['(x*y)^z', 'x^z*y^z'],
   ['a^(b+c)', 'a^b*a^c'],
-  ['a^(b-c)', 'a^b/a^c'],
   ['(a^b)^c', 'a^(b*c)'],
-
-  // Log laws
   ['log(a^b)', 'b*log(a)'],
   ['log(a*b)', 'log(a)+log(b)'],
-  ['log(a-b)', 'log(a)-log(b)'],
 
-  // Power cleanup
-  ['a^(-b)', '1/(a^b)'],
-  ['sqrt(a)', 'a^0.5']
+  // Expansions and distributive laws
+  ['(a+b)^2', 'a^2+2*a*b+b^2'],
+  ['(a+b)*(c+d)', 'a*c+a*d+b*c+b*d'],
+  ['(a+b)*c', 'a*c+b*c'],
+
+  // Collect like factors
+  ['x * x', 'x^2'],
+  ['x * x^y', 'x^(y+1)'],
+  ['x^y * x^z', 'x^(y+z)'],
+
+  // Collect like terms
+  ['x+x', '2*x'],
+  ['x+(-x)', '0'],
+  ['x*y + x', 'x*(y+1)'],
+  ['x*y + x*z', 'x*(y+z)'],
+
+  // Undo temporary rules
+  // ['(-x)*y', '-(x*y)'], // Make factors positive
+  ['(-1) * x', '-x'],
+  ['x+(-y)', 'x-y'],  // Undo replace 'subtract'
+  ['x*(y^(-1))', 'x/y'],  // Undo replace 'divide'
+  ['x*(y^(-z))', 'x/(y^z)'],
+  ['x^(-1)', '1/x'],
+  ['x^0.5', 'sqrt(x)'],
+
+  // Ordering
+  ['x*(y/z)', '(x*y)/z'],  // '*' before '/'
+  ['x-(y+z)', 'x-y-z'],  // '-' before '+'
+  // ['(x/y)/z', 'x/(y*z)'],
+  // ['(x*y)/(x*z)', 'y/z'],
+  // ['a-(b-c)', '(a+c)-b'],
+  // ['(a-b)-c', 'a-(b+c)'],
+  // ['a/(b/c)', '(a*c)/b'],
+  // ['(a/b)/c', 'a/(b*c)'],
+  // ['-(-a)', 'a'],
+
+  // Cleanup
+  ['1*x', 'x'],
+  ['0+x', 'x']
 ];
-let HAS_GENERATED_RULES = false;
-
-function match(expr, target) {
-  // The expression is immediately matched to a target placeholder
-  if (isString(target)) return {[target]: expr};
-  if (isNumber(target) && expr == target) return {};
-
-  if (expr[0] != target[0]) return;
-  if (expr.length != target.length) return;
-
-  let placeholders = {};
-  for (let i=1; i<target.length; ++i) {
-    let newPlaceholders = match(expr[i], target[i]);
-    if (!newPlaceholders) return;
-    Object.assign(placeholders, newPlaceholders);
-  }
-
-  return placeholders;
-}
-
-function fill(expr, placeholders) {
-  if (isNumber(expr)) return expr;
-  if (isString(expr)) return placeholders[expr];
-  let args = expr.slice(1).map(a => fill(a, placeholders));
-  return [expr[0], ...args];
-}
-
-// TODO simplify the rewrite function, merge with while loop, better efficiency?
-function rewrite(expr, rule) {
-  if (isString(expr) || isNumber(expr)) return;
-
-  let args = expr.slice(1).map(a => rewrite(a, rule));
-  let argsWereRewritten = args.some(a => !!a);
-
-  expr = expr.map((a, i) => args[i-1] || a);
-  let placeholders = match(expr, rule[0]);
-  if (placeholders) return fill(rule[1], placeholders);
-
-  // This expression wasn't rewritten, but one of its children was.
-  if (argsWereRewritten) return expr;
-}
-
-// TODO Improved flattening, remove traverse fn, add ordering functions above
-function flatten([fn, ...args], op1, op2) {
-  if (fn != op1 && fn != op2) return;
-
-  let positive = [];
-  let negative = [];
-  let swap = (args.length < 2);
-
-  for (let a of args) {
-    if (a[0] == op1) {
-      (swap ? negative : positive).push(...a.slice(1))
-    } else if (a[0] == op2) {
-      if (a.length == 3) {  // Only needed for -.
-        (swap ? negative : positive).push(a[1]);
-        (swap ? positive : negative).push(a[2])
-      } else {
-        (swap ? positive : negative).push(a[1])
-      }
-    } else {
-      (swap ? negative : positive).push(a);
-    }
-
-    // For negative operations (- and /), the values of the second argument are inverted.
-    if (fn == op2) swap = 2;
-  }
-
-  let unity = (op2 == '/') ? [1] : [];
-  if (!negative.length) return [op1, ...positive];
-  if (!positive.length) return ['-', ...unity, ['+', ...negative]];
-  return [op2, [op1, ...positive], [op1, ...negative]];
-}
-
-function traverse(expr, callback, ...options) {
-  if (typeof expr == 'number' || typeof expr == 'string') return expr;
-  let [fn, ...args] = expr;
-  args = args.map(a => traverse(a, callback, ...options));
-  return callback([fn, ...args], ...options) || [fn, ...args];
-}
 
 function simplify(expr) {
   if (!HAS_GENERATED_RULES) {
-    EXPAND_RULES = EXPAND_RULES.map(rule => [parseString(rule[0]), parseString(rule[1])]).reverse();
+    REWRITE_RULES = REWRITE_RULES.map(rule => [parseString(rule[0]), parseString(rule[1])]).reverse();
     HAS_GENERATED_RULES = true;
   }
 
-  let changes;
-  do {
-    changes = 0;
-    for (let r of EXPAND_RULES) {
-      let newExpr = rewrite(expr, r);
-      if (newExpr) {
-        changes += 1;
-        expr = newExpr;
-      }
+  let after = toString(expr);
+  let before = null;
+
+  while (before != after) {
+    before = after;
+    expr = evaluate(expr);
+    expr = flattenAssociative(expr);
+    for (let rule of REWRITE_RULES) {
+      // TODO change '-5' to ['-', '5'].
+      expr = rewrite(expr, rule);
     }
-  } while(changes);
-
-  expr = traverse(expr, flatten, '*', '/');
-  expr = traverse(expr, flatten, '+', '-');
-
-  // TODO collect and cancel terms (fix 2*a^2-a)
-
-  expr = evaluate(expr, null);
-
-  // TODO clean *0, *1, +0, /1, -0
+    after = toString(expr);
+  }
 
   return expr;
 }
 
-/* function addFractions([fn, ...args]) {
-  if (fn == '+' || fn == '-') {
-    let fractions = args.filter(a => a[0] == '/');
-    if (fractions.length) {
-      let num = args.map(a => {
-        let den = fractions.filter(f => f != a).map(f => f[1]);
-        return den.length ? ['*', a, ...den] : a;
-      });
-      let den = fractions.map(f => f[1]);
-      return ['/', [fn, ...num], den.length > 1 ? ['*', ...den] : den[0]];
-    }
+
+// -----------------------------------------------------------------------------
+// Expression Evaluation
+
+const FN_EVALUATE = {
+  '+': (...args) => args.reduce((a, b) => a + b, 0),
+  '-': (a, b) => (b === undefined) ? -a : a - b,
+  '*': (...args) => args.reduce((a, b) => a * b, 1),
+  '/': (a, b) => a / b,
+  '!': n => factorial(n),
+  '%': x => x / 100,
+  '^': (a, b) => Math.pow(a, b),
+  'log': (x, b) => (b === undefined) ? Math.log(x) : Math.log(x) / Math.log(b),
+  '=': (a, b) => simplify(['-', a, b]) == 0
+};
+
+const CONSTANTS = {
+  pi: Math.PI,
+  e: Math.E
+};
+
+function evaluate(expr, vars={}) {
+  if (isNumber(expr)) return expr;
+
+  if (isString(expr)) {
+    if (expr in vars) return vars[expr];
+    if (expr in CONSTANTS) return CONSTANTS[expr];
+    return expr;
   }
-} */
+
+  let [fn, ...args] = expr;
+  args = args.map(a => evaluate(a, vars));
+
+  if (args.every(a => isNumber(a))) {
+    if (fn in vars) return vars[fn](...args);
+    if (fn in FN_EVALUATE) return FN_EVALUATE[fn](...args);
+    if (fn in Math) return Math[fn](...args);
+  } else if ('+*'.includes(fn)) {
+    let constant =  FN_EVALUATE[fn](...args.filter(a => isNumber(a)));
+    let variables = args.filter(a => !isNumber(a));
+    return [fn, constant,...variables]
+  }
+
+  return [fn, ...args];
+}
 
 
 // -----------------------------------------------------------------------------
 // Expression Stringify
-// TODO correct bracket placement
 
 const FN_STRINGIFY = {
   '+': (...args) => args.join(' + '),
@@ -239,66 +329,10 @@ function stringify(expr) {
   if (isNumber(expr) || isString(expr)) return expr;
 
   let [fn, ...args] = expr;
-  args = args.map(a => stringify(a));
+  args = args.map(a => isArray(a) ? `(${stringify(a)})` : stringify(a));
+
   if (fn in FN_STRINGIFY) return FN_STRINGIFY[fn](...args);
   return fn + '(' + args.join(', ') + ')';
-}
-
-
-// -----------------------------------------------------------------------------
-// Substitution and Evaluation
-// TODO recursive substitutions
-
-const FN_EVALUATE = {
-  '+': (...args) => args.reduce((a, b) => a + b, 0),
-  '-': (a, b) => (b === undefined) ? -a : a - b,
-  '*': (...args) => args.reduce((a, b) => a * b, 1),
-  '/': (a, b) => a / b,
-  '!': n => factorial(n),
-  '%': x => x / 100,
-  '^': (a, b) => Math.pow(a, b),
-  'log': (x, b) => (b === undefined) ? Math.log(x) : Math.log(x) / Math.log(b),
-  '=': (a, b) => equals(a, b)
-};
-
-const CONSTANTS = {
-  'pi': Math.PI,
-  'e': Math.E
-};
-
-function evaluate(expr, vars) {
-  // Note that we explicitly set vars=null when using this
-  // internally as part of the simplify function.
-
-  if (isNumber(expr)) return expr;
-
-  if (isString(expr)) {
-    if (vars && expr in vars) return vars[expr];
-    if (expr in CONSTANTS) return CONSTANTS[expr];
-    if (vars) throw new ExprError('EvalError', `The variable "${expr}" doesn’t exist.`);
-    return expr;
-  }
-
-  let [fn, ...args] = expr;
-  args = args.map(a => evaluate(a, vars));
-
-  if (args.every(a => isNumber(a))) {
-    if (vars && fn in vars) return vars[fn](...args);
-    if (fn in FN_EVALUATE) return FN_EVALUATE[fn](...args);
-    if (fn in Math) return Math[fn](...args);
-  }
-
-  if (vars) throw new ExprError('EvalError', `The function "${fn}" doesn’t exist.`);
-  return [fn, ...args];
-}
-
-function substitute(expr, vars) {
-  if (isNumber(expr)) return expr;
-  if (isString(expr)) return (expr in vars) ? parseString(vars[expr]) : expr;
-
-  let [fn, ...args] = expr;
-  args = args.map(a => substitute(a, vars));
-  return [fn, ...args];
 }
 
 
@@ -344,7 +378,7 @@ function findBinaryFunction(tokens, chars) {
     if (chars.includes(tokens[i])) {
       let a = tokens[i-1];
       let b = tokens[i+1];
-      if (!b) throw new ExprError('SyntaxError', `An expression cannot end with a "${tokens[i]}".`);
+      if (b == null) throw new ExprError('SyntaxError', `An expression cannot end with a "${tokens[i]}".`);
       if ('+-*/^%!'.includes(a)) throw new ExprError('SyntaxError', `A "${a}" cannot be followed by a "${tokens[i]}".`);
       if ('+-*/^%!'.includes(b)) throw new ExprError('SyntaxError', `A "${tokens[i]}" cannot be followed by a "${b}".`);
       tokens.splice(i - 1, 3, [tokens[i], a, b]);
@@ -360,7 +394,7 @@ function parseMaths(tokens) {
     if (t ==  +t) tokens[i] = +t;
   }
 
-  if ('+*/^%!'.includes(tokens[0])) throw new ExprError('SyntaxError', `A term cannot start with a "${a}".`);
+  if ('+*/^%!'.includes(tokens[0])) throw new ExprError('SyntaxError', `A term cannot start with a "${tokens[0]}".`);
 
   // Factorials and Percentages
   for (let i=0; i<tokens.length; ++i) {
@@ -449,17 +483,46 @@ function parseString(str) {
 // Expressions Class
 
 export default class Expression {
-  constructor(str, parse=true) { this.expr = parse ? parseString(str) : str; }
+  constructor(str) { this.expr = isString(str) ? parseString(str) : str; }
+  toString() { return stringify(this.expr); }
 
-  get simplified() { return new Expression(simplify(this.expr), false); }
+  get simplified() { return new Expression(simplify(this.expr)); }
   get functions() { return functions(this.expr); }
   get variables() { return variables(this.expr); }
 
-  evaluate(vars={}) { return evaluate(this.expr, vars); }
-  substitute(vars) { return new Expression(substitute(this.expr, vars), false); }
+  same(other) { return same(this.expr, other.expr); }
+  equals(other) { return simplify(['-', this.expr, other.expr]) == 0; }
 
-  equals(other) { return equals(this.simplified.expr, other.simplified.expr); }
-  same(other) { return equals(this.expr, other.expr); }
+  evaluate(vars={}) {
+    let result = evaluate(this.expr, vars);
+    if (!isNumber(result)) {
+      let unknown = [...variables(result), ...functions(result)].join(', ');
+      throw new ExprError('EvalError', `This expression contains unknown variables or functions: ${unknown}.`);
+    }
+    return result;
+  }
 
-  toString() { return stringify(this.expr); }
+  numEquals(other) {
+    // This is an incredibly hacky and non-robust solution, but much faster than
+    // the full CAS simplification. We only test positive random numbers, because
+    // negative numbers raised to non-integer powers return NaN.
+    let vars = this.variables;
+    if (difference(vars, other.variables).length) return false;
+
+    for (let i=0; i<5; ++i) {
+      let substitution = {};
+      for (let v of vars) substitution[v] = Math.random() * 5;
+
+      let a = evaluate(substitute(this.expr, substitution));
+      let b = evaluate(substitute(other.expr, substitution));
+      if (!nearlyEquals(a, b)) return false;
+    }
+    return true;
+  }
+
+  substitute(vars) {
+    let newVars = {};
+    for (let v of Object.keys(vars)) newVars[v] = parseString('' + vars[v]);
+    return new Expression(substitute(this.expr, newVars));
+  }
 }
