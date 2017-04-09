@@ -11,9 +11,6 @@ import { map } from 'arrays';
 
 export default class Vector {
 
-  // -------------------------------------------------------------------------
-  // Contructors
-
   constructor(...args) {
 
     if (args.length === 1) {
@@ -30,7 +27,7 @@ export default class Vector {
 
 
   // -------------------------------------------------------------------------
-  // Getters and Methods
+  // Properties and Methods
 
   get total() {
     let total = 0;
@@ -95,7 +92,6 @@ export default class Vector {
   }
 
   static dot(v1, v2) {
-    // TODO multidimensional vectors
     let n = Math.min(v1.length, v2.length);
     let d = 0;
     for (let i = 0; i < n; ++i) d += (v1[i] || 0) * (v2[i] || 0);
@@ -125,4 +121,5 @@ export default class Vector {
     for (let i = 0; i < n; ++i) if (v1[i] !== v2[i]) return false;
     return true;
   }
+
 }

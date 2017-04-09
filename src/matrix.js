@@ -157,18 +157,14 @@ export function inverse(M) {
     // Subtract a multiple of this row from all other rows,
     // so that they end up having 0s in this column.
     for (let ii = 0; ii < n; ++ii) {
-      if (ii==i) continue;
-      for(let j = 0; j < n; j++){
-        C[ii][j] -= C[ii][i] * C[i][j];
-        I[ii][j] -= C[ii][i] * I[i][j];
+      if (ii == i) continue;
+      let f = C[ii][i];
+      for(let j = 0; j < n; ++j){
+        C[ii][j] -= f * C[i][j];
+        I[ii][j] -= f * I[i][j];
       }
     }
   }
 
   return I;
 }
-
-// -----------------------------------------------------------------------------
-
-export default { identity, rotation, shear, reflection, projection, transpose,
-  determinant, sum, scalarProduct, product, inverse };

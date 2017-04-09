@@ -6,7 +6,7 @@
 
 
 import { square, noop } from 'utilities';
-import matrix from 'matrix';
+import * as matrix from 'matrix';
 import { list } from 'arrays';
 
 
@@ -95,7 +95,7 @@ export function power(data) {
   return [a, b];  // y = a * x^b
 }
 
-/*export function polynomial(data, order=2) {
+export function polynomial(data, order=2) {
   // X = [[1, x1, x1^2], [1, x2, x2^2], [1, x3, x3^2]
   // y = [y1, y2, y3]
 
@@ -108,61 +108,6 @@ export function power(data) {
   let r = matrix.product(inv, XT, y);  // (XT*X)^(-1) * XT * y
 
   return r.map(x => x[0]);  // Flatten matrix
-} */
-
-function polynomial(data, order=2) {
-  order += 1;
-  let matrix = [];
-
-  let lhs = [];
-  for (let i = 0; i < order; i++) {
-    let a = 0;
-    for (let l = 0; l < data.length; l++) {
-      a += Math.pow(data[l][0], i) * data[l][1];
-    }
-    lhs.push(a);
-
-    let c = [];
-    for (let j = 0; j < order; j++) {
-      let b = 0;
-      for (let l = 0; l < data.length; l++) {
-        b += Math.pow(data[l][0], i + j);
-      }
-      c.push(b);
-    }
-    matrix.push(c);
-  }
-  matrix.push(lhs);
-
-  for (let i = 0; i < order; i++) {
-    let maxrow = i;
-    for (let j = i + 1; j < order; j++) {
-      if (Math.abs(matrix[i][j]) > Math.abs(matrix[i][maxrow])) {
-        maxrow = j;
-      }
-    }
-
-    for (let k = i; k < order + 1; k++) {
-      [matrix[k][i], matrix[k][maxrow]] = [matrix[k][maxrow], matrix[k][i]];
-    }
-
-    for (let j = i + 1; j < order; j++) {
-      for (let k = order; k >= i; k--) {
-        matrix[k][j] -= matrix[k][i] * matrix[i][j] / matrix[i][i];
-      }
-    }
-  }
-
-  let coefficients = new Array(order);
-  for (let j = order - 1; j >= 0; j--) {
-    let tmp = 0;
-    for (let k = j + 1; k < order; k++) {
-      tmp += matrix[k][j] * coefficients[k];
-    }
-    coefficients[j] = (matrix[order][j] - tmp) / matrix[j][j];
-  }
-
-  return coefficients;
 }
 
 
@@ -215,9 +160,3 @@ export function find(data, threshold = 0.9) {
 
   return { type: null, fn: noop, params: [] }
 }
-
-
-// -----------------------------------------------------------------------------
-
-export default { linear, linearThroughOrigin, exponential, logarithmic, power,
-  polynomial, coefficient, find };

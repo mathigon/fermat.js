@@ -12,8 +12,8 @@ export function nearlyEquals(x, y, tolerance = 0.0000001) {
   return Math.abs(x - y) < tolerance;
 }
 
-export function sign(x) {
-  return nearlyEquals(x, 0) ? 0 : (x > 0 ? 1 : -1);
+export function sign(x, tolerance = 0.0000001) {
+  return nearlyEquals(x, 0, tolerance) ? 0 : (x > 0 ? 1 : -1);
 }
 
 export function square(x) {
