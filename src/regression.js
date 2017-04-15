@@ -150,12 +150,13 @@ const types = [{
 }];
 
 export function find(data, threshold = 0.9) {
-
-  for (let t of types) {
-    let params = t.regression(data);
-    let fn = t.fn.bind(null, params);
-    let coeff = coefficient(data, fn);
-    if (coeff > threshold) return { type: t.name, fn, params, coeff };
+  if (data.length > 1) {
+    for (let t of types) {
+      let params = t.regression(data);
+      let fn = t.fn.bind(null, params);
+      let coeff = coefficient(data, fn);
+      if (coeff > threshold) return {type: t.name, fn, params, coeff};
+    }
   }
 
   return { type: null, fn: noop, params: [] }
