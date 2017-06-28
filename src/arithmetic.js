@@ -16,14 +16,6 @@ export function sign(x, tolerance = 0.0000001) {
   return nearlyEquals(x, 0, tolerance) ? 0 : (x > 0 ? 1 : -1);
 }
 
-export function square(x) {
-  return x * x;
-}
-
-export function cube(x) {
-  return x * x * x;
-}
-
 
 // -----------------------------------------------------------------------------
 // String Conversion
