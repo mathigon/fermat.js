@@ -1,14 +1,13 @@
 // ============================================================================
-// Fermat.js | Probability
-// (c) 2017 Mathigon
+// Fermat.js | Random Numbers
+// (c) Mathigon
 // ============================================================================
 
 
 
-import { each, some } from 'utilities';
-import { tabulate } from 'arrays';
-import { square } from 'arithmetic';
-import { integrate } from 'numeric';
+import { each, some, tabulate } from '@mathigon/core';
+import { square } from './arithmetic';
+import { integrate } from './numeric';
 
 
 // -----------------------------------------------------------------------------
@@ -111,7 +110,9 @@ export function binomial(n = 1, p = 0.5) {
 export function poisson(l = 1) {
   if (l <= 0) return 0;
   let L = Math.exp(-l), p = 1;
-  for (let k = 0; p > L; ++k) p *= Math.random();
+
+  let k = 0;
+  for (; p > L; ++k) p *= Math.random();
   return k - 1;
 }
 

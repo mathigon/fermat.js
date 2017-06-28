@@ -1,11 +1,11 @@
 // ============================================================================
 // Fermat.js | Number Theory
-// (c) 2017 Mathigon
+// (c) Mathigon
 // ============================================================================
 
 
 
-import { unique } from 'arrays';
+import { unique } from '@mathigon/core';
 
 
 export function gcd(first, ...rest) {
@@ -79,7 +79,7 @@ export function generatePrime(d) {
   function randomInt(d) {
     let pow = Math.pow(10, d - 2);
     let n = Math.floor(Math.random() * 9 * pow) + pow;
-    return 10 * n + lastDigit[Math.floor(4 * Math.random())];
+    return 10 * n + lastDigit[Math.floor(4 * Math.random())];
   }
 
   function isPrime(n) {
@@ -89,7 +89,7 @@ export function generatePrime(d) {
   }
 
   let x;
-  do { x = randomInt(d); } while (!isPrime(x));
+  do { x = randomInt(d); } while (!isPrime(x));
   return x;
 }
 

@@ -1,28 +1,39 @@
 {
-  "name": "fermat.js",
-  "title": "Fermat Mathematics Library",
-  "description": "Powerful mathematics, statistics and geometry library for JavaScript.",
+  "name": "@mathigon/fermat",
   "version": "0.1.0",
-  "homepage": "http://mathigon.io/fermat",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mathigon/fermat.js.git"
+  "description": "Powerful mathematics, statistics and geometry library for JavaScript.",
+  "keywords": [
+    "mathematics",
+    "math",
+    "statistics",
+    "expressions",
+    "random",
+    "geometry"
+  ],
+  "homepage": "http://mathigon.io/",
+  "license": "MIT",
+  "author": {
+    "name": "Philipp Legner",
+    "email": "dev@mathigon.org",
+    "url": "https://mathigon.org"
   },
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/Mathigon/fermat.js/blob/master/LICENSE"
+  "main": "build/fermat.js",
+  "module": "index",
+  "jsnext:main": "index",
+  "repository": "mathigon/fermat.js",
+  "scripts": {
+    "install": "mkdir build && rollup -c build.js",
+    "pretest": "rollup -c build.js",
+    "test": "tape 'test/**/*-test.js' && eslint fermat.js src",
+    "prepublish": "npm run test"
+  },
+  "dependencies": {
+    "@mathigon/core": "^0.1.3"
   },
   "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-contrib-clean": "^1.0.0",
-    "grunt-contrib-nodeunit": "^1.0.0",
-    "jshint-stylish": "~0.4.0",
-    "nodeunit": "^0.10.2",
-    "rollup": "^0.21.1"
-  },
-  "scripts": {
-    "start": "node_modules/.bin/rollup -i src/index.js -o fermat.js",
-    "lint": "jshint src/**/*.js",
-    "test": "grunt test"
+    "eslint": "^4.1.1",
+    "rollup": "^0.43.0",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "tape": "^4.7.0"
   }
 }

@@ -1,6 +1,6 @@
 // ============================================================================
 // Fermat.js | Cryptography
-// (c) 2017 Mathigon
+// (c) Mathigon
 // ============================================================================
 
 
@@ -18,7 +18,7 @@ const ENGLISH_FREQUENCY = {
 
 
 // -----------------------------------------------------------------------------
-// Cipher
+// Ciphers
 
 export function caesarCipher(msg, shift = 0) {
   let cipher = '';
@@ -62,7 +62,7 @@ export function vigenereCipher(msg, key = '') {
 
 
 // -----------------------------------------------------------------------------
-// FREQUENCY UTILITIES
+// Letter Frequency Utilities
 
 export function letterFrequency(letter) {
   return ENGLISH_FREQUENCY[letter.toLowerCase()];

@@ -1,16 +1,22 @@
 // =============================================================================
-// Fermat.js | Expressions Unit Tests
-// (c) 2017 Mathigon
+// Fermat.js | Expressions Tests
+// (c) Mathigon
 // =============================================================================
 
 
-import Expression from 'expression';
 
-function expr(src) { return new Expression(src).simplified; }
-function numEquals(a, b) { return new Expression(a).numEquals(new Expression(b)); }
+const tape = require('tape');
+const fermat = require('../');
 
+function expr(src) {
+  return new fermat.Expression(src).simplified;
+}
 
-exports['Parsing'] = function(test) {
+function numEquals(a, b) {
+  return new fermat.Expression(a).numEquals(new fermat.Expression(b));
+}
+
+/*tape('parsing', function(test) {
   test.equal(expr('1').toString(), '1');
   test.equal(expr('-1').toString(), '-1');
   test.equal(expr('x + y').toString(), 'x + y');
@@ -20,10 +26,10 @@ exports['Parsing'] = function(test) {
   test.equal(expr('a + (b*c)^d').toString(), 'a + ((b^d)*(c^d))');
   test.equal(expr('((a + b)*c)^d').toString(), 'a + ((b^d)*(c^d))');
   test.equal(expr('([{|a|}])').toString(), '|a|');
-  test.done();
-};
+  test.end();
+});
 
-exports['Implicit evaluation'] = function(test) {
+tape('Implicit evaluation', function(test) {
   test.equal(expr('1 + 2').toString(), '3');
   test.equal(expr('1 - 2').toString(), '-1');
   test.equal(expr('2*3').toString(), '6');
@@ -34,22 +40,22 @@ exports['Implicit evaluation'] = function(test) {
   test.equal(expr('3+sin(pi)').toString(), '3');
   test.equal(expr('5%').toString(), '0.05');
   test.equal(expr('log(e)').toString(), '1');
-  test.done();
-};
+  test.end();
+});
 
-exports['Function and variable extraction'] = function(test) {
+tape('Function and variable extraction', function(test) {
   test.deepEqual(expr('a + b(c - d(5))').variables, ['a', 'c']);
   test.deepEqual(expr('a + b(c - d(5))').functions, ['+', 'b', '-', 'd']);
-  test.done();
-};
+  test.end();
+});
 
-exports['Direct evaluation'] = function(test) {
+tape('Direct evaluation', function(test) {
   test.equal(expr('a + b + sqrt(1)').evaluate({a: 1, b: 2}), 4);
   test.equal(expr('a + b(a)').evaluate({a: 10, b: (x => x/2)}), 15);
-  test.done();
-};
+  test.end();
+});
 
-exports['Basic simplification'] = function(test) {
+tape('Basic simplification', function(test) {
   test.equal(expr('x+x').toString(), '2*x');
   test.equal(expr('2x+x').toString(), '3*x');
   test.equal(expr('2(x+1)+(x+1)').toString(), '3*(x + 1)');
@@ -67,10 +73,10 @@ exports['Basic simplification'] = function(test) {
 
   test.equal(expr('foo(x)').toString(), 'foo(x)');
 
-  test.done();
-};
+  test.end();
+});
 
-/* exports['Advanced simplification'] = function(test) {
+tape('Advanced simplification', function(test) {
   test.equal(expr('1/x + 1/y').toString(), '(x + y)/(x*y)');
   test.equal(expr('4 + 4*x - 2*(2 + 2*x))/(2 + 2*x)').toString(), '0');
   test.equal(expr('-4*x*y^2 - 2*y^3 - 2*x^2*y)/(x + y)^2').toString(), '-2*y');
@@ -84,10 +90,10 @@ exports['Basic simplification'] = function(test) {
   test.equal(expr('-x/0)').toString(), 'Infinity');
   test.equal(expr('-a*x/(-y - b))').toString(), 'a*x/(b + y)');
   test.done();
-}; */
+});
 
-exports['Numeric equality checking'] = function(test) {
+tape('Numeric equality checking', function(test) {
   test.ok(numEquals('x + y', 'y + x'));
   test.ok(numEquals('x + y*z^(w+1)', '(y / z^2) * z^(w+3) + x * 1'));
-  test.done();
-};
+  test.end();
+});*/

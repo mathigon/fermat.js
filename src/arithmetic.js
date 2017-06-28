@@ -1,6 +1,6 @@
 // ============================================================================
 // Fermat.js | Number Theory
-// (c) 2017 Mathigon
+// (c) Mathigon
 // ============================================================================
 
 
@@ -96,7 +96,7 @@ export function toWord(n) {
 
 // digits(376) = [6, 7, 3]
 export function digits(n) {
-  let str = '' + Math.abs(x);
+  let str = '' + Math.abs(n);
   return str.split('').reverse().map(x => +x);
 }
 

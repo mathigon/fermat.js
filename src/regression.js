@@ -5,9 +5,8 @@
 
 
 
-import { square, noop } from 'utilities';
-import * as matrix from 'matrix';
-import { list } from 'arrays';
+import { square, noop, list } from '@mathigon/core';
+import * as matrix from './matrix';
 
 
 // -----------------------------------------------------------------------------
@@ -24,9 +23,9 @@ export function linear(data) {
     sXY += data[n][0] * data[n][1];
   }
 
-  let gradient = (len * sXY - sX * sY) / (len  * sXX - sX * sX);
+  let gradient = (len * sXY - sX * sY) / (len * sXX - sX * sX);
   let intercept = (sY / len) - (gradient * sX) / len;
-  return [intercept, gradient];  // y = gx + i
+  return [intercept, gradient];  // y = gx + i
 }
 
 export function linearThroughOrigin(data) {
@@ -34,12 +33,12 @@ export function linearThroughOrigin(data) {
   let n = data.length;
 
   for (let i = 0; i < n; i++) {
-    sXX += data[i][0] * data[i][0];  // sumSqX
-    sXY += data[i][0] * data[i][1];  // sumXY
+    sXX += data[i][0] * data[i][0];  // sumSqX
+    sXY += data[i][0] * data[i][1];  // sumXY
   }
 
   let gradient = sXY / sXX;
-  return [0, gradient];  // y = gx
+  return [0, gradient];  // y = gx
 }
 
 export function exponential(data) {
@@ -58,7 +57,7 @@ export function exponential(data) {
   let a = Math.exp((sum[2] * sum[3] - sum[5] * sum[4]) / denominator);
   let b = (sum[1] * sum[4] - sum[5] * sum[3]) / denominator;
 
-  return [a, b];  // y = a * e^(bx)
+  return [a, b];  // y = a * e^(bx)
 }
 
 export function logarithmic(data) {
@@ -73,9 +72,9 @@ export function logarithmic(data) {
   }
 
   let b = (len * sum[1] - sum[2] * sum[0]) / (len * sum[3] - sum[0] * sum[0]);
-  let a = (sum[2] - coeffB * sum[0]) / len;
+  let a = (sum[2] - b * sum[0]) / len;
 
-  return [a, b];  // y = a + b * log(x)
+  return [a, b];  // y = a + b * log(x)
 }
 
 export function power(data) {
@@ -90,9 +89,9 @@ export function power(data) {
   }
 
   let b = (len * sum[1] - sum[2] * sum[0]) / (len * sum[3] - sum[0] * sum[0]);
-  let a = Math.exp((sum[2] - coeffB * sum[0]) / len);
+  let a = Math.exp((sum[2] - b * sum[0]) / len);
 
-  return [a, b];  // y = a * x^b
+  return [a, b];  // y = a * x^b
 }
 
 export function polynomial(data, order=2) {
@@ -103,9 +102,9 @@ export function polynomial(data, order=2) {
   let XT = matrix.transpose(X);
   let y = data.map(d => [d[1]]);
 
-  let XTX = matrix.product(XT, X);     // XT*X
-  let inv = matrix.inverse(XTX);       // (XT*X)^(-1)
-  let r = matrix.product(inv, XT, y);  // (XT*X)^(-1) * XT * y
+  let XTX = matrix.product(XT, X);     // XT*X
+  let inv = matrix.inverse(XTX);       // (XT*X)^(-1)
+  let r = matrix.product(inv, XT, y);  // (XT*X)^(-1) * XT * y
 
   return r.map(x => x[0]);  // Flatten matrix
 }

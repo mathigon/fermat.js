@@ -1,11 +1,11 @@
 // =============================================================================
 // Fermat.js | Matrix
-// (c) 2017 Mathigon
+// (c) Mathigon
 // =============================================================================
 
 
 
-import { tabulate } from 'arrays';
+import { tabulate } from '@mathigon/core';
 
 
 // -----------------------------------------------------------------------------
@@ -17,11 +17,11 @@ export function identity(n = 2) {
   return x;
 }
 
-export function rotation(angle) {
+export function rotation(_angle) {
   // TODO
 }
 
-export function shear(s) {
+export function shear(_s) {
   // TODO
 }
 
@@ -54,7 +54,7 @@ export function sum(M1, ...rest) {
   return S;
 }
 
-function scalarProduct(M, v) {
+export function scalarProduct(M, v) {
   return M.map(row => row.map(x => x * v));
 }
 
@@ -127,7 +127,7 @@ export function inverse(M) {
   if (n !== M[0].length) throw new Error('Not a square matrix.');
 
   let I = identity(n);
-  let C = tabulate((x, y) => M[x][y], n, n);  // Copy of original matrix
+  let C = tabulate((x, y) => M[x][y], n, n);  // Copy of original matrix
 
   for(let i = 0; i < n; ++i){
     // Loop over the elements e in along the diagonal of C.

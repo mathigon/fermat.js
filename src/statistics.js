@@ -5,8 +5,8 @@
 
 
 
-import { total } from 'arrays';
-import { square } from 'arithmetic';
+import { total } from '@mathigon/core';
+import { square } from './arithmetic';
 
 
 // -----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ export function variance(values) {
 
   let sum = 0;
   for (let v of values) sum += square(v - mean);
-  return sum / (n - 1);
+  return sum / (values.length - 1);
 }
 
 export function stdDev(values) {

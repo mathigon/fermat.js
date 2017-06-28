@@ -1,6 +1,6 @@
 // =============================================================================
 // Fermat.js | Units
-// (c) 2017 Mathigon
+// (c) Mathigon
 // =============================================================================
 
 
@@ -30,20 +30,6 @@ const prefixes = {
   a:  { name: 'atto',  value: 1e-18 },
   z:  { name: 'zepto', value: 1e-21 },
   y:  { name: 'yocto', value: 1e-24 }
-};
-
-const baseUnits = {
-  length: 'm',
-  surface: 'm2',
-  volume: 'm3',
-  mass: 'kg',
-  time: 's',
-  angle: 'rad',
-  current: 'a',
-  temperature: 'K',
-  substance: 'mol',
-  force: 'N',
-  bit: 'b'
 };
 
 const units = {
@@ -117,8 +103,8 @@ const units = {
 // ---------------------------------------------------------------------------------------------
 // Create Regex
 
-const prefixRegexp = prefixes.keys().join('|');
-const unitRegexp = units.keys().join('|');
+const prefixRegexp = Object.keys(prefixes).join('|');
+const unitRegexp = Object.keys(units).join('|');
 const regexp = new RegExp('^(' + prefixRegexp + ')?(' + unitRegexp + ')$');
 
 

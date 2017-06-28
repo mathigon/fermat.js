@@ -1,15 +1,14 @@
 // =============================================================================
-// Fermat.js | Vector
-// (c) 2017 Mathigon
+// Fermat.js | Vectors
+// (c) Mathigon
 // =============================================================================
 
 
 
-import { square } from 'utilities';
-import { map } from 'arrays';
+import { square, map } from '@mathigon/core';
 
 
-export default class Vector {
+export class Vector {
 
   constructor(...args) {
 

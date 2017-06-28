@@ -1,11 +1,11 @@
 // ============================================================================
 // Fermat.js | Combinatorics
-// (c) 2017 Mathigon
+// (c) Mathigon
 // ============================================================================
 
 
 
-import { cache } from 'utilities';
+import { cache } from '@mathigon/core';
 
 
 function facRec(x, acc) {

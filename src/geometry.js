@@ -1,15 +1,14 @@
 // =============================================================================
 // Fermat.js | Geometry
-// (c) 2017 Mathigon
+// (c) Mathigon
 // =============================================================================
 
 
 
-import { nearlyEquals, square, cube } from 'arithmetic';
-import { tabulate, total, list } from 'arrays';
-import { permutations } from 'combinatorics';
-import { isBetween } from 'utilities';
-import Vector from 'vector';
+import { tabulate, total, list, isBetween } from '@mathigon/core';
+import { nearlyEquals, square, cube } from './arithmetic';
+import { permutations } from './combinatorics';
+import { Vector } from './vector';
 
 
 // -----------------------------------------------------------------------------
@@ -143,11 +142,11 @@ export class Line {
       nearlyEquals(y1 / x1, y2 / x2);
   }
 
-  static isPerpendicular(l1, l2) {
+  static isPerpendicular(_l1, _l2) {
     // TODO
   }
 
-  static angleBetween(l1, l2) {
+  static angleBetween(_l1, _l2) {
     // TODO
   }
 
@@ -251,7 +250,7 @@ export class Bezier {
     // TODO
   }
 
-  contains(p) {
+  contains(_p) {
   }
 
   at(t = 0) {
@@ -293,11 +292,11 @@ export class Circle extends Ellipse {
     return Math.PI * square(this.r);
   }
 
-  contains(p) {
+  contains(_p) {
     // TODO
   }
 
-  at(t = 0) {
+  at(_t = 0) {
     // TODO
   }
 
@@ -337,10 +336,10 @@ export class Rectangle {
     return new Polygon(a, b, c, d);
   }
 
-  contains(p) {
+  contains(_p) {
   }
 
-  at(t = 0) {
+  at(_t = 0) {
   }
 
   // TODO toString, transform, rotate, reflect, scale, shift
@@ -367,7 +366,7 @@ export class Polygon {
   get circumference() {
     let C = 0;
     for (let i = 1; i < this.points.length; ++i) {
-      C += distance(this.points[i - 1], this.points[i]);
+      C += Point.distance(this.points[i - 1], this.points[i]);
     }
     return C;
   }
@@ -392,11 +391,11 @@ export class Polygon {
     // TODO
   }
 
-  contains(p) {
+  contains(_p) {
     // TODO
   }
 
-  at(t = 0) {
+  at(_t = 0) {
     // TODO
   }
 
@@ -450,15 +449,15 @@ function sameLine(l1, l2, oriented=false) {
     (!oriented && samePoint(l1.p1, l2.p2) && samePoint(l1.p2, l2.p1));
 }
 
-function sameRect(r1, r2, oriented=false) {
+function sameRect(_r1, _r2, _oriented=false) {
   // TODO
 }
 
-function sameEllipse(c1, c2) {
+function sameEllipse(_c1, _c2) {
   // TODO
 }
 
-function samePolygon(p1, p2, oriented=false) {
+function samePolygon(_p1, _p2, _oriented=false) {
   // TODO
 }
 
@@ -522,7 +521,7 @@ export function intersect(x, ...rest) {
     case 'Line-Line':   return lineLineIntersect(x, y);
   }
 
-  throw new Error('Can\'t intersect ' + getGeoType(x) + 's and ' + getGeoType(y) + '.');
+  throw new Error(`Can't intersect ${typeX}s and ${typeY}s.`);
 }
 
 

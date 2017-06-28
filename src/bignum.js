@@ -1,6 +1,6 @@
 // =============================================================================
 // Fermat.js | Bignum
-// (c) 2017 Mathigon
+// (c) Mathigon
 // *** EXPERIMENTAL ***
 // =============================================================================
 
@@ -86,7 +86,7 @@ export default class Integer {
   }
 
   isUnit() {
-    return this.length === 1 && n[0] === 1;
+    return this.length === 1 && this.n[0] === 1;
   }
 
   isZero() {
@@ -288,23 +288,24 @@ export default class Integer {
   // Advanced Arithmetic
 
   factorial() {
-    if (this.isUnit() || this.isZero(n)) return new Integer(1);
-    return Integer.multiply(this, Integer.subtract(n, new Integer(1)).factorial());
+    if (this.isUnit() || this.isZero()) return new Integer(1);
+    return Integer.multiply(this, Integer.subtract(this.n, new Integer(1))
+                  .factorial());
   }
 
   sqrt() {
     // TODO
   }
 
-  power(a) {
+  power(_a) {
     // TODO
   }
 
-  static lcm(a, b) {
+  static lcm(_a, _b) {
     // TODO
   }
 
-  static gcd(a, b) {
+  static gcd(_a, _b) {
     // TODO
   }
 

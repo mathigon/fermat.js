@@ -1,14 +1,13 @@
 // =============================================================================
 // Fermat.js | Expressions
-// (c) 2017 Mathigon
+// (c) Mathigon
 // =============================================================================
 
 
 
-import { isNumber, isString, isArray } from 'types';
-import { difference, flatten, list, tabulate } from 'arrays';
-import { factorial, permutations, subsets } from 'combinatorics';
-import { nearlyEquals } from 'arithmetic';
+import { difference, flatten, list, tabulate, isNumber, isString, isArray } from '@mathigon/core';
+import { factorial, permutations, subsets } from './combinatorics';
+import { nearlyEquals } from './arithmetic';
 
 
 // -----------------------------------------------------------------------------
@@ -182,9 +181,9 @@ let REWRITE_RULES = [
 
   // Temporary rules
   ['sqrt(x)', 'x^0.5'],
-  ['x-y', 'x+(-y)'], // Replace 'subtract' so we can flatten addition
+  ['x-y', 'x+(-y)'], // Replace 'subtract', to flatten addition
   ['-V', '(-1) * V'],
-  ['x/(y^z)', 'x*(y^(-z))'], // Replace 'divide' so we can flatten multiplication
+  ['x/(y^z)', 'x*(y^(-z))'], // Replace 'divide', to flatten multiplication
   ['x/y', 'x*(y^(-1))'],
 
   // Power and log laws
@@ -237,7 +236,8 @@ let REWRITE_RULES = [
 
 function simplify(expr) {
   if (!HAS_GENERATED_RULES) {
-    REWRITE_RULES = REWRITE_RULES.map(rule => [parseString(rule[0]), parseString(rule[1])]).reverse();
+    REWRITE_RULES = REWRITE_RULES.map(
+        rule => [parseString(rule[0]), parseString(rule[1])]).reverse();
     HAS_GENERATED_RULES = true;
   }
 
@@ -482,7 +482,7 @@ function parseString(str) {
 // -----------------------------------------------------------------------------
 // Expressions Class
 
-export default class Expression {
+export class Expression {
   constructor(str) { this.expr = isString(str) ? parseString(str) : str; }
   toString() { return stringify(this.expr); }
 
