@@ -5,8 +5,7 @@
 
 
 
-import { each, some, tabulate } from '@mathigon/core';
-import { square } from './arithmetic';
+import { each, some, tabulate, square } from '@mathigon/core';
 import { integrate } from './numeric';
 
 

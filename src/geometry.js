@@ -5,8 +5,8 @@
 
 
 
-import { tabulate, total, list, isBetween } from '@mathigon/core';
-import { nearlyEquals, square, cube } from './arithmetic';
+import { tabulate, total, list, isBetween, square, cube } from '@mathigon/core';
+import { nearlyEquals } from './arithmetic';
 import { permutations } from './combinatorics';
 import { Vector } from './vector';
 

@@ -5,8 +5,7 @@
 
 
 
-import { total } from '@mathigon/core';
-import { square } from './arithmetic';
+import { total, square } from '@mathigon/core';
 
 
 // -----------------------------------------------------------------------------
