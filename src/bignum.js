@@ -59,7 +59,7 @@ function zeros(length) {
 // -----------------------------------------------------------------------------
 // Integer Class
 
-export default class Integer {
+export class Integer {
 
   constructor(n, base = 10) {
     if (!Array.isArray(n)) {
