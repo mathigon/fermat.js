@@ -12,9 +12,13 @@ import { tabulate } from '@mathigon/core';
 // Matrix Constructors
 
 export function identity(n = 2) {
-  let x = tabulate(0, n, n);
+  const x = tabulate(0, n, n);
   for (let i = 0; i < n; ++i) x[i][i] = 1;
   return x;
+}
+
+export function fill(x, y, value) {
+  return tabulate(value, x, r);
 }
 
 export function rotation(_angle) {

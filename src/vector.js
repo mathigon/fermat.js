@@ -7,6 +7,9 @@
 
 import { square, map } from '@mathigon/core';
 
+export function V(...args) {
+  return new Vector(...args);
+}
 
 export class Vector {
 
@@ -24,6 +27,10 @@ export class Vector {
     for (let i = 0; i < args.length; ++i) this[i] = args[i];
   }
 
+  static fill(length, value) {
+    return new Vector(new Array(length).map((_, i) => run(value, i)));
+  }
+
 
   // -------------------------------------------------------------------------
   // Properties and Methods
@@ -38,7 +45,7 @@ export class Vector {
     return this.total() / this.length;
   }
 
-  get norm() {
+  get magnitude() {
     let squares = 0;
     for (let i = 0; i < this.length; ++i) squares += square(this[i]);
     return Math.sqrt(squares);
@@ -65,7 +72,15 @@ export class Vector {
   }
 
   normalise() {
-    return this.scale(1 / this.norm);
+    return this.scale(1 / this.magnitude);
+  }
+
+  project(v) {
+    return v.scale(Vector.dot(this, v) / Vector.dot(v, v));
+  }
+
+  angle(v) {
+    return Math.acos(Vector.dot(this, v) / this.magnitude / v.magnitude);
   }
 
   toString() {
@@ -80,14 +95,18 @@ export class Vector {
   // Static Functions
 
   static sum(v1, v2) {
-    // TODO multidimensional vectors
-    let a = map((a,b) => a + b, v1, v2);
-    return new Vector(a);
+    let x = map((a,b) => a + b, v1, v2);
+    return new Vector(x);
   }
 
   static difference(v1, v2) {
-    // TODO multidimensional vectors
-    return Vector.sum(v1, v2.scaled(-1));
+    let x = map((a,b) => a - b, v1, v2);
+    return new Vector(x);
+  }
+
+  static product(v1, v2) {
+    let x = map((a,b) => a * b, v1, v2);
+    return new Vector(x);
   }
 
   static dot(v1, v2) {
@@ -105,12 +124,6 @@ export class Vector {
     return new Vector([v1[1] * v2[2] - v1[2] * v2[1],
       v1[2] * v2[0] - v1[0] * v2[2],
       v1[0] * v2[1] - v1[1] * v2[0]]);
-  }
-
-  static product(v1, v2) {
-    // TODO multidimensional vectors
-    let a = map((a,b) => a * b, v1, v2);
-    return new Vector(a);
   }
 
   static equals(v1, v2) {
