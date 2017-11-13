@@ -5,7 +5,7 @@
 
 
 
-import { tabulate, total, list, isBetween, square, cube } from '@mathigon/core';
+import { tabulate, total, list, isBetween, square } from '@mathigon/core';
 import { nearlyEquals } from './arithmetic';
 import { permutations } from './combinatorics';
 import { Vector } from './vector';
@@ -51,9 +51,15 @@ export class Point {
     this.y = y;
   }
 
-  get center() { return this; }
+  static equals(p1, p2) {
+    return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
+  }
 
-  get distance() {
+  get normal() {
+    return this.scale(1/this.length);
+  }
+
+  get length() {
     return Math.sqrt(square(this.x) + square(this.y));
   }
 
@@ -61,21 +67,15 @@ export class Point {
     return '(' + this.x + ', ' + this.y + ')';
   }
 
-  get polar() {
-    let th = Math.atan2(this.y, this.x);
-    if (th < 0) th += 2 * Math.PI;
-    return { r: this.distance, th };
-  }
-
-  static fromPolar(polar) {
-    let x = polar.r * Math.cos(polar.th);
-    let y = polar.r * Math.sin(polar.th);
-    return new Point(x, y);
-  }
-
   project(l = xAxis) {
-    let k = Point.dot(Point.difference(this, l.p1), l.normalVector);
-    return Point.add(l.p1, k);  // TODO check this!
+    const a = Point.difference(l.p2, l.p1);
+    const b = Point.difference(this, l.p1);
+    const proj = a.scale(Point.dot(a, b) / square(l.length));
+    return Point.sum(l.p1, proj);
+  }
+
+  distanceFromLine(l) {
+    return Point.distance(this, this.project(l));
   }
 
   transform(m = identity) {
@@ -117,10 +117,6 @@ export class Point {
   shift(x = 0, y = 0) {
     return new Point(this.x + x, this.y + y);
   }
-
-  distanceFromLine(l) {
-    return Point.distance(this, this.project(l));  // TODO check this!
-  }
 }
 
 const origin = new Point(0,0);
@@ -128,41 +124,58 @@ const identity = [[1, 0], [0, 1]];
 
 
 // -----------------------------------------------------------------------------
-// Straight Lines
+// Angles
 
-export class Line {
+export class Angle {
 
-  static isParallel(l1, l2) {
-    let x1 = l1.p2.x - l1.p1.x;
-    let y1 = l1.p2.y - l1.p1.y;
-    let x2 = l2.p2.x - l2.p1.x;
-    let y2 = l2.p2.y - l2.p1.y;
-
-    return (x1 == 0 && x2 == 0) || (y1 == 0 && y2 == 0) ||
-      nearlyEquals(y1 / x1, y2 / x2);
+  constructor(a, b, c) {
+    this.a = a;
+    this.b = b;
+    this.c = c;
   }
 
-  static isPerpendicular(_l1, _l2) {
-    // TODO
+  get rad() {
+    let phiA = Math.atan2(this.a.y - this.b.y, this.a.x - this.b.x);
+    let phiC = Math.atan2(this.c.y - this.b.y, this.c.x - this.b.x);
+    let phi = phiC - phiA;
+
+    if (phi < 0) phi += 2 * Math.PI;
+    return phi;
   }
 
-  static angleBetween(_l1, _l2) {
-    // TODO
+  get deg() {
+    return this.rad * 180 / Math.PI;
   }
 
-  // Calculates the angle bisector of the angle a, b, c.
-  static angleBisector(a, b, c) {
-    let phiA =  Math.atan2(a.y - b.y, a.x - b.x);
-    let phiC =  Math.atan2(c.y - b.y, c.x - b.x);
+  get size() {
+    let rad = this.rad;
+    return Math.min(rad, 2 * Math.PI - rad);
+  }
+
+  get isRight() {
+    return nearlyEquals(this.trueSize, Math.PI/2, 0.01);
+  }
+
+  get bisector() {
+    let phiA = Math.atan2(this.a.y - this.b.y, this.a.x - this.b.x);
+    let phiC = Math.atan2(this.c.y - this.b.y, this.c.x - this.b.x);
     let phi = (phiA + phiC) / 2;
 
     if (phiA > phiC) phi += Math.PI;
 
-    let x = Math.cos(phi) + b.x;
-    let y = Math.sin(phi) + b.y;
+    let x = Math.cos(phi) + this.b.x;
+    let y = Math.sin(phi) + this.b.y;
 
-    return new Line(b, new Point(x, y));
+    return new Line(this.b, new Point(x, y));
   }
+
+}
+
+
+// -----------------------------------------------------------------------------
+// Straight Lines
+
+export class Line {
 
   constructor(p1, p2) {
     this.p1 = p1;
@@ -173,8 +186,12 @@ export class Line {
     return Point.distance(this.p1, this.p2);
   }
 
-  get center() {
+  get midpoint() {
     return Point.average(this.p1, this.p2);
+  }
+
+  get slope() {
+    return (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
   }
 
   get normalVector() {
@@ -186,7 +203,7 @@ export class Line {
 
   contains(p) {
     let grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
-    let grad2 = (p.y - this.p1.y) / (p - this.p1.x);
+    let grad2 = (p.y - this.p1.y) / (p.x - this.p1.x);
     return nearlyEquals(grad1, grad2);
   }
 
@@ -196,16 +213,16 @@ export class Line {
     return new Point(x, y);
   }
 
-  perpendicular(p = origin) {
+  perpendicular(p) {
     // Special case: point is the first point of the line.
-    if (same(p, this.p1)) {
+    if (Point.equals(p, this.p1)) {
       let dx = this.p2.y - this.p1.y;
       let dy = this.p1.x - this.p2.x;
       return new Line(p, p.shift(dx, dy));
     }
 
     // Special case: point is the second point of the line.
-    if (same(p, this.p2)) {
+    if (Point.equals(p, this.p2)) {
       let dx = this.p1.y - this.p2.y;
       let dy = this.p2.x - this.p1.x;
       return new Line(p, p.shift(dx, dy));
@@ -223,7 +240,56 @@ export class Line {
     return new Line(p, p.shift(q.x, q.y));
   }
 
-  // TODO toString, transform, rotate, reflect, scale, shift
+  get perpendicularBisector() {
+    return this.perpendicular(this.midpoint);
+  }
+
+  static equals(l1, l2, oriented=false) {
+    return (Point.equals(l1.p1, l2.p1) && Point.equals(l1.p2, l2.p2)) ||
+      (!oriented && Point.equals(l1.p1, l2.p2) && Point.equals(l1.p2, l2.p1));
+  }
+
+  static intersect(l1, l2) {
+    let s = Point.equals(l1.p1, l2.p1) + Point.equals(l1.p1, l2.p2) +
+      Point.equals(l1.p2, l2.p1) + Point.equals(l1.p2, l2.p2);
+
+    if (s === 2) return l1.p1;  // same lines intersect
+    if (s === 1) return;        // connected lines don't intersect
+
+    let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
+    let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
+
+    let denominator = Vector.cross2D(d2, d1);
+    if (nearlyEquals(denominator, 0)) return;  // -> colinear
+
+    let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
+    let x = Vector.cross2D(d1, d) / denominator;
+    let y = Vector.cross2D(d2, d) / denominator;
+
+    if (isBetween(x, 0, 1) && isBetween(y, 0, 1)) {
+      let intersectionX = l1.p1.x + x * d[0];
+      let intersectionY = l1.p1.y + y * d[1];
+      return new Point(intersectionX, intersectionY);
+    }
+  }
+
+  toString() {
+    return `line((${this.p1.x}, ${this.p1.y}), (${this.p2.x}, ${this.p2.y}))`;
+  }
+
+  // TODO transform, rotate, reflect, scale, shift
+}
+
+export class Ray extends Line {
+  static intersect(_l1, _l2) {
+    // TODO
+  }
+}
+
+export class Segment extends Line {
+  static intersect(_l1, _l2) {
+    // TODO
+  }
 }
 
 const xAxis = new Line(origin, new Point(1, 0));
@@ -231,51 +297,11 @@ const yAxis = new Line(origin, new Point(0, 1));
 
 
 // -----------------------------------------------------------------------------
-// Beziers
-
-export class Bezier {
-
-  constructor(p1, p2, q1 = p1, q2 = p2) {
-    this.p1 = p1;
-    this.p2 = p2;
-    this.q1 = q1;
-    this.q2 = q2;
-  }
-
-  get length() {
-    // TODO
-  }
-
-  get center() {
-    // TODO
-  }
-
-  contains(_p) {
-  }
-
-  at(t = 0) {
-    let x = cube(1 - t) * this.p1.x + 3 * t * (1 - t) * (1 - t) * this.q1.x +
-      3 * t * t * (1 - t) * this.q2.x + cube(t) * this.p2.x;
-    let y = cube(1 - t) * this.p1.y + 3 * t * (1 - t) * (1 - t) * this.q1.y +
-      3 * t * t * (1 - t) * this.q2.y + cube(t) * this.p2.y;
-    return new Point(x, y);
-  }
-
-  // TODO toString, transform, rotate, reflect, scale, shift
-}
-
-
-// -------------------------------------------------------------------------
 // Ellipses and Circles
 
-export class Ellipse {
-  // TODO
-}
-
-export class Circle extends Ellipse {
+export class Circle {
 
   constructor(c = origin, r = 1) {
-    super();  // TODO
     this.c = c;
     this.r = r;
   }
@@ -300,11 +326,171 @@ export class Circle extends Ellipse {
     // TODO
   }
 
-  // TODO toString, transform, rotate, reflect, scale, shift
+  toString() {
+    return '';  // TODO
+  }
+
+  static equals(c1, c2) {
+    return (c1.r === c2.r) && Point.equals(c1.c, c2.c);
+  }
+
+  // TODO transform, rotate, reflect, scale, shift
+}
+
+export class Ellipse {
+  // TODO
 }
 
 
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// Polygons
+
+export class Polygon {
+
+  constructor(...points) {
+    this.points = points;
+  }
+
+  get circumference() {
+    let C = 0;
+    for (let i = 1; i < this.points.length; ++i) {
+      C += Point.distance(this.points[i - 1], this.points[i]);
+    }
+    return C;
+  }
+
+  get area() {
+    let p = this.points;
+    let n = p.length;
+    let A = p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
+
+    for (let i = 1; i < n; ++i) {
+      A += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y;
+    }
+
+    return A / 2;
+  }
+
+  get centroid() {
+    let p = this.points;
+    let n = p.length;
+
+    let Cx = 0;
+    for (let i=0; i<n-2; ++i) Cx += 0;
+
+    let Cy = 0;
+    for (let i=0; i<n-2; ++i) Cy += 0;
+
+    const A = this.area;
+    return new Point(Cx / 6 / A, Cy / 6 / A);
+  }
+
+  get edges() {
+    let p = this.points;
+    let n = p.length;
+
+    let edges = [];
+    for (let i=0; i<n; ++i) edges.push(new Line(p[i], p[(i+1) % n]));
+    return edges;
+  }
+
+  contains(p) {
+    let n = this.points.length;
+    let count = false;
+
+    for (let i = 0; i < n; ++i) {
+      const q1 = this.points[i];
+      const q2 = this.points[(i+1) % n];
+
+      const x = (q2.y > p.y) !== (q1.y > p.y);
+      const y = (p.x - q2.x) * (q1.y - q2.y) < (p.y - q2.y) * (q1.x - q2.x);
+      if (x && y) count = !count;
+    }
+
+    return count;
+  }
+
+  at(_t = 0) {
+    // TODO
+  }
+
+  get convexHull() {
+    // TODO
+  }
+
+  toString() {
+    return '';  // TODO
+  }
+
+  static equals(_p1, _p2) {
+    // TODO
+  }
+
+  static collision(p1, p2) {
+    // Check if one of the vertices is in one of the the polygons.
+    for (let v of p1.points) if (p2.contains(v)) return true;
+    for (let v of p2.points) if (p1.contains(v)) return true;
+
+    // Check if any of the edges overlap.
+    for (let e1 of p1.edges) {
+      for (let e2 of p2.edges) {
+        if (Line.intersect(e1, e2)) return true;
+      }
+    }
+
+    return false;
+  }
+
+  static overlap(_p1, _p2) {
+    // TODO
+  }
+
+  // TODO transform, rotate, reflect, scale, shift
+}
+
+export class Triangle extends Polygon {
+  constructor(a, b, c) {
+    super(a, b, c);
+  }
+
+  get circumcircle() {
+    const p = this.points;
+
+    const d = 2 * (p[0].x * (p[1].y - p[2].y) + p[1].x * (p[2].y - p[0].y)
+      + p[2].x * (p[0].y - p[1].y));
+
+    const ux = (square(p[0].x) + square(p[0].y)) * (p[1].y - p[2].y) +
+      (square(p[1].x) + square(p[1].y)) * (p[2].y - p[0].y) +
+      (square(p[2].x) + square(p[2].y)) * (p[0].y - p[1].y);
+
+    const uy = (square(p[0].x) + square(p[0].y)) * (p[2].x - p[1].x) +
+      (square(p[1].x) + square(p[1].y)) * (p[0].x - p[2].x) +
+      (square(p[2].x) + square(p[2].y)) * (p[1].x - p[0].x);
+
+    const center = new Point(ux / d, uy / d);
+    const radius = Point.distance(center, this.points[0]);
+
+    return new Circle(center, radius);
+  }
+
+  get incircle() {
+    const edges = this.edges;
+    const sides = edges.map(e => e.length);
+    const total = sides[0] + sides[1] + sides[2];
+    const p = this.points;
+
+    const ux = sides[1] * p[0].x + sides[2] * p[1].x + sides[0] * p[2].x;
+    const uy = sides[1] * p[0].y + sides[2] * p[1].y + sides[0] * p[2].y;
+
+    const center = new Point(ux / total, uy / total);
+    const radius = center.distanceFromLine(edges[0]);
+
+    return new Circle(center, radius);
+  }
+}
+
+
+// -----------------------------------------------------------------------------
 // Rectangles and Squares
 
 export class Rectangle {
@@ -342,190 +528,21 @@ export class Rectangle {
   at(_t = 0) {
   }
 
+  static equals(_r1, _r2) {
+    // TODO
+  }
+
   // TODO toString, transform, rotate, reflect, scale, shift
 }
 
 export class Square extends Rectangle {
-
   constructor(x = 0, y = 0, w = 1) {
     super(x, y, w, w);
   }
-
 }
 
 
-// -------------------------------------------------------------------------
-// Polygons
-
-export class Polygon {
-
-  constructor(...points) {
-    this.points = points;
-  }
-
-  get circumference() {
-    let C = 0;
-    for (let i = 1; i < this.points.length; ++i) {
-      C += Point.distance(this.points[i - 1], this.points[i]);
-    }
-    return C;
-  }
-
-  get area() {
-    let p = this.points;
-    let n = p.length;
-    let A = p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
-
-    for (let i = 1; i < n; ++i) {
-      A += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y;
-    }
-
-    return Math.abs(A/2);
-  }
-
-  get center() {
-    // TODO
-  }
-
-  get centroid() {
-    // TODO
-  }
-
-  contains(_p) {
-    // TODO
-  }
-
-  at(_t = 0) {
-    // TODO
-  }
-
-  get convexHull() {
-    // TODO
-  }
-
-  // TODO toString, transform, rotate, reflect, scale, shift
-}
-
-export class Triangle extends Polygon {
-  constructor(...points) {
-    if (points.length !== 3) {
-      throw new Error('Triangles need exactly 3 vertices.');
-    }
-    super(points);
-  }
-
-  get circumcircle() {
-    // TODO
-  }
-
-  get incircle() {
-    // TODO
-  }
-}
-
-
-// -------------------------------------------------------------------------
-// Angles
-
-export function angle(a, b, c) {
-  let phiA = Math.atan2(a.y - b.y, a.x - b.x);
-  let phiC = Math.atan2(c.y - b.y, c.x - b.x);
-  let phi = phiC - phiA;
-
-  if (phi < 0) phi += 2 * Math.PI;
-  return phi;
-}
-
-
-// -------------------------------------------------------------------------
-// Equality Checking
-
-function samePoint(p1, p2) {
-  return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
-}
-
-function sameLine(l1, l2, oriented=false) {
-  return (samePoint(l1.p1, l2.p1) && samePoint(l1.p2, l2.p2)) ||
-    (!oriented && samePoint(l1.p1, l2.p2) && samePoint(l1.p2, l2.p1));
-}
-
-function sameRect(_r1, _r2, _oriented=false) {
-  // TODO
-}
-
-function sameEllipse(_c1, _c2) {
-  // TODO
-}
-
-function samePolygon(_p1, _p2, _oriented=false) {
-  // TODO
-}
-
-export function same(a, b, oriented=false) {
-  // TODO Handle Circle (Ellipse) and Rectangle + Square + Triangle (Polygon).
-  let type = a.constructor.name;
-  if (type !== b.constructor.name) return false;
-
-  switch (type) {
-    case 'Point': return samePoint(a, b, oriented);
-    case 'Line': return sameLine(a, b, oriented);
-    case 'Rect': return sameRect(a, b, oriented);
-    case 'Ellipse': return sameEllipse(a, b, oriented);
-    case 'Polygon': return samePolygon(a, b, oriented);
-  }
-  return false;
-}
-
-
-// -------------------------------------------------------------------------
-// Intersections and Overlaps
-
-function pointPointIntersect(p1, p2) {
-  return same(p1, p2) ? [new Point(p1.x, p1.y)] : [];
-}
-
-export function lineLineIntersect(l1, l2) {
-  let s = samePoint(l1.p1, l2.p1) + samePoint(l1.p1, l2.p2) +
-    samePoint(l1.p2, l2.p1) + samePoint(l1.p2, l2.p2);
-
-  if (s === 2) return l1.p1;  // same lines intersect
-  if (s === 1) return;        // connected lines don't intersect
-
-  let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
-  let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
-
-  let denominator = Vector.cross2D(d2, d1);
-  if (nearlyEquals(denominator, 0)) return;  // -> colinear
-
-  let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
-  let x = Vector.cross2D(d1, d) / denominator;
-  let y = Vector.cross2D(d2, d) / denominator;
-
-  if (isBetween(x, 0, 1) && isBetween(y, 0, 1)) {
-    let intersectionX = l1.p1.x + x * d[0];
-    let intersectionY = l1.p1.y + y * d[1];
-    return new Point(intersectionX, intersectionY);
-  }
-}
-
-export function intersect(x, ...rest) {
-  // TODO Handle Circle (Ellipse) and Rectangle + Square + Triangle (Polygon).
-  if (rest.length > 1) return intersect(x, intersect(...rest));
-  let y = rest[0];
-
-  let typeX = x.constructor.name;
-  let typeY = y.constructor.name;
-
-  switch (typeX + '-' + typeY) {
-    case 'Point-Point': return pointPointIntersect(x, y);
-    case 'Line-Line':   return lineLineIntersect(x, y);
-  }
-
-  throw new Error(`Can't intersect ${typeX}s and ${typeY}s.`);
-}
-
-
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Projections
 
 export function projectPointOnRect(point, rect) {
@@ -555,7 +572,7 @@ export function projectPointOnRect(point, rect) {
 }
 
 
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Computational Geometry
 
 export function travellingSalesman(dist) {
@@ -579,10 +596,6 @@ export function travellingSalesman(dist) {
 
   return { path: minPath, length: minLength };
 }
-
-
-// -------------------------------------------------------------------------
-// Graph Colouring
 
 const COLOURS = [1,2,3,4];
 
