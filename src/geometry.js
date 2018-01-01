@@ -5,7 +5,7 @@
 
 
 
-import { tabulate, total, list, isBetween, square } from '@mathigon/core';
+import { tabulate, total, list, isBetween, square, clamp } from '@mathigon/core';
 import { nearlyEquals } from './arithmetic';
 import { permutations, subsets } from './combinatorics';
 import { Vector } from './vector';
@@ -16,43 +16,9 @@ import { Vector } from './vector';
 
 export class Point {
 
-  static average(...points) {
-    let x = total(points.map(p => p.x)) / points.length;
-    let y = total(points.map(p => p.y)) / points.length;
-    return new Point(x, y);
-  }
-
-  static dot(p1, p2) {
-    return p1.x * p2.x + p1.y * p2.y;
-  }
-
-  static sum(p1, p2) {
-    return new Point(p1.x + p2.x, p1.y + p2.y);
-  }
-
-  static difference(p1, p2) {
-    return new Point(p1.x - p2.x, p1.y - p2.y);
-  }
-
-  static distance(p1, p2) {
-    return Math.sqrt(square(p1.x - p2.x) + square(p1.y - p2.y));
-  }
-
-  static manhattan(p1, p2) {
-    return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
-  }
-
-  static interpolate(p1, p2, t=0.5) {
-    return { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
-  }
-
   constructor(x = 0, y = 0) {
     this.x = x;
     this.y = y;
-  }
-
-  static equals(p1, p2) {
-    return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
   }
 
   get normal() {
@@ -67,19 +33,24 @@ export class Point {
     return new Point(-this.x, -this.y);
   }
 
+  get flip() {
+    return new Point(this.y, this.x);
+  }
+
   toString() {
     return '(' + this.x + ', ' + this.y + ')';
   }
 
   project(l = xAxis) {
-    const a = Point.difference(l.p2, l.p1);
-    const b = Point.difference(this, l.p1);
-    const proj = a.scale(Point.dot(a, b) / square(l.length));
-    return Point.sum(l.p1, proj);
+    l.project(this);  // TODO Remove this!
   }
 
   distanceFromLine(l) {
     return Point.distance(this, this.project(l));
+  }
+
+  clamp(xMin, xMax, yMin, yMax) {
+    return new Point(clamp(this.x, xMin, xMax), clamp(this.y, yMin, yMax));
   }
 
   transform(m = identity) {
@@ -123,7 +94,44 @@ export class Point {
   }
 
   add(p) { return Point.sum(this, p); }
+
   subtract(p) { return Point.difference(this, p); }
+
+  equals(p) { return Point.equals(this, p); }
+
+  static average(...points) {
+    let x = total(points.map(p => p.x)) / points.length;
+    let y = total(points.map(p => p.y)) / points.length;
+    return new Point(x, y);
+  }
+
+  static dot(p1, p2) {
+    return p1.x * p2.x + p1.y * p2.y;
+  }
+
+  static sum(p1, p2) {
+    return new Point(p1.x + p2.x, p1.y + p2.y);
+  }
+
+  static difference(p1, p2) {
+    return new Point(p1.x - p2.x, p1.y - p2.y);
+  }
+
+  static distance(p1, p2) {
+    return Math.sqrt(square(p1.x - p2.x) + square(p1.y - p2.y));
+  }
+
+  static manhattan(p1, p2) {
+    return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+  }
+
+  static interpolate(p1, p2, t=0.5) {
+    return { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
+  }
+
+  static equals(p1, p2) {
+    return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
+  }
 }
 
 const origin = new Point(0,0);
@@ -202,6 +210,10 @@ export class Line {
     return (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
   }
 
+  get angle() {
+    return Math.atan2(this.p2.y - this.p1.y, this.p2.x - this.p1.x) * 180 / Math.PI;
+  }
+
   get normalVector() {
     let l = this.length;
     let x = (this.p2.x - this.p1.x) / l;
@@ -211,6 +223,10 @@ export class Line {
 
   get perpendicularVector() {
     return new Point(this.p2.y - this.p1.y, this.p1.x - this.p2.x).normal;
+  }
+
+  get perpendicularBisector() {
+    return this.perpendicular(this.midpoint);
   }
 
   contains(p) {
@@ -231,35 +247,21 @@ export class Line {
   }
 
   perpendicular(p) {
-    // Special case: point is the first point of the line.
-    if (Point.equals(p, this.p1)) {
-      let dx = this.p2.y - this.p1.y;
-      let dy = this.p1.x - this.p2.x;
-      return new Line(p, p.shift(dx, dy));
-    }
-
-    // Special case: point is the second point of the line.
-    if (Point.equals(p, this.p2)) {
-      let dx = this.p1.y - this.p2.y;
-      let dy = this.p2.x - this.p1.x;
-      return new Line(p, p.shift(dx, dy));
-    }
-
-    // Special case: point lies somewhere else on the line.
-    if (this.contains(p)) {
-      let dx = this.p1.y - p.y;
-      let dy = p.x - this.p1.x;
-      return new Line(p, p.shift(dx, dy));
-    }
-
-    // General case: point does not lie on the line.
-    let q = p.project(this);
-    return new Line(p, p.shift(q.x, q.y));
+    return new Line(p, Point.sum(p, this.perpendicularVector));
   }
 
-  get perpendicularBisector() {
-    return this.perpendicular(this.midpoint);
+  toString() {
+    return `line((${this.p1.x}, ${this.p1.y}), (${this.p2.x}, ${this.p2.y}))`;
   }
+
+  project(p) {
+    const a = Point.difference(this.p2, this.p1);
+    const b = Point.difference(p, this.p1);
+    const proj = a.scale(Point.dot(a, b) / square(this.length));
+    return Point.sum(this.p1, proj);
+  }
+
+  // TODO transform, rotate, reflect, scale, shift
 
   static equals(l1, l2, oriented=false) {
     return (Point.equals(l1.p1, l2.p1) && Point.equals(l1.p2, l2.p2)) ||
@@ -289,12 +291,6 @@ export class Line {
       return new Point(intersectionX, intersectionY);
     }
   }
-
-  toString() {
-    return `line((${this.p1.x}, ${this.p1.y}), (${this.p2.x}, ${this.p2.y}))`;
-  }
-
-  // TODO transform, rotate, reflect, scale, shift
 }
 
 export class Ray extends Line {
@@ -306,6 +302,14 @@ export class Ray extends Line {
 export class Segment extends Line {
   static intersect(_l1, _l2) {
     // TODO
+  }
+
+  project(p) {
+    const a = Point.difference(this.p2, this.p1);
+    const b = Point.difference(p, this.p1);
+
+    const q = clamp(Point.dot(a, b) / square(this.length), 0, 1);
+    return Point.sum(this.p1, a.scale(q));
   }
 }
 
@@ -430,13 +434,12 @@ export class Polygon {
     let n = p.length;
 
     let Cx = 0;
-    for (let i=0; i<n-2; ++i) Cx += 0;
+    for (let i=0; i<n; ++i) Cx += p[i].x;
 
     let Cy = 0;
-    for (let i=0; i<n-2; ++i) Cy += 0;
+    for (let i=0; i<n; ++i) Cy += p[i].y;
 
-    const A = this.area;
-    return new Point(Cx / 6 / A, Cy / 6 / A);
+    return new Point(Cx / n, Cy / n);
   }
 
   get edges() {
@@ -446,6 +449,10 @@ export class Polygon {
     let edges = [];
     for (let i=0; i<n; ++i) edges.push(new Segment(p[i], p[(i+1) % n]));
     return edges;
+  }
+
+  get convexHull() {
+    // TODO
   }
 
   contains(p) {
@@ -468,13 +475,16 @@ export class Polygon {
     // TODO
   }
 
-  get convexHull() {
-    // TODO
-  }
-
   toString() {
     return '';  // TODO
   }
+
+  shift(x, y=x) {
+    const points = this.points.map(p => p.shift(x, y));
+    return new Polygon(...points);
+  }
+
+  // TODO rotate, reflect, scale
 
   static equals(_p1, _p2) {
     // TODO
@@ -498,8 +508,6 @@ export class Polygon {
   static overlap(_p1, _p2) {
     // TODO
   }
-
-  // TODO transform, rotate, reflect, scale, shift
 }
 
 export class Triangle extends Polygon {
@@ -540,6 +548,11 @@ export class Triangle extends Polygon {
     const radius = center.distanceFromLine(edges[0]);
 
     return new Circle(center, radius);
+  }
+
+  get orthocenter() {
+    // TODO
+    return origin;
   }
 }
 
