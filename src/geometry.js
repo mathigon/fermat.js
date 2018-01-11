@@ -93,6 +93,10 @@ export class Point {
     return new Point(this.x + x, this.y + y);
   }
 
+  translate(p) {
+    return this.shift(p.x, p.y);
+  }
+
   add(p) { return Point.sum(this, p); }
 
   subtract(p) { return Point.difference(this, p); }
@@ -263,33 +267,12 @@ export class Line {
 
   // TODO transform, rotate, reflect, scale, shift
 
-  static equals(l1, l2, oriented=false) {
-    return (Point.equals(l1.p1, l2.p1) && Point.equals(l1.p2, l2.p2)) ||
-      (!oriented && Point.equals(l1.p1, l2.p2) && Point.equals(l1.p2, l2.p1));
+  static equals(l1, l2) {
+    return l1.contains(l2.p1) && l1.contains(l2.p2);
   }
 
-  static intersect(l1, l2) {
-    let s = Point.equals(l1.p1, l2.p1) + Point.equals(l1.p1, l2.p2) +
-      Point.equals(l1.p2, l2.p1) + Point.equals(l1.p2, l2.p2);
-
-    if (s === 2) return l1.p1;  // same lines intersect
-    if (s === 1) return;        // connected lines don't intersect
-
-    let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
-    let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
-
-    let denominator = Vector.cross2D(d2, d1);
-    if (nearlyEquals(denominator, 0)) return;  // -> colinear
-
-    let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
-    let x = Vector.cross2D(d1, d) / denominator;
-    let y = Vector.cross2D(d2, d) / denominator;
-
-    if (isBetween(x, 0, 1) && isBetween(y, 0, 1)) {
-      let intersectionX = l1.p1.x + x * d[0];
-      let intersectionY = l1.p1.y + y * d[1];
-      return new Point(intersectionX, intersectionY);
-    }
+  static intersect(_l1, _l2) {
+    // TODO
   }
 }
 
@@ -300,9 +283,6 @@ export class Ray extends Line {
 }
 
 export class Segment extends Line {
-  static intersect(_l1, _l2) {
-    // TODO
-  }
 
   project(p) {
     const a = Point.difference(this.p2, this.p1);
@@ -310,6 +290,34 @@ export class Segment extends Line {
 
     const q = clamp(Point.dot(a, b) / square(this.length), 0, 1);
     return Point.sum(this.p1, a.scale(q));
+  }
+
+  static equals(l1, l2, oriented=false) {
+    return (Point.equals(l1.p1, l2.p1) && Point.equals(l1.p2, l2.p2)) ||
+      (!oriented && Point.equals(l1.p1, l2.p2) && Point.equals(l1.p2, l2.p1));
+  }
+
+  static intersect(l1, l2) {
+    // Equal or touching lines don't intersect
+    let s = Point.equals(l1.p1, l2.p1) + Point.equals(l1.p1, l2.p2) +
+      Point.equals(l1.p2, l2.p1) + Point.equals(l1.p2, l2.p2);
+    if (s >= 1) return;
+
+    let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
+    let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
+
+    let denominator = Vector.cross2D(d2, d1);
+    if (nearlyEquals(denominator, 0)) return;  // -> colinear
+
+    let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
+    let q1 = Vector.cross2D(d1, d) / denominator;
+    let q2 = Vector.cross2D(d2, d) / denominator;
+
+    if (isBetween(q1, 0, 1) && isBetween(q2, 0, 1)) {
+      let intersectionX = l1.p1.x + q1 * d[0];
+      let intersectionY = l1.p1.y + q2 * d[1];
+      return new Point(intersectionX, intersectionY);
+    }
   }
 }
 
@@ -484,17 +492,25 @@ export class Polygon {
     return new Polygon(...points);
   }
 
-  // TODO rotate, reflect, scale
+  translate(p) {
+    return this.shift(p.x, p.y);
+  }
+
+  rotate(a, center=origin) {
+    const points = this.points.map(p => p.rotate(a, center));
+    return new Polygon(...points);
+  }
+
+  reflect(line) {
+    const points = this.points.map(p => p.reflect(line));
+    return new Polygon(...points);
+  }
 
   static equals(_p1, _p2) {
     // TODO
   }
 
   static collision(p1, p2) {
-    // Check if one of the vertices is in one of the the polygons.
-    for (let v of p1.points) if (p2.contains(v)) return true;
-    for (let v of p2.points) if (p1.contains(v)) return true;
-
     // Check if any of the edges overlap.
     for (let e1 of p1.edges) {
       for (let e2 of p2.edges) {
@@ -502,11 +518,11 @@ export class Polygon {
       }
     }
 
-    return false;
-  }
+    // TODO Check if one of the vertices is in one of the the polygons.
+    // for (let v of p1.points) if (p2.contains(v)) return true;
+    // for (let v of p2.points) if (p1.contains(v)) return true;
 
-  static overlap(_p1, _p2) {
-    // TODO
+    return false;
   }
 }
 
