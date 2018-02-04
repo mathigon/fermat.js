@@ -5,10 +5,9 @@
 
 
 
-import { tabulate, total, list, isBetween, square, clamp, last } from '@mathigon/core';
+import { tabulate, total, list, isBetween, square, clamp, last, flatten } from '@mathigon/core';
 import { nearlyEquals, roundTo } from './arithmetic';
 import { permutations, subsets } from './combinatorics';
-import { Vector } from './vector';
 
 
 // -----------------------------------------------------------------------------
@@ -149,7 +148,6 @@ export class Point {
 }
 
 const origin = new Point(0,0);
-const identity = [[1, 0, 0], [0, 1, 0]];
 
 
 // -----------------------------------------------------------------------------
@@ -164,6 +162,7 @@ export class Angle {
   }
 
   transform(m) {
+    if (!m) return this;
     return new Angle(this.a.transform(m), this.b.transform(m), this.c.transform(m));
   }
 
@@ -279,11 +278,30 @@ export class Line {
     return Point.sum(this.p1, proj);
   }
 
-  transform(m=identity) {
+  transform(m) {
+    if (!m) return this;
     return new this.constructor(this.p1.transform(m), this.p2.transform(m));
   }
 
-  // TODO rotate, reflect, scale, shift
+  rotate(phi = 0, p = origin) {
+    return new this.constructor(this.p1.rotate(phi, p), this.p2.rotate(phi, p))
+  }
+
+  reflect(l = yAxis) {
+    return new this.constructor(this.p1.reflect(l), this.p2.reflect(l))
+  }
+
+  scale(sx = 1, sy = sx) {
+    return new this.constructor(this.p1.scale(sx, sy), this.p2.scale(sx, sy))
+  }
+
+  shift(x = 0, y = x) {
+    return new this.constructor(this.p1.shift(x, y), this.p2.shift(x, y))
+  }
+
+  translate(p) {
+    return new this.constructor(this.p1.translate(p), this.p2.translate(p))
+  }
 
   equals(other) {
     return this.constructor.equals(this, other);
@@ -291,16 +309,6 @@ export class Line {
 
   static equals(l1, l2) {
     return l1.contains(l2.p1) && l1.contains(l2.p2);
-  }
-
-  static intersect(_l1, _l2) {
-    // TODO
-  }
-}
-
-export class Ray extends Line {
-  static intersect(_l1, _l2) {
-    // TODO
   }
 }
 
@@ -320,26 +328,12 @@ export class Segment extends Line {
   }
 
   static intersect(l1, l2) {
-    // Equal or touching lines don't intersect
+    // Equal or touching line segments don't intersect
     let s = Point.equals(l1.p1, l2.p1) + Point.equals(l1.p1, l2.p2) +
       Point.equals(l1.p2, l2.p1) + Point.equals(l1.p2, l2.p2);
     if (s >= 1) return;
 
-    let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
-    let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
-
-    let denominator = Vector.cross2D(d2, d1);
-    if (nearlyEquals(denominator, 0)) return;  // -> colinear
-
-    let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
-    let q1 = Vector.cross2D(d1, d) / denominator;
-    let q2 = Vector.cross2D(d2, d) / denominator;
-
-    if (isBetween(q1, 0, 1) && isBetween(q2, 0, 1)) {
-      let intersectionX = l1.p1.x + q1 * d[0];
-      let intersectionY = l1.p1.y + q2 * d[1];
-      return new Point(intersectionX, intersectionY);
-    }
+    return intersections(l1, l2);
   }
 }
 
@@ -391,7 +385,8 @@ export class Circle {
     return '';  // TODO
   }
 
-  transform(m=identity) {
+  transform(m) {
+    if (!m) return this;
     return new Circle(this.c.transform(m), this.r * (m[0][0] + m[1][1]) / 2);
   }
 
@@ -433,6 +428,7 @@ export class Arc {
   }
 
   transform(m) {
+    if (!m) return this;
     return new Arc(this.c.transform(m), this.a1.transform(m), this.a2.transform(m));
   }
 }
@@ -519,7 +515,8 @@ export class Polygon {
     return new Polygon(...lower, ...upper);
   }
 
-  transform(m=identity) {
+  transform(m) {
+    if (!m) return this;
     return new this.constructor(...this.points.map(p => p.transform(m)));
   }
 
@@ -638,7 +635,7 @@ export class Triangle extends Polygon {
 
 export class Rectangle {
 
-  constructor(p, w = 1, h = 1) {
+  constructor(p, w = 1, h = w) {
     this.p = p;
     this.w = w;
     this.h = h;
@@ -656,6 +653,10 @@ export class Rectangle {
     return Math.abs(this.w * this.h);
   }
 
+  get edges() {
+    return this.polygon.edges;
+  }
+
   get polygon() {
     let b = new Point(this.p.x + this.w, this.p.y);
     let c = new Point(this.p.x + this.w, this.p.y + this.h);
@@ -663,7 +664,9 @@ export class Rectangle {
     return new Polygon(this.p, b, c, d);
   }
 
-  transform(m=identity) {
+  transform(m) {
+    if (!m) return this;
+
     const w1 = this.w * m[0][0];
     const h1 = this.h * m[1][1];
     return new this.constructor(this.p.transform(m), w1, h1);
@@ -681,6 +684,12 @@ export class Rectangle {
     // TODO
   }
 
+  project(p) {
+    // TODO Handle for points that lie *inside* the rectangle
+    const line = new Segment(p, this.center);
+    return intersections(line, this)[0];
+  }
+
   // TODO toString, rotate, reflect, scale, shift
 }
 
@@ -694,17 +703,27 @@ export class Square extends Rectangle {
 // -----------------------------------------------------------------------------
 // Intersections
 
+function liesOnSegment(s, p) {
+  if (nearlyEquals(s.p1.x, s.p2.x)) return isBetween(p.y, s.p1.y, s.p2.y);
+  return isBetween(p.x, s.p1.x, s.p2.x);
+}
+
+function lineLineIntersection(l1, l2) {
+  const m1 = l1.slope;
+  const m2 = l2.slope;
+
+  const x = (l2.p1.y - l1.p1.y - m2 * l2.p1.x + m1 * l1.p1.x) / (m1 - m2);
+  const y = l1.p1.y + m1 * (x - l1.p1.x);
+  return [new Point(x, y)];
+}
+
 function circleCircleIntersection(c1, c2) {
   const d = Point.distance(c1.c, c2.c);
 
   if (d > c1.r + c2.r) return [];  // Circles are separate.
   if (d < Math.abs(c1.r - c2.r)) return [];  // One circles contains the other.
-  if (d === 0 && c1.r === c2.r) return [];  // Circles are the same.
-
-  if (d === c1.r + c2.r) {
-    // TODO
-    return [];
-  }
+  if (nearlyEquals(d, 0) && nearlyEquals(c1.r,c2.r)) return [];  // Circles are the same.
+  if (nearlyEquals(d, c1.r + c2.r)) return [new Line(c1.c, c2.c).midpoint]; // Circles touch.
 
   const a = (square(c1.r) - square(c2.r) + square(d)) / (2 * d);
   const b = Math.sqrt(square(c1.r) - square(a));
@@ -717,62 +736,37 @@ function circleCircleIntersection(c1, c2) {
   return [new Point(px, py), new Point(qx, qy)]
 }
 
-export function intersections(...elements) {
-  if (elements.length < 2) return [];
-
-  if (elements.length > 2) {
-    let pairs = subsets(elements, 2).map(e => intersections(...e));
-    return pairs[0].concat(...pairs.slice(1));
-  }
-
-  const [a, b] = elements;
-
-  if (a instanceof Polygon) return intersections(b, ...a.edges);
-  if (b instanceof Polygon) return intersections(a, ...b.edges);
-
-  if (a instanceof Line && b instanceof Line) {
-    // TODO handle rays and segments
-    return Line.intersect(a, b);
-  } else if (a instanceof Line && b instanceof Circle) {
-    // TODO
-    return [];
-  } else if (a instanceof Circle && b instanceof Line) {
-    return lineCircleIntersection(b, a);
-  } else if (a instanceof Circle && b instanceof Circle) {
-    return circleCircleIntersection(a, b);
-  }
-
+function lineCircleIntersection(_l, _c) {
+  // TODO
   return [];
 }
 
+export function intersections(...elements) {
+  if (elements.length < 2) return [];
+  if (elements.length > 2) return flatten(subsets(elements, 2).map(e => intersections(...e)));
 
-// -----------------------------------------------------------------------------
-// Projections
+  const [a, b] = elements;
 
-export function projectPointOnRect(point, rect) {
-    let rect1 = { x: rect.x + rect.w, y: rect.y + rect.h };  // bottom right corner of rect
-    let center = { x: rect.x + rect.w/2, y: rect.y + rect.h/2 };
-    let m = (center.y - point.y) / (center.x - point.x);
+  if (a instanceof Polygon || a instanceof Rectangle) return intersections(b, ...a.edges);
+  if (b instanceof Polygon || a instanceof Rectangle) return intersections(a, ...b.edges);
 
-    if (point.x <= center.x) {  // check left side
-        let y = m * (rect.x - point.x) + point.y;
-        if (rect.y < y && y < rect1.y) return { x: rect.x, y };
-    }
+  let results = [];
 
-    if (point.x >= center.x) {  // check right side
-        let y = m * (rect1.x - point.x) + point.y;
-        if (rect.y < y && y < rect1.y) return { x: rect1.x, y };
-    }
+  // TODO Handle Arcs and Rays
+  if (a instanceof Line && b instanceof Line) {
+    results = lineLineIntersection(a, b);
+  } else if (a instanceof Line && b instanceof Circle) {
+    results = lineCircleIntersection(a, b);
+  } else if (a instanceof Circle && b instanceof Line) {
+    results = lineCircleIntersection(b, a);
+  } else if (a instanceof Circle && b instanceof Circle) {
+    results = circleCircleIntersection(a, b);
+  }
 
-    if (point.y <= center.y) {  // check top side
-        let x = (rect.y - point.y) / m + point.x;
-        if (rect.x < x && x < rect1.x) return { x, y: rect.y };
-    }
+  if (a instanceof Segment) results = results.filter(i => liesOnSegment(a, i));
+  if (b instanceof Segment) results = results.filter(i => liesOnSegment(b, i));
 
-    if (point.y >= center.y) {  // check bottom side
-        let x = (rect1.y - point.y) / m + point.x;
-        if (rect.x < x && x < rect1.x) return { x, y: rect1.y };
-    }
+  return results;
 }
 
 
