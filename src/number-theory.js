@@ -27,12 +27,13 @@ export function lcm(first, ...rest) {
 // Contains no dependencies, so that this function can easily be stringified
 // and run in a web worker.
 export function isPrime(n) {
+  const M = Math;
   if (n % 1 !== 0 || n < 2) return false;
 
-  if (n % 2 === 0) return (n == 2);
-  if (n % 3 === 0) return (n == 3);
+  if (n % 2 === 0) return (n === 2);
+  if (n % 3 === 0) return (n === 3);
 
-  let m = Math.sqrt(n);
+  let m = M.sqrt(n);
   for (let i = 5;i <= m;i += 6) {
     if (n % i === 0)     return false;
     if (n % (i+2) === 0) return false;
@@ -73,17 +74,18 @@ export function listPrimes(n = 100) {
 // Contains no dependencies, so that this function can easily be stringified
 // and run in a web worker. Number of digits 2 <= d <= 16.
 export function generatePrime(d) {
+  const M = Math;
   if (d < 2 || d > 16) throw new Error('Invalid number of digits.');
 
   let lastDigit = [1, 3, 7, 9];
   function randomInt(d) {
-    let pow = Math.pow(10, d - 2);
-    let n = Math.floor(Math.random() * 9 * pow) + pow;
-    return 10 * n + lastDigit[Math.floor(4 * Math.random())];
+    let pow = M.pow(10, d - 2);
+    let n = M.floor(M.random() * 9 * pow) + pow;
+    return 10 * n + lastDigit[M.floor(4 * M.random())];
   }
 
   function isPrime(n) {
-    let sqrt = Math.sqrt(n);
+    let sqrt = M.sqrt(n);
     for (let i = 3; i <= sqrt; i += 2) if (n % i === 0) return false;
     return true;
   }
@@ -96,14 +98,15 @@ export function generatePrime(d) {
 // Contains no dependencies, so that this function can easily be stringified
 // and run in a web worker.
 export function goldbach(x) {
+  const M = Math;
 
   function isPrime(n) {
-    let sqrt = Math.sqrt(n);
+    let sqrt = M.sqrt(n);
     for (let i = 3; i <= sqrt; i += 2) if (n % i === 0) return false;
     return true;
   }
 
-  if (x == 4) return [2, 2];
+  if (x === 4) return [2, 2];
 
   let a = x / 2;
   let b = x / 2;
