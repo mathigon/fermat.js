@@ -5,9 +5,10 @@
 
 
 
-import { tabulate, total, list, isBetween, square, clamp, last, flatten } from '@mathigon/core';
+import { tabulate, total, list, isBetween, square, clamp, flatten } from '@mathigon/core';
 import { nearlyEquals, roundTo } from './arithmetic';
 import { permutations, subsets } from './combinatorics';
+import { Vector } from './vector';
 
 
 // -----------------------------------------------------------------------------
@@ -40,16 +41,8 @@ export class Point {
     return [this.x, this.y];
   }
 
-  toString() {
-    return '(' + this.x + ', ' + this.y + ')';
-  }
-
-  project(l = xAxis) {
-    l.project(this);  // TODO Remove this!
-  }
-
   distanceFromLine(l) {
-    return Point.distance(this, this.project(l));
+    return Point.distance(this, l.project(this));
   }
 
   clamp(xMin, xMax, yMin, yMax) {
@@ -64,19 +57,19 @@ export class Point {
     return new Point(x, y);
   }
 
-  rotate(phi = 0, p = origin) {
-    let x0 = this.x - p.x;
-    let y0 = this.y - p.y;
+  rotate(angle, c = origin) {
+    let x0 = this.x - c.x;
+    let y0 = this.y - c.y;
 
-    let cos = Math.cos(phi);
-    let sin = Math.sin(phi);
+    let cos = Math.cos(angle);
+    let sin = Math.sin(angle);
 
-    let x = x0 * cos - y0 * sin + p.x;
-    let y = x0 * sin + y0 * cos + p.y;
+    let x = x0 * cos - y0 * sin + c.x;
+    let y = x0 * sin + y0 * cos + c.y;
     return new Point(x, y);
   }
 
-  reflect(l = yAxis) {
+  reflect(l) {
     let v = l.p2.x - l.p1.x;
     let w = l.p2.y - l.p1.y;
 
@@ -90,11 +83,11 @@ export class Point {
     return new Point(x, y);
   }
 
-  scale(sx = 1, sy = sx) {
+  scale(sx, sy = sx) {
     return new Point(this.x * sx, this.y * sy);
   }
 
-  shift(x = 0, y = x) {
+  shift(x, y = x) {
     return new Point(this.x + x, this.y + y);
   }
 
@@ -139,7 +132,7 @@ export class Point {
   }
 
   static interpolate(p1, p2, t=0.5) {
-    return { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
+    return new Point(p1.x + t * (p2.x - p1.x), p1.y + t * (p2.y - p1.y));
   }
 
   static equals(p1, p2) {
@@ -152,6 +145,8 @@ const origin = new Point(0,0);
 
 // -----------------------------------------------------------------------------
 // Angles
+
+const twoPi = 2 * Math.PI;
 
 export class Angle {
 
@@ -203,9 +198,14 @@ export class Angle {
 
 }
 
+function rad(p, c=origin) {
+  const a = Math.atan2(p.y - c.y, p.x - c.x);
+  return (a + twoPi) % twoPi;
+}
+
 
 // -----------------------------------------------------------------------------
-// Straight Lines
+// Lines, Rays and Line Segments
 
 export class Line {
 
@@ -246,18 +246,6 @@ export class Line {
     return this.perpendicular(this.midpoint);
   }
 
-  contains(p) {
-    let grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
-    let grad2 = (p.y - this.p1.y) / (p.x - this.p1.x);
-    return nearlyEquals(grad1, grad2);
-  }
-
-  at(t = 0) {
-    let x = t * this.p1.x + (1-t) * this.p2.x;
-    let y = t * this.p1.y + (1-t) * this.p2.y;
-    return new Point(x, y);
-  }
-
   parallel(p) {
     const q = Point.sum(p, Point.difference(this.p2, this.p1));
     return new Line(p, q);
@@ -267,8 +255,14 @@ export class Line {
     return new Line(p, Point.sum(p, this.perpendicularVector));
   }
 
-  toString() {
-    return `line((${this.p1.x}, ${this.p1.y}), (${this.p2.x}, ${this.p2.y}))`;
+  contains(p) {
+    let grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
+    let grad2 = (p.y - this.p1.y) / (p.x - this.p1.x);
+    return nearlyEquals(grad1, grad2);
+  }
+
+  at(t) {
+    return Point.interpolate(this.p1, this.p2, t);
   }
 
   project(p) {
@@ -283,24 +277,24 @@ export class Line {
     return new this.constructor(this.p1.transform(m), this.p2.transform(m));
   }
 
-  rotate(phi = 0, p = origin) {
-    return new this.constructor(this.p1.rotate(phi, p), this.p2.rotate(phi, p))
+  rotate(a, c = origin) {
+    return new this.constructor(this.p1.rotate(a, c), this.p2.rotate(a, c));
   }
 
-  reflect(l = yAxis) {
-    return new this.constructor(this.p1.reflect(l), this.p2.reflect(l))
+  reflect(l) {
+    return new this.constructor(this.p1.reflect(l), this.p2.reflect(l));
   }
 
-  scale(sx = 1, sy = sx) {
-    return new this.constructor(this.p1.scale(sx, sy), this.p2.scale(sx, sy))
+  scale(sx, sy = sx) {
+    return new this.constructor(this.p1.scale(sx, sy), this.p2.scale(sx, sy));
   }
 
-  shift(x = 0, y = x) {
-    return new this.constructor(this.p1.shift(x, y), this.p2.shift(x, y))
+  shift(x, y = x) {
+    return new this.constructor(this.p1.shift(x, y), this.p2.shift(x, y));
   }
 
   translate(p) {
-    return new this.constructor(this.p1.translate(p), this.p2.translate(p))
+    return new this.constructor(this.p1.translate(p), this.p2.translate(p));
   }
 
   equals(other) {
@@ -313,6 +307,10 @@ export class Line {
 }
 
 export class Segment extends Line {
+
+  contains(_p) {
+    // TODO
+  }
 
   project(p) {
     const a = Point.difference(this.p2, this.p1);
@@ -328,25 +326,34 @@ export class Segment extends Line {
   }
 
   static intersect(l1, l2) {
+    // TODO Use the generic intersection() function
+
     // Equal or touching line segments don't intersect
     let s = Point.equals(l1.p1, l2.p1) + Point.equals(l1.p1, l2.p2) +
       Point.equals(l1.p2, l2.p1) + Point.equals(l1.p2, l2.p2);
     if (s >= 1) return;
 
-    return intersections(l1, l2);
+    let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
+    let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
+
+    let denominator = Vector.cross2D(d2, d1);
+    if (nearlyEquals(denominator, 0)) return;  // -> colinear
+
+    let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
+    let q1 = Vector.cross2D(d1, d) / denominator;
+    let q2 = Vector.cross2D(d2, d) / denominator;
+
+    if (q1 >= 0 && q1 <= 1 && q2 >= 0 && q2 <= 1) {
+      let intersectionX = l1.p1.x + q1 * d[0];
+      let intersectionY = l1.p1.y + q2 * d[1];
+      return new Point(intersectionX, intersectionY);
+    }
   }
 }
 
-const xAxis = new Line(origin, new Point(1, 0));
-const yAxis = new Line(origin, new Point(0, 1));
-
 
 // -----------------------------------------------------------------------------
-// Ellipses and Circles
-
-export class Ellipse {
-  // TODO
-}
+// Circles, Ellipses and Arcs
 
 export class Circle {
 
@@ -368,12 +375,38 @@ export class Circle {
     return new Arc(this.c, a, a);
   }
 
-  contains(_p) {
-    // TODO
+  transform(m) {
+    if (!m) return this;
+    return new Circle(this.c.transform(m), this.r * (m[0][0] + m[1][1]) / 2);
   }
 
-  at(_t = 0) {
-    // TODO
+  rotate(a, c = origin) {
+    return new Circle(this.c.rotate(a, c), this.r);
+  }
+
+  reflect(l) {
+    return new Circle(this.c.reflect(l), this.r);
+  }
+
+  scale(sx, sy = sx) {
+    return new Circle(this.c.scale(sx, sy), this.r * (sx + sy) / 2);
+  }
+
+  shift(x, y = x) {
+    return new Circle(this.c.shift(x, y), this.r)
+  }
+
+  translate(p) {
+    return new Circle(this.c.translate(p), this.r);
+  }
+
+  contains(p) {
+    return Point.distance(p, this.c) <= this.r;
+  }
+
+  equals(other) {
+    return other instanceof Circle && nearlyEquals(this.r, other.r)
+      && this.c.equals(other.c);
   }
 
   project(p) {
@@ -381,65 +414,58 @@ export class Circle {
     return Point.sum(this.c, proj);
   }
 
-  toString() {
-    return '';  // TODO
+  at(t) {
+    const a = 2 * Math.PI * t;
+    return this.c.shift(this.r * Math.cos(a), this.r * Math.sin(a));
   }
-
-  transform(m) {
-    if (!m) return this;
-    return new Circle(this.c.transform(m), this.r * (m[0][0] + m[1][1]) / 2);
-  }
-
-  static equals(c1, c2) {
-    return (c1.r === c2.r) && Point.equals(c1.c, c2.c);
-  }
-
-  // TODO rotate, reflect, scale, shift
 }
 
 export class Arc {
 
-  constructor(c, a1, a2) {
+  constructor(c, start, angle) {
     this.c = c;
-    this.a1 = a1;
-    this.a2 = a2;
+    this.start = start;
+    this.angle = angle;
   }
 
   get radius() {
-    return this.a1.length;
+    return Point.distance(this.c, this.start);
   }
 
-  get angle() {
-    return new Angle(Point.sum(this.c, this.a1), this.c, Point.sum(this.c, this.a2));
-  }
-
-  get startAngle() {
-    return new Angle(this.c.shift(1, 0), this.c, Point.sum(this.c, this.a1));
-  }
-
-  get endAngle() {
-    return new Angle(this.c.shift(1, 0), this.c, Point.sum(this.c, this.a2));
-  }
-
-  project(p) {
-    // TODO Update this for arcs
-    const proj = Point.difference(p, this.c).normal.scale(this.radius);
-    return Point.sum(this.c, proj);
+  get end() {
+    return this.start.rotate(this.angle, this.c);
   }
 
   transform(m) {
     if (!m) return this;
-    return new Arc(this.c.transform(m), this.a1.transform(m), this.a2.transform(m));
+    return new Arc(this.c.transform(m), this.start.transform(m), this.angle);
   }
+
+  project(p) {
+    let start = rad(this.start, this.c);
+    let end = start + this.angle;
+
+    let angle = rad(p, this.c);
+    if (end > twoPi && angle < end - twoPi) angle += twoPi;
+    angle = clamp(angle, start, end);
+
+    return this.c.shift(this.radius, 0).rotate(angle, this.c);
+  }
+
+  at(t) {
+    return this.start.rotate(this.angle * t, this.c);
+  }
+
+  contract(p) {
+    return new Arc(this.c, this.at(p / 2), this.angle * (1 - p));
+  }
+
+  // TODO rotate, reflect, scale, shift, translate, contains, equals
 }
 
 
 // -----------------------------------------------------------------------------
 // Polygons
-
-function cross(a, b, o) {
-  return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x)
-}
 
 export class Polygon {
 
@@ -489,35 +515,33 @@ export class Polygon {
     return edges;
   }
 
-  get convexHull() {
-    let points = this.points.slice(0);
-    points.sort((a, b) => a.x - b.x || a.y - b.y);
-
-    const lower = [];
-    for (let p of points) {
-      while (lower.length >= 2 && cross(last(lower, 1), last(lower), p) <= 0) {
-        lower.pop();
-      }
-      lower.push(p);
-    }
-
-    points.reverse();
-    const upper = [];
-    for (let p of points) {
-      while (upper.length >= 2 && cross(last(lower, 1), last(lower), p) <= 0) {
-        upper.pop();
-      }
-      upper.push(p);
-    }
-
-    upper.pop();
-    lower.pop();
-    return new Polygon(...lower, ...upper);
-  }
-
   transform(m) {
     if (!m) return this;
     return new this.constructor(...this.points.map(p => p.transform(m)));
+  }
+
+  rotate(a, center=origin) {
+    const points = this.points.map(p => p.rotate(a, center));
+    return new Polygon(...points);
+  }
+
+  reflect(line) {
+    const points = this.points.map(p => p.reflect(line));
+    return new Polygon(...points);
+  }
+
+  scale(sx, sy = sx) {
+    const points = this.points.map(p => p.scale(sx, sy));
+    return new Polygon(...points);
+  }
+
+  shift(x, y=x) {
+    const points = this.points.map(p => p.shift(x, y));
+    return new Polygon(...points);
+  }
+
+  translate(p) {
+    return this.shift(p.x, p.y);
   }
 
   contains(p) {
@@ -536,34 +560,15 @@ export class Polygon {
     return inside;
   }
 
-  at(_t = 0) {
+  equals(_other) {
     // TODO
   }
 
-  toString() {
-    return '';  // TODO
+  project(_p) {
+    // TODO
   }
 
-  shift(x, y=x) {
-    const points = this.points.map(p => p.shift(x, y));
-    return new Polygon(...points);
-  }
-
-  translate(p) {
-    return this.shift(p.x, p.y);
-  }
-
-  rotate(a, center=origin) {
-    const points = this.points.map(p => p.rotate(a, center));
-    return new Polygon(...points);
-  }
-
-  reflect(line) {
-    const points = this.points.map(p => p.reflect(line));
-    return new Polygon(...points);
-  }
-
-  static equals(_p1, _p2) {
+  at(_t) {
     // TODO
   }
 
@@ -584,6 +589,7 @@ export class Polygon {
 }
 
 export class Triangle extends Polygon {
+
   constructor(a, b, c) {
     super(a, b, c);
   }
@@ -646,7 +652,7 @@ export class Rectangle {
   }
 
   get circumference() {
-    return 2 * this.w + 2 * this.h;
+    return 2 * Math.abs(this.w) + 2 * Math.abs(this.h);
   }
 
   get area() {
@@ -672,25 +678,46 @@ export class Rectangle {
     return new this.constructor(this.p.transform(m), w1, h1);
   }
 
+  // TODO rotate, reflect, scale, shift, translate
+
   contains(_p) {
     // TODO
   }
 
-  at(_t = 0) {
-    // TODO
-  }
-
-  static equals(_r1, _r2) {
+  equals(_other) {
     // TODO
   }
 
   project(p) {
-    // TODO Handle for points that lie *inside* the rectangle
-    const line = new Segment(p, this.center);
-    return intersections(line, this)[0];
+    // TODO Use the generic intersections() function
+    let rect1 = { x: this.p.x + this.w, y: this.p.y + this.h };  // bottom right corner of rect
+    let center = { x: this.p.x + this.w/2, y: this.p.y + this.h/2 };
+    let m = (center.y - p.y) / (center.x - p.x);
+
+    if (p.x <= center.x) {  // check left side
+      let y = m * (this.p.x - p.x) + p.y;
+      if (this.p.y < y && y < rect1.y) return new Point(this.p.x, y);
+    }
+
+    if (p.x >= center.x) {  // check right side
+      let y = m * (rect1.x - p.x) + p.y;
+      if (this.p.y < y && y < rect1.y) return new Point(rect1.x, y);
+    }
+
+    if (p.y <= center.y) {  // check top side
+      let x = (this.p.y - p.y) / m + p.x;
+      if (this.p.x < x && x < rect1.x) return new Point(x, this.p.y);
+    }
+
+    if (p.y >= center.y) {  // check bottom side
+      let x = (rect1.y - p.y) / m + p.x;
+      if (this.p.x < x && x < rect1.x) return new Point(x, rect1.y);
+    }
   }
 
-  // TODO toString, rotate, reflect, scale, shift
+  at(_t) {
+    // TODO
+  }
 }
 
 export class Square extends Rectangle {
