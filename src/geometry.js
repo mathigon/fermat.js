@@ -209,10 +209,9 @@ function rad(p, c=origin) {
 
 export class Line {
 
-  constructor(p1, p2, decoration=null) {
+  constructor(p1, p2) {
     this.p1 = p1;
     this.p2 = p2;
-    this.decoration = decoration;
   }
 
   get length() {
@@ -228,7 +227,7 @@ export class Line {
   }
 
   get angle() {
-    return Math.atan2(this.p2.y - this.p1.y, this.p2.x - this.p1.x) * 180 / Math.PI;
+    return rad(this.p2, this.p1);
   }
 
   get normalVector() {
@@ -306,6 +305,10 @@ export class Line {
   }
 }
 
+export class Ray extends Line {
+  // TODO
+}
+
 export class Segment extends Line {
 
   contains(_p) {
@@ -371,8 +374,8 @@ export class Circle {
   }
 
   get arc() {
-    let a = this.c.shift(this.r, 0);
-    return new Arc(this.c, a, a);
+    let start = this.c.shift(this.r, 0);
+    return new Arc(this.c, start, twoPi);
   }
 
   transform(m) {
@@ -441,8 +444,12 @@ export class Arc {
     return new Arc(this.c.transform(m), this.start.transform(m), this.angle);
   }
 
+  get startAngle() {
+    return rad(this.start, this.c);
+  }
+
   project(p) {
-    let start = rad(this.start, this.c);
+    let start = this.startAngle;
     let end = start + this.angle;
 
     let angle = rad(p, this.c);
