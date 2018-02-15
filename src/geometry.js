@@ -105,6 +105,10 @@ export class Point {
     return new Point(roundTo(this.x, inc), roundTo(this.y, inc))
   }
 
+  mod(x, y = x) {
+    return new Point(this.x % x, this.y % y);
+  }
+
   static average(...points) {
     let x = total(points.map(p => p.x)) / points.length;
     let y = total(points.map(p => p.y)) / points.length;
