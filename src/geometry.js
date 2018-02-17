@@ -230,6 +230,10 @@ export class Line {
     return (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
   }
 
+  get intercept() {
+    return this.p1.y + this.slope * this.p1.x
+  }
+
   get angle() {
     return rad(this.p2, this.p1);
   }
@@ -259,6 +263,8 @@ export class Line {
   }
 
   contains(p) {
+    if (this.p1.x === this.p2.x) return this.p1.x === p.x;  // Vertical lines
+
     let grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
     let grad2 = (p.y - this.p1.y) / (p.x - this.p1.x);
     return nearlyEquals(grad1, grad2);
