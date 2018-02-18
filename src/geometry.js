@@ -539,22 +539,22 @@ export class Polygon {
 
   rotate(a, center=origin) {
     const points = this.points.map(p => p.rotate(a, center));
-    return new Polygon(...points);
+    return new this.constructor(...points);
   }
 
   reflect(line) {
     const points = this.points.map(p => p.reflect(line));
-    return new Polygon(...points);
+    return new this.constructor(...points);
   }
 
   scale(sx, sy = sx) {
     const points = this.points.map(p => p.scale(sx, sy));
-    return new Polygon(...points);
+    return new this.constructor(...points);
   }
 
   shift(x, y=x) {
     const points = this.points.map(p => p.shift(x, y));
-    return new Polygon(...points);
+    return new this.constructor(...points);
   }
 
   translate(p) {
@@ -603,6 +603,17 @@ export class Polygon {
 
     return false;
   }
+}
+
+export class Polyline extends Polygon {
+  get edges() {
+    let edges = [];
+    for (let i=0; i<this.points.length-1; ++i)
+      edges.push(new Segment(this.points[i], this.points[i+1]));
+    return edges;
+  }
+
+  // TODO Other methods and properties
 }
 
 export class Triangle extends Polygon {
