@@ -5,7 +5,7 @@
 
 
 
-import { square, map } from '@mathigon/core';
+import { square, map , run} from '@mathigon/core';
 
 export function V(...args) {
   return new Vector(...args);
@@ -114,10 +114,6 @@ export class Vector {
     let d = 0;
     for (let i = 0; i < n; ++i) d += (v1[i] || 0) * (v2[i] || 0);
     return d;
-  }
-
-  static cross2D(x, y) {
-    return x[0] * y[1] - x[1] * y[0];
   }
 
   static cross(v1, v2) {

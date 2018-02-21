@@ -8,7 +8,6 @@
 import { tabulate, total, list, isBetween, square, clamp, flatten } from '@mathigon/core';
 import { nearlyEquals, roundTo } from './arithmetic';
 import { permutations, subsets } from './combinatorics';
-import { Vector } from './vector';
 
 
 // -----------------------------------------------------------------------------
@@ -263,7 +262,8 @@ export class Line {
   }
 
   contains(p) {
-    if (this.p1.x === this.p2.x) return this.p1.x === p.x;  // Vertical lines
+    // Vertical lines
+    if (nearlyEquals(this.p1.x, this.p2.x)) return nearlyEquals(this.p1.x, p.x);
 
     let grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
     let grad2 = (p.y - this.p1.y) / (p.x - this.p1.x);
@@ -339,28 +339,9 @@ export class Segment extends Line {
   }
 
   static intersect(l1, l2) {
-    // TODO Use the generic intersection() function
-
-    // Equal or touching line segments don't intersect
-    let s = Point.equals(l1.p1, l2.p1) + Point.equals(l1.p1, l2.p2) +
-      Point.equals(l1.p2, l2.p1) + Point.equals(l1.p2, l2.p2);
-    if (s >= 1) return;
-
-    let d1 = [l1.p2.x - l1.p1.x, l1.p2.y - l1.p1.y];
-    let d2 = [l2.p2.x - l2.p1.x, l2.p2.y - l2.p1.y];
-
-    let denominator = Vector.cross2D(d2, d1);
-    if (nearlyEquals(denominator, 0)) return;  // -> colinear
-
-    let d  = [l2.p1.x - l1.p1.x, l2.p1.y - l1.p1.y];
-    let q1 = Vector.cross2D(d1, d) / denominator;
-    let q2 = Vector.cross2D(d2, d) / denominator;
-
-    if (q1 >= 0 && q1 <= 1 && q2 >= 0 && q2 <= 1) {
-      let intersectionX = l1.p1.x + q1 * d[0];
-      let intersectionY = l1.p1.y + q2 * d[1];
-      return new Point(intersectionX, intersectionY);
-    }
+    const s1 = new Segment(l1.p1, l1.p2);
+    const s2 = new Segment(l2.p1, l2.p2);
+    return intersections(s1, s2)[0] || null;
   }
 }
 
@@ -498,7 +479,7 @@ export class Polygon {
     return C;
   }
 
-  get area() {
+  get signedArea() {
     let p = this.points;
     let n = p.length;
     let A = p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
@@ -509,6 +490,8 @@ export class Polygon {
 
     return A / 2;
   }
+
+  get area() { return Math.abs(this.signedArea); }
 
   get centroid() {
     let p = this.points;
@@ -587,6 +570,50 @@ export class Polygon {
 
   at(_t) {
     // TODO
+  }
+
+  // Returns the same polygon, but always oriented clockwise.
+  get oriented() {
+    if (this.signedArea <= 0) return this;
+    const points = [...this.points].reverse();
+    return new Polygon(points);
+  }
+
+  // Weiler–Atherton clipping algorithm
+  // TODO Support intersections with multiple disjoint overlapping areas.
+  // TODO Support segments intersecting at their endpoints
+  intersect(polygon) {
+    const points = [this.oriented.points, polygon.oriented.points];
+    const edges = [this.oriented.edges, polygon.oriented.edges];
+    const X = [];
+
+    let active = 0;
+    let i = points[0].findIndex(p => polygon.contains(p));
+    if (i < 0) return null;  // No intersection
+
+    while(X[0] !== points[active][i]) {
+      // Add the active vertex
+      X.push(points[active][i]);
+
+      // Check all edges of the other polygon for a possible intersection
+      const nextEdge = edges[active][i];
+      const otherEdges = edges[1 - active];
+      for (let j = 0; j < otherEdges.length; ++j) {
+        let intersect = intersections(nextEdge, otherEdges[j])[0];
+        if (intersect) {
+          // If there is one, add it and then switch to the other polygon.
+          X.push(intersect);
+          active = 1 - active;
+          i = j;
+          break;
+        }
+      }
+
+      // Increment to the next vertex
+      i = (i + 1) % points[active].length;
+    }
+
+    return new Polygon(...X);
   }
 
   static collision(p1, p2) {
@@ -764,12 +791,21 @@ function liesOnSegment(s, p) {
 }
 
 function lineLineIntersection(l1, l2) {
-  const m1 = l1.slope;
-  const m2 = l2.slope;
+  const d1x = l1.p1.x - l1.p2.x;
+  const d1y = l1.p1.y - l1.p2.y;
 
-  const x = (l2.p1.y - l1.p1.y - m2 * l2.p1.x + m1 * l1.p1.x) / (m1 - m2);
-  const y = l1.p1.y + m1 * (x - l1.p1.x);
-  return [new Point(x, y)];
+  const d2x = l2.p1.x - l2.p2.x;
+  const d2y = l2.p1.y - l2.p2.y;
+
+  const d = d1x * d2y - d1y * d2x;
+  if (nearlyEquals(d, 0)) return [];  // Colinear lines never intersect
+
+  const q1 = l1.p1.x * l1.p2.y - l1.p1.y * l1.p2.x;
+  const q2 = l2.p1.x * l2.p2.y - l2.p1.y * l2.p2.x;
+
+  const x = q1 * d2x - d1x * q2;
+  const y = q1 * d2y - d1y * q2;
+  return [new Point(x/d, y/d)];
 }
 
 function circleCircleIntersection(c1, c2) {
