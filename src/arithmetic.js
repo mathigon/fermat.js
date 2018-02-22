@@ -8,12 +8,19 @@
 // -----------------------------------------------------------------------------
 // Simple Functions
 
-export function nearlyEquals(x, y, tolerance = 0.0000001) {
-  return Math.abs(x - y) < tolerance;
+const tolerance = 0.000001;
+
+export function nearlyEquals(x, y, t = tolerance) {
+  return Math.abs(x - y) < t;
 }
 
-export function sign(x, tolerance = 0.0000001) {
-  return nearlyEquals(x, 0, tolerance) ? 0 : (x > 0 ? 1 : -1);
+export function isBetween(x, a, b, t = tolerance) {
+  if (a > b) [a, b] = [b, a];
+  return x > a + t && x < b - t;
+}
+
+export function sign(x, t = tolerance) {
+  return nearlyEquals(x, 0, t) ? 0 : (x > 0 ? 1 : -1);
 }
 
 

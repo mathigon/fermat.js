@@ -5,8 +5,8 @@
 
 
 
-import { tabulate, total, list, isBetween, square, clamp, flatten } from '@mathigon/core';
-import { nearlyEquals, roundTo } from './arithmetic';
+import { tabulate, total, list, square, clamp, flatten, toLinkedList } from '@mathigon/core';
+import { nearlyEquals, isBetween, roundTo } from './arithmetic';
 import { permutations, subsets } from './combinatorics';
 
 
@@ -482,7 +482,7 @@ export class Polygon {
   get signedArea() {
     let p = this.points;
     let n = p.length;
-    let A = p[0].x * p[n - 1].y - p[n - 1].x * p[0].y;
+    let A = p[n - 1].x * p[0].y - p[0].x * p[n - 1].y;
 
     for (let i = 1; i < n; ++i) {
       A += p[i - 1].x * p[i].y - p[i].x * p[i - 1].y;
@@ -574,46 +574,42 @@ export class Polygon {
 
   // Returns the same polygon, but always oriented clockwise.
   get oriented() {
-    if (this.signedArea <= 0) return this;
+    if (this.signedArea >= 0) return this;
     const points = [...this.points].reverse();
-    return new Polygon(points);
+    return new Polygon(...points);
   }
 
   // Weiler–Atherton clipping algorithm
   // TODO Support intersections with multiple disjoint overlapping areas.
   // TODO Support segments intersecting at their endpoints
   intersect(polygon) {
-    const points = [this.oriented.points, polygon.oriented.points];
-    const edges = [this.oriented.edges, polygon.oriented.edges];
-    const X = [];
+    const points = [toLinkedList(this.oriented.points),
+      toLinkedList(polygon.oriented.points)];
+    const max = this.points.length + polygon.points.length;
+    const result = [];
 
-    let active = 0;
-    let i = points[0].findIndex(p => polygon.contains(p));
-    if (i < 0) return null;  // No intersection
+    let which = 0;
+    let active = points[which].find(p => polygon.contains(p.val));
+    if (!active) return null;  // No intersection
 
-    while(X[0] !== points[active][i]) {
-      // Add the active vertex
-      X.push(points[active][i]);
+    while(active.val !== result[0] && result.length < max) {
+      result.push(active.val);
 
-      // Check all edges of the other polygon for a possible intersection
-      const nextEdge = edges[active][i];
-      const otherEdges = edges[1 - active];
-      for (let j = 0; j < otherEdges.length; ++j) {
-        let intersect = intersections(nextEdge, otherEdges[j])[0];
+      const nextEdge = new Segment(active.val, active.next.val);
+      active = active.next;
+
+      for (let p of points[1 - which]) {
+        const testEdge = new Segment(p.val, p.next.val);
+        const intersect = intersections(nextEdge, testEdge)[0];
         if (intersect) {
-          // If there is one, add it and then switch to the other polygon.
-          X.push(intersect);
-          active = 1 - active;
-          i = j;
+          which = 1 - which;  // Switch active polygon
+          active = {val: intersect, next: p.next};
           break;
         }
       }
-
-      // Increment to the next vertex
-      i = (i + 1) % points[active].length;
     }
 
-    return new Polygon(...X);
+    return new Polygon(...result);
   }
 
   static collision(p1, p2) {
