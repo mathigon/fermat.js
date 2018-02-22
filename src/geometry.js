@@ -248,7 +248,7 @@ export class Line {
     return new Point(this.p2.y - this.p1.y, this.p1.x - this.p2.x).normal;
   }
 
-  get perpendicularBisector() {
+  get perpBisector() {
     return this.perpendicular(this.midpoint);
   }
 
@@ -262,12 +262,10 @@ export class Line {
   }
 
   contains(p) {
-    // Vertical lines
-    if (nearlyEquals(this.p1.x, this.p2.x)) return nearlyEquals(this.p1.x, p.x);
-
-    let grad1 = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
-    let grad2 = (p.y - this.p1.y) / (p.x - this.p1.x);
-    return nearlyEquals(grad1, grad2);
+    // det([[p.x, p.y, 1],[p1.x, p1.y, 1],[p2.x, ,p2.y 1]])
+    const det = p.x * (this.p1.y - this.p2.y) + this.p1.x * (this.p2.y - p.y)
+      + this.p2.x * (p.y - this.p1.y);
+    return nearlyEquals(det, 0);
   }
 
   at(t) {
@@ -681,8 +679,10 @@ export class Triangle extends Polygon {
   }
 
   get orthocenter() {
-    // TODO
-    return origin;
+    const [a, b, c] = this.points;
+    const h1 = new Line(a, b).perpendicular(c);
+    const h2 = new Line(a, c).perpendicular(b);
+    return intersections(h1, h2)[0];
   }
 }
 
@@ -723,13 +723,28 @@ export class Rectangle {
 
   transform(m) {
     if (!m) return this;
-
-    const w1 = this.w * m[0][0];
-    const h1 = this.h * m[1][1];
-    return new this.constructor(this.p.transform(m), w1, h1);
+    return this.polygon.transform(m);
   }
 
-  // TODO rotate, reflect, scale, shift, translate
+  rotate(a, c = origin) {
+    return this.polygon.rotate(a,c);
+  }
+
+  reflect(l) {
+    return this.polygon.reflect(l);
+  }
+
+  scale(sx, sy = sx) {
+    return new Rectangle(this.p.scale(sx, sy), this.w * sx, this.h * sy);
+  }
+
+  shift(x, y = x) {
+    return new Rectangle(this.p.shift(x, y), this.w, this.h);
+  }
+
+  translate(p) {
+    return new Rectangle(this.p.translate(p), this.w, this.h);
+  }
 
   contains(_p) {
     // TODO
