@@ -801,6 +801,11 @@ function liesOnSegment(s, p) {
   return isBetween(p.x, s.p1.x, s.p2.x);
 }
 
+function liesOnRay(r, p) {
+  if (nearlyEquals(r.p1.x, r.p2.x)) return (p.y - r.p1.y) / (r.p2.y - r.p1.y) > 0;
+  return (p.x - r.p1.x) / (r.p2.x - r.p1.x)  > 0;
+}
+
 function lineLineIntersection(l1, l2) {
   const d1x = l1.p1.x - l1.p2.x;
   const d1y = l1.p1.y - l1.p2.y;
@@ -867,6 +872,9 @@ export function intersections(...elements) {
 
   if (a instanceof Segment) results = results.filter(i => liesOnSegment(a, i));
   if (b instanceof Segment) results = results.filter(i => liesOnSegment(b, i));
+
+  if (a instanceof Ray) results = results.filter(i => liesOnRay(a, i));
+  if (b instanceof Ray) results = results.filter(i => liesOnRay(b, i));
 
   return results;
 }

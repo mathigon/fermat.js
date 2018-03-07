@@ -18,7 +18,7 @@ export function identity(n = 2) {
 }
 
 export function fill(x, y, value) {
-  return tabulate(value, x, r);
+  return tabulate(value, x, y);
 }
 
 export function rotation(_angle) {
