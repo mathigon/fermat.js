@@ -20,6 +20,13 @@ const ENGLISH_FREQUENCY = {
 // -----------------------------------------------------------------------------
 // Ciphers
 
+/**
+ * Enciphers a string by shifting every letter by a certain offset through the
+ * alphabet.
+ * @param {string} msg
+ * @param {number} shift
+ * @returns {string}
+ */
 export function caesarCipher(msg, shift = 0) {
   let cipher = '';
 
@@ -36,7 +43,13 @@ export function caesarCipher(msg, shift = 0) {
   return cipher;
 }
 
-export function vigenereCipher(msg, key = '') {
+/**
+ * Enciphers a string using a Vigenere cipher with a give key.
+ * @param {string} msg
+ * @param {string} key
+ * @returns {string}
+ */
+export function vigenereCipher(msg, key) {
   let cipher = '';
   let count = 0;
   let keyLength = key.length;
@@ -64,10 +77,20 @@ export function vigenereCipher(msg, key = '') {
 // -----------------------------------------------------------------------------
 // Letter Frequency Utilities
 
+/**
+ * Returns the relative frequency of a given letter in the English language.
+ * @param {string} letter
+ * @returns {number}
+ */
 export function letterFrequency(letter) {
   return ENGLISH_FREQUENCY[letter.toLowerCase()];
 }
 
+/**
+ * Counts how often every letter occurs in a given cipher.
+ * @param {str} cipher
+ * @returns {number[]}
+ */
 export function cipherLetterFreq(cipher) {
   let msg = cipher.toLowerCase();
   let freq = new Array(26).fill(0);

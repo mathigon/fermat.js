@@ -39,7 +39,7 @@ function same(expr1, expr2) {
 
   // Different functions are always unequal (we assume already simplified).
   if (!isArray(expr1) || !isArray(expr2)) return false;
-  if (expr1[0] != expr2[0]) return false;
+  if (expr1[0] !== expr2[0]) return false;
 
   let [fn, ...args1] = expr1;
   let args2 = expr2.slice(1);
@@ -482,17 +482,44 @@ function parseString(str) {
 // -----------------------------------------------------------------------------
 // Expressions Class
 
+/**
+ * Parsed mathematical expression class.
+ */
 export class Expression {
   constructor(str) { this.expr = isString(str) ? parseString(str) : str; }
+
+  /** @return {string} */
   toString() { return stringify(this.expr); }
 
+  /** @returns {Expression} */
   get simplified() { return new Expression(simplify(this.expr)); }
+
+  /** @returns {string[]} */
   get functions() { return functions(this.expr); }
+
+  /** @returns {string[]} */
   get variables() { return variables(this.expr); }
 
+  /**
+   * Checks if two expressions are exactly the same.
+   * @param {Expression} other
+   * @returns {boolean}
+   */
   same(other) { return same(this.expr, other.expr); }
-  equals(other) { return simplify(['-', this.expr, other.expr]) == 0; }
 
+  /**
+   * Checks if two expressions are mathematically equivalent.
+   * @param {Expression} other
+   * @returns {boolean}
+   */
+  equals(other) { return simplify(['-', this.expr, other.expr]) === 0; }
+
+  /**
+   * Evaluates this expression with a given set of variable values.
+   * @param vars
+   * @throws {ExprError}
+   * @return {number}
+   */
   evaluate(vars={}) {
     let result = evaluate(this.expr, vars);
     if (!isNumber(result)) {
@@ -502,6 +529,11 @@ export class Expression {
     return result;
   }
 
+  /**
+   * Numerically checks if two expressions are mathematically equal.
+   * @param {Expression} other
+   * @returns {boolean}
+   */
   numEquals(other) {
     // This is an incredibly hacky and non-robust solution, but much faster than
     // the full CAS simplification. We only test positive random numbers, because
@@ -520,6 +552,11 @@ export class Expression {
     return true;
   }
 
+  /**
+   * Substitutes certain variables in an expression.
+   * @param {Object} vars
+   * @returns {Expression}
+   */
   substitute(vars) {
     let newVars = {};
     for (let v of Object.keys(vars)) newVars[v] = parseString('' + vars[v]);

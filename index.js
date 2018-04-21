@@ -14,7 +14,6 @@ export * from './src/geometry'
 export * from './src/number-theory'
 export * from './src/numeric'
 export * from './src/statistics'
-export * from './src/units'
 export * from './src/vector'
 
 import * as matrix from './src/matrix';

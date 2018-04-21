@@ -5,18 +5,32 @@
 
 
 
+/** @module matrix */
+
 import { tabulate } from '@mathigon/core';
 
 
 // -----------------------------------------------------------------------------
 // Matrix Constructors
 
+/**
+ * Returns the identity matrix of size n.
+ * @param {number} n
+ * @returns {Array.<number[]>}
+ */
 export function identity(n = 2) {
   const x = tabulate(0, n, n);
   for (let i = 0; i < n; ++i) x[i][i] = 1;
   return x;
 }
 
+/**
+ * Fills a matrix of size x, y with a given value.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} value
+ * @returns {Array.<number[]>}
+ */
 export function fill(x, y, value) {
   return tabulate(value, x, y);
 }
@@ -41,7 +55,13 @@ export function projection() {
 // -----------------------------------------------------------------------------
 // Matrix Operations
 
-export function sum(M1, ...rest) {
+/**
+ * Calculates the sum of multiple matrices.
+ * @param {...Array.<number[]>} matrices
+ * @return {Array.<number[]>}
+ */
+export function sum(matrices) {
+  let [M1, ...rest] = matrices;
   let M2 = rest.length > 1 ? sum(...rest) : rest[0];
 
   if (M1.length !== M2.length || M1[0].length !== M2[0].length)
@@ -58,14 +78,26 @@ export function sum(M1, ...rest) {
   return S;
 }
 
+/**
+ * Multiplies a matrix M by a scalar v.
+ * @param {Array.<number[]>} M
+ * @param {number} v
+ * @return {Array.<number[]>}
+ */
 export function scalarProduct(M, v) {
   return M.map(row => row.map(x => x * v));
 }
 
-export function product(M1, ...rest) {
+/**
+ * Calculates the matrix product of multiple matrices.
+ * @param {...Array.<number[]>} matrices
+ * @return {Array.<number[]>}
+ */
+export function product(matrices) {
+  let [M1, ...rest] = matrices;
   let M2 = rest.length > 1 ? product(...rest) : rest[0];
 
-  if (M1[0].length != M2.length) throw new Error('Matrix sizes don’t match.');
+  if (M1[0].length !== M2.length) throw new Error('Matrix sizes don’t match.');
 
   let P = [];
   for (let i = 0; i < M1.length; ++i) {
@@ -88,6 +120,11 @@ export function product(M1, ...rest) {
 // -----------------------------------------------------------------------------
 // Matrix Properties
 
+/**
+ * Calculates the transpose of a matrix M.
+ * @param {Array.<number[]>} M
+ * @return Array.<number[]>
+ */
 export function transpose(M) {
   let T = [];
   for (let j = 0; j < M[0].length; ++j) {
@@ -100,8 +137,13 @@ export function transpose(M) {
   return T
 }
 
+/**
+ * Calculates the determinant of a matrix M.
+ * @param {Array.<number[]>} M
+ * @return number
+ */
 export function determinant(M) {
-  if (M.length != M[0].length) throw new Error('Not a square matrix.');
+  if (M.length !== M[0].length) throw new Error('Not a square matrix.');
   let n = M.length;
 
   // Shortcuts for small n
@@ -122,6 +164,11 @@ export function determinant(M) {
   return det;
 }
 
+/**
+ * Calculates the inverse of a matrix M.
+ * @param {Array.<number[]>} M
+ * @return Array.<number[]>
+ */
 export function inverse(M) {
   // Perform Gaussian elimination:
   // (1) Apply the same operations to both I and C.
@@ -140,7 +187,7 @@ export function inverse(M) {
     // If e is 0, we need to swap this row with a lower row.
     if (!e) {
       for (let ii = i + 1; ii < n; ++ii) {
-        if (C[ii][i] != 0){
+        if (C[ii][i] !== 0){
           for (let j = 0; j < n; ++j) {
             [C[ii][j], C[i][j]] = [C[i][j], C[ii][j]];
             [I[ii][j], I[i][j]] = [I[i][j], I[ii][j]];
@@ -161,7 +208,7 @@ export function inverse(M) {
     // Subtract a multiple of this row from all other rows,
     // so that they end up having 0s in this column.
     for (let ii = 0; ii < n; ++ii) {
-      if (ii == i) continue;
+      if (ii === i) continue;
       let f = C[ii][i];
       for(let j = 0; j < n; ++j){
         C[ii][j] -= f * C[i][j];

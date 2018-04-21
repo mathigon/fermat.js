@@ -11,10 +11,20 @@ import { total, square } from '@mathigon/core';
 // -----------------------------------------------------------------------------
 // Mean, Media and Mode
 
-export function mean(a) {
-  return a.length ? total(a) / a.length : null;
+/**
+ * Calculates the mean of an array of numbers.
+ * @param {number[]} values
+ * @returns {?number}
+ */
+export function mean(values) {
+  return values.length ? total(values) / values.length : null;
 }
 
+/**
+ * Calculates the median of an array of numbers.
+ * @param {number[]} values
+ * @returns {?number}
+ */
 export function median(values) {
   let n = values.length;
   if (!n) return 0;
@@ -23,7 +33,12 @@ export function median(values) {
   return (n % 2 === 1) ? sorted[Math.floor(n/2)] : (sorted[n/2 - 1] + sorted[n/2]) / 2;
 }
 
-// Returns 'null' if no mode exists (multiple values with the same largest count)
+/**
+ * Calculates the mode of an array of numbers. Returns null if no mode exists,
+ * i.e. there are multiple values with the same largest count.
+ * @param {number[]} values
+ * @returns {?number}
+ */
 export function mode(values) {
   let counts = new Map();
 
@@ -57,6 +72,11 @@ export function mode(values) {
 // -----------------------------------------------------------------------------
 // Variance
 
+/**
+ * Calculates the variance of an array of numbers.
+ * @param {number[]} values
+ * @returns {number}
+ */
 export function variance(values) {
   if (!values.length) return null;
   let mean = mean(values);
@@ -66,11 +86,21 @@ export function variance(values) {
   return sum / (values.length - 1);
 }
 
+/**
+ * Calculates the standard deviation of an array of numbers.
+ * @param {number[]} values
+ * @returns {number}
+ */
 export function stdDev(values) {
   return Math.sqrt(variance(values));
 }
 
-// Determines the covariance of the numbers in two arrays aX and aY
+/**
+ * Calculates the covariance of the numbers in two arrays aX and aY.
+ * @param {number[]} aX
+ * @param {number[]} aY
+ * @returns {number}
+ */
 export function covariance(aX, aY) {
   if (aX.length !== aY.length) throw new Error('Array length mismatch.');
   let n = aX.length;
@@ -79,40 +109,16 @@ export function covariance(aX, aY) {
   return (total - total(aX) * total(aY) / n) / n;
 }
 
+/**
+ * Calculates the correlation between the numbers in two arrays aX and aY.
+ * @param {number[]} aX
+ * @param {number[]} aY
+ * @returns {number}
+ */
 export function correlation(aX, aY) {
   if (aX.length !== aY.length) throw new Error('Array length mismatch.');
   let covarXY = covariance(aX, aY);
   let stdDevX = stdDev(aX);
   let stdDevY = stdDev(aY);
   return covarXY / (stdDevX * stdDevY);
-}
-
-
-// -----------------------------------------------------------------------------
-// Regression
-
-export function rSquared(source, regression) {
-  let sourceMean = mean(source);
-
-  let residualSquares = source.map((d, i) => square(d - regression[i]));
-  let totalSquares = source.map(d => square(d - sourceMean));
-
-  return 1 - total(residualSquares) / total(totalSquares);
-}
-
-export function linearRegression(aX, aY) {
-  let n = aX.length;
-
-  let sumX = total(aX);
-  let sumY = total(aY);
-  let sumXY = total(aX.map((d, i) => d * aY[i]));
-  let sumXSquared = total(aX.map(d => d * d));
-
-  let meanX = mean(aX);
-  let meanY = mean(aY);
-
-  let b = (sumXY - 1 / n * sumX * sumY) / (sumXSquared - 1 / n * (sumX * sumX));
-  let a = meanY - b * meanX;
-
-  return (x) => (a + b * x);
 }

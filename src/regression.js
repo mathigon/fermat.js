@@ -5,6 +5,8 @@
 
 
 
+/** @module regression */
+
 import { square, noop, list } from '@mathigon/core';
 import * as matrix from './matrix';
 
@@ -12,6 +14,12 @@ import * as matrix from './matrix';
 // -----------------------------------------------------------------------------
 // Regression Functions
 
+/**
+ * Finds a linear regression that best approximates a set of data. The result
+ * will be an array [c, m], where y = m * x + c.
+ * @param {Array.<number[]>} data
+ * @returns {number[]}
+ */
 export function linear(data) {
   let sX = 0, sY = 0, sXX = 0, sXY = 0;
   let len = data.length;
@@ -25,9 +33,15 @@ export function linear(data) {
 
   let gradient = (len * sXY - sX * sY) / (len * sXX - sX * sX);
   let intercept = (sY / len) - (gradient * sX) / len;
-  return [intercept, gradient];  // y = gx + i
+  return [intercept, gradient];
 }
 
+/**
+ * Finds a linear regression going through the origin, that best approximates a
+ * set of data. The result will be an array [0, m], where y = m * x.
+ * @param {Array.<number[]>} data
+ * @returns {number[]}
+ */
 export function linearThroughOrigin(data) {
   let sXX = 0, sXY = 0;
   let n = data.length;
@@ -38,9 +52,15 @@ export function linearThroughOrigin(data) {
   }
 
   let gradient = sXY / sXX;
-  return [0, gradient];  // y = gx
+  return [0, gradient];
 }
 
+/**
+ * Finds an exponential regression that best approximates a set of data. The
+ * result will be an array [a, b], where y = a * e^(bx).
+ * @param {Array.<number[]>} data
+ * @returns {number[]}
+ */
 export function exponential(data) {
   let sum = [0, 0, 0, 0, 0, 0];
 
@@ -57,9 +77,15 @@ export function exponential(data) {
   let a = Math.exp((sum[2] * sum[3] - sum[5] * sum[4]) / denominator);
   let b = (sum[1] * sum[4] - sum[5] * sum[3]) / denominator;
 
-  return [a, b];  // y = a * e^(bx)
+  return [a, b];
 }
 
+/**
+ * Finds a logarithmic regression that best approximates a set of data. The
+ * result will be an array [a, b], where y = a + b * log(x).
+ * @param {Array.<number[]>} data
+ * @returns {number[]}
+ */
 export function logarithmic(data) {
   let sum = [0, 0, 0, 0];
   let len = data.length;
@@ -74,9 +100,15 @@ export function logarithmic(data) {
   let b = (len * sum[1] - sum[2] * sum[0]) / (len * sum[3] - sum[0] * sum[0]);
   let a = (sum[2] - b * sum[0]) / len;
 
-  return [a, b];  // y = a + b * log(x)
+  return [a, b];
 }
 
+/**
+ * Finds a power regression that best approximates a set of data. The result
+ * will be an array [a, b], where y = a * x^b.
+ * @param {Array.<number[]>} data
+ * @returns {number[]}
+ */
 export function power(data) {
   let sum = [0, 0, 0, 0];
   let len = data.length;
@@ -91,9 +123,17 @@ export function power(data) {
   let b = (len * sum[1] - sum[2] * sum[0]) / (len * sum[3] - sum[0] * sum[0]);
   let a = Math.exp((sum[2] - b * sum[0]) / len);
 
-  return [a, b];  // y = a * x^b
+  return [a, b];
 }
 
+/**
+ * Finds a polynomial regression of given `order` that best approximates a set
+ * of data. The result will be an array giving the coefficients of the
+ * resulting polynomial.
+ * @param {Array.<number[]>} data
+ * @param {number} order
+ * @returns {number[]}
+ */
 export function polynomial(data, order=2) {
   // X = [[1, x1, x1^2], [1, x2, x2^2], [1, x3, x3^2]
   // y = [y1, y2, y3]
@@ -113,6 +153,12 @@ export function polynomial(data, order=2) {
 // -----------------------------------------------------------------------------
 // Regression Coefficient
 
+/**
+ * Finds the regression coefficient of a given data set and regression function.
+ * @param {Array.<number[]>} data
+ * @param {Function} fn
+ * @returns {number}
+ */
 export function coefficient(data, fn) {
   let total = data.reduce((sum, d) => sum + d[1], 0);
   let mean = total / data.length;
@@ -148,6 +194,12 @@ const types = [{
   fn(p, x) { return p[0] * Math.pow(Math.E, p[1] * x); },
 }];
 
+/**
+ * Finds the most suitable
+ * @param {Array.<number[]>} data
+ * @param {?number} threshold
+ * @returns {Object}
+ */
 export function find(data, threshold = 0.9) {
   if (data.length > 1) {
     for (let t of types) {

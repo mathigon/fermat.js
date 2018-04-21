@@ -5,21 +5,29 @@
 
 
 
-import { cache } from '@mathigon/core';
-
-
 function facRec(x, acc) {
   if (x <= 1) return x;
   return x * facRec(x - 1, acc);
 }
 
+/**
+ * Calculates the factorial of a number x.
+ * @param {number} x
+ * @returns {number}
+ */
 export function factorial(x) {
   if (x === 0) return 1;
   if (x < 0) return NaN;
   return facRec(x, 1);
 }
 
-export const binomial = cache(function(n, k) {  // n choose k
+/**
+ * Calculates the binomial coefficient nCk of two numbers n and k.
+ * @param {number} n
+ * @param {number} k
+ * @returns {number}
+ */
+export function binomial(n, k) {
   if (k === 0) {
     return 1;
   } else if (2 * k > n) {
@@ -32,11 +40,16 @@ export const binomial = cache(function(n, k) {  // n choose k
     }
     return coeff;
   }
-});
+}
 
-// permutations(arr)[0] == arr
-// http://stackoverflow.com/questions/9960908/permutations-in-javascript
+/**
+ * Returns an array of all possible permutations of an input array arr. In this
+ * implementation, we always have permutations(arr)[0] == arr.
+ * @param {Array} arr
+ * @returns {Array}
+ */
 export function permutations(arr) {
+  // http://stackoverflow.com/questions/9960908/permutations-in-javascript
   let permArr = [];
   let usedChars = [];
   function permute(input) {
@@ -68,6 +81,13 @@ function _getSubsets(arr) {
   return result;
 }
 
+/**
+ * Returns an array of all possible subsets (of given length) of an input array
+ * arr.
+ * @param {Array} arr
+ * @param {number} length
+ * @returns {Array}
+ */
 export function subsets(arr, length = 0) {
   let myArr = arr.slice(0);
   let results = _getSubsets(myArr);
@@ -76,7 +96,11 @@ export function subsets(arr, length = 0) {
   return results;
 }
 
-// Returns a string of n coin flips like 'HTTHTHTTHTT'
+/**
+ * Returns a string of n coin flips like 'HTTHTHTTHTT'.
+ * @param {number} n
+ * @returns {string}
+ */
 export function coinFlips(n = 10) {
   let str = '';
   for (let i = 0; i < n; ++i) {

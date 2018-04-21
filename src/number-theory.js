@@ -8,7 +8,13 @@
 import { unique } from '@mathigon/core';
 
 
-export function gcd(first, ...rest) {
+/**
+ * Calculates the greatest common divisor of multiple numbers.
+ * @param {...number} numbers
+ * @returns {number}
+ */
+export function gcd(numbers) {
+  const [first, ...rest] = numbers;
   if (rest.length > 1) return gcd(first, gcd(...rest));
 
   let a = Math.abs(first);
@@ -18,14 +24,24 @@ export function gcd(first, ...rest) {
   return a;
 }
 
-export function lcm(first, ...rest) {
+/**
+ * Calculates the lowest common multiple of multiple numbers.
+ * @param {...number} numbers
+ * @returns {number}
+ */
+export function lcm(numbers) {
+  const [first, ...rest] = numbers;
   if (rest.length > 1) return lcm(first, lcm(...rest));
 
   return Math.abs(first * rest[0]) / gcd(first, rest[0]);
 }
 
-// Contains no dependencies, so that this function can easily be stringified
-// and run in a web worker.
+/**
+ * Checks if a number n is prime. Contains no dependencies, so that this
+ * function can easily be stringified and run in a web worker.
+ * @param {number} n
+ * @returns {boolean}
+ */
 export function isPrime(n) {
   const M = Math;
   if (n % 1 !== 0 || n < 2) return false;
@@ -42,6 +58,11 @@ export function isPrime(n) {
   return true;
 }
 
+/**
+ * Finds the prime factorisation of a number n.
+ * @param {number} n
+ * @returns {number[]}
+ */
 export function primeFactorisation(n) {
   if (n === 1) return [];
   if (isPrime(n)) return [n];
@@ -52,10 +73,20 @@ export function primeFactorisation(n) {
   }
 }
 
+/**
+ * Finds all prime factors of a number n.
+ * @param {number} n
+ * @returns {number[]}
+ */
 export function primeFactors(n) {
   return unique(primeFactorisation(n));
 }
 
+/**
+ * Lists all prime numbers between 0 and n.
+ * @param {number} n
+ * @returns {number[]}
+ */
 export function listPrimes(n = 100) {
   if (n < 2) return [];
   let result = [2];
@@ -71,8 +102,13 @@ export function listPrimes(n = 100) {
   return result;
 }
 
-// Contains no dependencies, so that this function can easily be stringified
-// and run in a web worker. Number of digits 2 <= d <= 16.
+/**
+ * Generates a random prime number with d digits, where 2 <= d <= 16. Contains
+ * no dependencies, so that this function can easily be stringified and run in
+ * a web worker.
+ * @param {number} d
+ * @returns {number}
+ */
 export function generatePrime(d) {
   const M = Math;
   if (d < 2 || d > 16) throw new Error('Invalid number of digits.');
@@ -95,8 +131,12 @@ export function generatePrime(d) {
   return x;
 }
 
-// Contains no dependencies, so that this function can easily be stringified
-// and run in a web worker.
+/**
+ * Tries to write a number x as the sum of two primes. Contains no dependencies,
+ * so that this function can easily be stringified and run in a web worker.
+ * @param {number} x
+ * @returns {number[]}
+ */
 export function goldbach(x) {
   const M = Math;
 

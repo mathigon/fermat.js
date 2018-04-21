@@ -5,7 +5,15 @@
 
 
 
-// bisect(function(x){ return Math.cos(x/2); }, 10) => Pi
+/**
+ * Uses interval bisection to find a solution to fn(x) = 0. For example,
+ * bisect(function(x){ return Math.cos(x/2); }, 10) => Pi
+ * @param {Function} fn
+ * @param {number} precision
+ * @param {number} l
+ * @param {number} h
+ * @returns {number}
+ */
 export function bisect(fn, precision = 3, l = 0, h = null) {
 
   let p = Math.pow(10, -precision);
@@ -47,6 +55,14 @@ export function bisect(fn, precision = 3, l = 0, h = null) {
   return Math.round(l * q) * p;
 }
 
+/**
+ * Riemann-integrates a function fn from xMin to xMax, with an interval size dx.
+ * @param {Function} fn
+ * @param {number} xMin
+ * @param {number} xMax
+ * @param {?number} dx
+ * @returns {number}
+ */
 export function integrate(fn, xMin, xMax, dx = 1) {
   let result = 0;
   for (let x = xMin; x < xMax; x += dx) {
