@@ -6,7 +6,6 @@
 
 
 export * from './src/arithmetic'
-export * from './src/bignum'
 export * from './src/combinatorics'
 export * from './src/complex'
 export * from './src/cryptography'

@@ -30,9 +30,9 @@
     "@mathigon/core": "^0.2.1"
   },
   "devDependencies": {
-    "eslint": "^4.1.1",
-    "rollup": "^0.43.0",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "tape": "^4.7.0"
+    "eslint": "^4.19.1",
+    "rollup": "^0.58.1",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "tape": "^4.9.0"
   }
 }
