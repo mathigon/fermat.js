@@ -477,7 +477,7 @@ export class Segment extends Line {
    * Checks if two line segments l1 and l2 are equal.
    * @param {Line} l1
    * @param {Line} l2
-   * @param {?boolean} oriented Make true of the orientation matters.
+   * @param {boolean=} oriented Make true of the orientation matters.
    * @returns {boolean}
    */
   static equals(l1, l2, oriented=false) {
