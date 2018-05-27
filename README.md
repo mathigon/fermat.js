@@ -55,7 +55,7 @@ import { Complex, gcd } from '@mathigon/fermat'
 
 We welcome community contributions: please file any bugs you find or send us
 pull requests with improvements. You can find out more on
-[Mathigon.io](http://mathigon.io).
+[Mathigon.io](https://mathigon.io).
 
 
 ## Copyright and License
