@@ -1,6 +1,6 @@
 {
   "name": "@mathigon/fermat",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Powerful mathematics, statistics and geometry library for JavaScript.",
   "keywords": [
     "mathematics",
@@ -27,7 +27,7 @@
     "prepublish": "npm test"
   },
   "dependencies": {
-    "@mathigon/core": "^0.2.1"
+    "@mathigon/core": "^0.2.2"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
