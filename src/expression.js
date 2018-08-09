@@ -13,7 +13,7 @@ import { nearlyEquals } from './arithmetic';
 // -----------------------------------------------------------------------------
 // Error handling
 
-class ExprError extends Error {
+export class ExprError extends Error {
   constructor(name, message) {
     super(message);
     this.name = name;

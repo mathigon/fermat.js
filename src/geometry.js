@@ -134,6 +134,12 @@ export class Point {
     return this.shift(p.x, p.y);
   }
 
+  changeCoordinates(originCoords, targetCoords) {
+    const x = targetCoords.xMin + (this.x - originCoords.xMin) / (originCoords.dx) * (targetCoords.dx);
+    const y = targetCoords.yMin + (this.y - originCoords.yMin) / (originCoords.dy) * (targetCoords.dy);
+    return new Point(x, y);
+  }
+
   add(p) { return Point.sum(this, p); }
 
   subtract(p) { return Point.difference(this, p); }
@@ -220,6 +226,23 @@ export class Point {
 }
 
 const origin = new Point(0,0);
+
+
+// -----------------------------------------------------------------------------
+// Angles
+
+export class Bounds {
+
+  constructor(xMin, xMax, yMin, yMax) {
+    this.xMin = xMin;
+    this.xMax = xMax;
+    this.yMin = yMin;
+    this.yMax = yMax;
+  }
+
+  get dx() { return this.xMax - this.xMin; }
+  get dy() { return this.yMax - this.yMin; }
+}
 
 
 // -----------------------------------------------------------------------------
