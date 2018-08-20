@@ -325,14 +325,42 @@ const FN_STRINGIFY = {
   '≥': (a, b) => a + ' ≥ ' + b
 };
 
+const PRECEDENCE = ['+', '-', '*', '/', 'sqrt', '^'];
+
+function needsBrackets(expr, parentOperator) {
+  if (isNumber(expr) || isString(expr)) return false;
+  return PRECEDENCE.indexOf(parentOperator) < PRECEDENCE.indexOf(expr[0]);
+}
+
 function stringify(expr) {
   if (isNumber(expr) || isString(expr)) return expr;
 
   let [fn, ...args] = expr;
-  args = args.map(a => isArray(a) ? `(${stringify(a)})` : stringify(a));
+  args = args.map(a => needsBrackets(a, fn) ? `(${stringify(a)})` : stringify(a));
 
   if (fn in FN_STRINGIFY) return FN_STRINGIFY[fn](...args);
   return fn + '(' + args.join(', ') + ')';
+}
+
+function mathML(expr) {
+  // TODO Implement MathML for all operators.
+  // TODO Distinguish between fractions and '÷'.
+
+  if (isNumber(expr)) return `<mn>${expr}</mn>`;
+  if (isString(expr)) return `<mi>${expr}</mi>`;
+
+  const [fn, ...args] = expr;
+  const argsStr = args.map(a => needsBrackets(a, fn) ? `<mfenced>${mathML(a)}</mfenced>` : mathML(a));
+
+  switch(fn) {
+    case 'sqrt': return `<msqrt>${mathML(args[0])}</msqrt>`;
+    case '/': return `<mfrac><mrow>${mathML(args[0])}</mrow><mrow>${mathML(args[1])}</mrow></mfrac>`;
+    case '^': return `<msup>${argsStr[0]}<mrow>${mathML(args[1])}</mrow></msup>`;
+    case '*': return argsStr.join('<mo value="×">×</mo>');
+    case '+': return argsStr.join('<mo value="+">+</mo>');
+    case '-': return argsStr.join('<mo value="–">–</mo>');
+    default: return `<mi>TODO</mi>`;
+  }
 }
 
 
@@ -369,7 +397,7 @@ function functions(tree) {
 // Expression Parser
 // TODO handle functions with multiple arguments (commas)
 
-const TOKEN_REGEX = /\b[0-9]+(\.[0-9]*)?\b|\b\.[0-9]+\b|\b\w+\b|\+|-|–|±|\*|×|\/|÷|\^|%|!|\(|\)|\[|\]|\{|\}|\||=|<|>|≤|≥/g;
+const TOKEN_REGEX = /\b[0-9]+(\.[0-9]*)?\b|\b\.[0-9]+\b|\b\w+\b|\+|-|–|±|\*|×|\/|÷|\^|%|!|\(|\)|\[|]|{|}|\||=|<|>|≤|≥/g;
 const TOKEN_REPLACE = {'–': '-', '÷': '/', '×': '*'};
 const BRACKETS = { '(': ')', '[': ']', '{': '}', '|': '|' };
 
@@ -378,9 +406,9 @@ function findBinaryFunction(tokens, chars) {
     if (chars.includes(tokens[i])) {
       let a = tokens[i-1];
       let b = tokens[i+1];
-      if (b == null) throw new ExprError('SyntaxError', `An expression cannot end with a "${tokens[i]}".`);
-      if ('+-*/^%!'.includes(a)) throw new ExprError('SyntaxError', `A "${a}" cannot be followed by a "${tokens[i]}".`);
-      if ('+-*/^%!'.includes(b)) throw new ExprError('SyntaxError', `A "${tokens[i]}" cannot be followed by a "${b}".`);
+      if (b == null) throw new ExprError('SyntaxError', `An expression cannot end with a “${tokens[i]}”.`);
+      if ('+-*/^%!'.includes(a)) throw new ExprError('SyntaxError', `A “${a}” cannot be followed by a “${tokens[i]}”.`);
+      if ('+-*/^%!'.includes(b)) throw new ExprError('SyntaxError', `A “${tokens[i]}” cannot be followed by a “${b}”.`);
       tokens.splice(i - 1, 3, [tokens[i], a, b]);
       i -= 2;
     }
@@ -394,7 +422,7 @@ function parseMaths(tokens) {
     if (t ==  +t) tokens[i] = +t;
   }
 
-  if ('+*/^%!'.includes(tokens[0])) throw new ExprError('SyntaxError', `A term cannot start with a "${tokens[0]}".`);
+  if ('+*/^%!'.includes(tokens[0])) throw new ExprError('SyntaxError', `A term cannot start with a “${tokens[0]}”.`);
 
   // Factorials and Percentages
   for (let i=0; i<tokens.length; ++i) {
@@ -435,10 +463,10 @@ function matchBrackets(tokens) {
 
     } else if ('([{|'.includes(t)) {
       let last = newTokens.pop();
-      if ('%!'.includes(last)) throw new ExprError('SyntaxError', `A "${last}" cannot be followed by a "${t}".`);
+      if ('%!'.includes(last)) throw new ExprError('SyntaxError', `A “${last}” cannot be followed by a “${t}”.`);
 
       let [inside, [close, ...rest]] = matchBrackets(tokens.slice(i + 1));
-      if (close != BRACKETS[t]) throw new ExprError('SyntaxError', `The brackets "${t}" and "${close}" don’t match.`);
+      if (close != BRACKETS[t]) throw new ExprError('SyntaxError', `The brackets “${t}” and "${close}” don’t match.`);
 
       // Vertical lines are automatically converted into abs.
       if (t == '|') inside = ['abs', inside];
@@ -466,7 +494,7 @@ function matchBrackets(tokens) {
 
 function parseString(str) {
   let invalidChars = str.replace(TOKEN_REGEX, '').trim();
-  if (invalidChars) throw new ExprError('SyntaxError', `The character "${invalidChars[0]}" is invalid.`);
+  if (invalidChars) throw new ExprError('SyntaxError', `The character “${invalidChars[0]}” is invalid.`);
 
   let tokens = str.match(TOKEN_REGEX);
   for (let i=0; i<tokens.length; ++i) {
@@ -474,7 +502,7 @@ function parseString(str) {
   }
 
   let [expr, rest] = matchBrackets(tokens);
-  if (rest.length) throw new ExprError('SyntaxError', `The character "${rest[0][0]}" shouldn’t be here.`);
+  if (rest.length) throw new ExprError('SyntaxError', `The character “${rest[0][0]}” shouldn’t be here.`);
   return expr;
 }
 
@@ -499,6 +527,9 @@ export class Expression {
 
   /** @returns {string[]} */
   get variables() { return variables(this.expr); }
+
+  /** @returns {string} */
+  get mathML() { return mathML(this.expr); }
 
   /**
    * Checks if two expressions are exactly the same.
