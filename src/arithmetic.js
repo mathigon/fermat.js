@@ -48,20 +48,41 @@ export function sign(x, t = tolerance) {
 // -----------------------------------------------------------------------------
 // String Conversion
 
-const numRegex = /(\d+)(\d{3})/;
+const NUM_REGEX = /(\d+)(\d{3})/;
+const POWER_SUFFIX = ['', 'k', 'm', 'b', 't', 'q'];
 
-/**
- * Adds thousand separators to a number.
- * @param {number} x
- * @returns {string}
- */
-export function numberFormat(x) {
+function addThousandSeparators(x) {
   x = ('' + x).split('.');
   let n = x[0];
-  while (numRegex.test(n)) {
-    n = n.replace(numRegex, '$1,$2');
+  while (NUM_REGEX.test(n)) {
+    n = n.replace(NUM_REGEX, '$1,$2');
   }
   return n + (x.length > 1 ? '.' + x[1] : '');
+}
+
+function addPowerSuffix(n, places) {
+  if (!places) return n;
+
+  // Trim short numbers to the appropriate number of decimal places.
+  const d = ('' + Math.abs(Math.floor(n))).length;
+  const m = n < 0 ? 1 : 0;
+  if (d <= places - m) return round(n, places - d - m - 1);
+
+  // Append a power suffix to longer numbers.
+  const x = Math.floor(Math.log10(Math.abs(n)) / 3);
+  return (round(n / Math.pow(10, 3 * x), places - ((d % 3) || 3) - m - 1))
+      + POWER_SUFFIX[x];
+}
+
+/**
+ * Converts a number to a clean string, by rounding, adding power suffixes, and
+ * adding thousand separators.
+ * @param {number} n
+ * @param {?number} places The number of digits to show in the result.
+ * @returns {string}
+ */
+export function numberFormat(n, places) {
+  return addThousandSeparators(addPowerSuffix(n, places)).replace('-', '–');
 }
 
 /**
