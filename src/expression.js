@@ -444,7 +444,10 @@ function parseMaths(tokens) {
   }
 
   // Leading (plus)minus.
-  if ('-±'.includes(tokens[0])) tokens.splice(0, 2, [tokens[0], tokens[1]]);
+  if ('-±'.includes(tokens[0])) {
+    if (tokens.length <= 1) throw new ExprError('SyntaxError', `This expression is invalid.`);
+    tokens.splice(0, 2, [tokens[0], tokens[1]]);
+  }
 
   findBinaryFunction(tokens, '+-±');  // Addition and subtraction.
   findBinaryFunction(tokens, '=<>≤≥');  // Equalities and inequalities.
