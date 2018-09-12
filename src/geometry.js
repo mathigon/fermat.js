@@ -147,7 +147,11 @@ export class Point {
   equals(p) { return Point.equals(this, p); }
 
   round(inc = 1) {
-    return new Point(roundTo(this.x, inc), roundTo(this.y, inc))
+    return new Point(roundTo(this.x, inc), roundTo(this.y, inc));
+  }
+
+  floor() {
+    return new Point(Math.floor(this.x), Math.floor(this.y));
   }
 
   mod(x, y = x) {
