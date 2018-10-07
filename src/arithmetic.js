@@ -79,10 +79,10 @@ function addPowerSuffix(n, places) {
  * Converts a number to a clean string, by rounding, adding power suffixes, and
  * adding thousand separators.
  * @param {number} n
- * @param {?number} places The number of digits to show in the result.
+ * @param {number=} places The number of digits to show in the result.
  * @returns {string}
  */
-export function numberFormat(n, places) {
+export function numberFormat(n, places=0) {
   return addThousandSeparators(addPowerSuffix(n, places)).replace('-', '–');
 }
 
@@ -132,7 +132,7 @@ function cons(xs, x, g) {
  * @returns {string}
  */
 export function toWord(n) {
-  if (!n) return 'zero';
+  if (n === 0) return 'zero';
 
   let str = '';
   let i = 0;
