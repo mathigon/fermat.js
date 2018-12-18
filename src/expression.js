@@ -333,7 +333,8 @@ function needsBrackets(expr, parentOperator) {
 }
 
 function stringify(expr) {
-  if (isNumber(expr) || isString(expr)) return expr;
+  if (isNumber(expr)) return '' + expr;
+  if (isString(expr)) return expr;
 
   let [fn, ...args] = expr;
   args = args.map(a => needsBrackets(a, fn) ? `(${stringify(a)})` : stringify(a));
@@ -397,8 +398,6 @@ function functions(tree) {
 // Expression Parser
 // TODO handle functions with multiple arguments (commas)
 
-const TOKEN_REGEX = /\b[0-9]+(\.[0-9]*)?\b|\b\.[0-9]+\b|\b\w+\b|\+|-|–|±|\*|×|\/|÷|\^|%|!|\(|\)|\[|]|{|}|\||=|<|>|≤|≥/g;
-const TOKEN_REPLACE = {'–': '-', '÷': '/', '×': '*'};
 const BRACKETS = { '(': ')', '[': ']', '{': '}', '|': '|' };
 
 function findBinaryFunction(tokens, chars) {
@@ -416,12 +415,6 @@ function findBinaryFunction(tokens, chars) {
 }
 
 function parseMaths(tokens) {
-  // Numbers
-  for (let i=0; i<tokens.length; ++i) {
-    let t = tokens[i];
-    if (t ==  +t) tokens[i] = +t;
-  }
-
   if ('+*/^%!'.includes(tokens[0])) throw new ExprError('SyntaxError', `A term cannot start with a “${tokens[0]}”.`);
 
   // Factorials and Percentages
@@ -461,7 +454,7 @@ function matchBrackets(tokens) {
 
   for (let i=0; i<tokens.length; ++i) {
     let t = tokens[i];
-    if (')]}'.includes(t) || (t == '|' && i > 0)) {
+    if (')]}'.includes(t) || (t === '|' && i > 0)) {
       return [parseMaths(newTokens), tokens.slice(i)]
 
     } else if ('([{|'.includes(t)) {
@@ -472,7 +465,7 @@ function matchBrackets(tokens) {
       if (close != BRACKETS[t]) throw new ExprError('SyntaxError', `The brackets “${t}” and "${close}” don’t match.`);
 
       // Vertical lines are automatically converted into abs.
-      if (t == '|') inside = ['abs', inside];
+      if (t === '|') inside = ['abs', inside];
 
       // Check last value of newTokens for possible function call.
       if (last && last.match(/^\w+$/) && last != +last) {
@@ -496,13 +489,34 @@ function matchBrackets(tokens) {
 }
 
 function parseString(str) {
-  let invalidChars = str.replace(TOKEN_REGEX, '').trim();
-  if (invalidChars) throw new ExprError('SyntaxError', `The character “${invalidChars[0]}” is invalid.`);
+  const tokens = [];
+  let numBuffer = '';
+  let varBuffer = '';
 
-  let tokens = str.match(TOKEN_REGEX);
-  for (let i=0; i<tokens.length; ++i) {
-    if (tokens[i] in TOKEN_REPLACE) tokens[i] = TOKEN_REPLACE[tokens[i]];
+  function clearBuffers() {
+    if (numBuffer) tokens.push(+numBuffer);
+    if (varBuffer) tokens.push(varBuffer);
+    varBuffer = numBuffer = '';
   }
+
+  for (let s of str.split('')) {
+    if (/\s/.test(s)) {  // Space
+      clearBuffers();
+    } else if (!varBuffer && /[\d.]/.test(s)) {  // Numbers
+      numBuffer += s;
+    } else if (/\w/.test(s)) {  // Variable Names
+      varBuffer += s;
+    } else {  // Operators
+      clearBuffers();
+      if (/[+\-–×*÷/±^%!()[\]{}|=<>≤≥]/.test(s)) {
+        const t = s.replace('–', '-').replace('÷', '/').replace('×', '*');
+        tokens.push(t);
+      } else {
+        throw new ExprError('SyntaxError', `The character “${s}” is invalid.`);
+      }
+    }
+  }
+  clearBuffers();
 
   let [expr, rest] = matchBrackets(tokens);
   if (rest.length) throw new ExprError('SyntaxError', `The character “${rest[0][0]}” shouldn’t be here.`);

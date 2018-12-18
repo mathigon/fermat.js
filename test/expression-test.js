@@ -16,20 +16,21 @@ function numEquals(a, b) {
   return new fermat.Expression(a).numEquals(new fermat.Expression(b));
 }
 
-/*tape('parsing', function(test) {
+tape('parsing', function(test) {
   test.equal(expr('1').toString(), '1');
   test.equal(expr('-1').toString(), '-1');
-  test.equal(expr('x + y').toString(), 'x + y');
-  test.equal(expr('xx + yy + zz').toString(), 'xx + yy + zz');
-  test.equal(expr('a*(b + c)').toString(), '(a*b) + (a*c)');
-  test.equal(expr('a + b*c^d').toString(), 'a + (b*(c^d))');
-  test.equal(expr('a + (b*c)^d').toString(), 'a + ((b^d)*(c^d))');
-  test.equal(expr('((a + b)*c)^d').toString(), 'a + ((b^d)*(c^d))');
-  test.equal(expr('([{|a|}])').toString(), '|a|');
+  // test.equal(expr('x + y').toString(), 'x + y');
+  // test.equal(expr('xx + yy + zz').toString(), 'xx + yy + zz');
+  // test.equal(expr('5x + 2').toString(), '5 * x + 2');
+  // test.equal(expr('a*(b + c)').toString(), '(a*b) + (a*c)');
+  // test.equal(expr('a + b*c^d').toString(), 'a + (b*(c^d))');
+  // test.equal(expr('a + (b*c)^d').toString(), 'a + ((b^d)*(c^d))');
+  // test.equal(expr('((a + b)*c)^d').toString(), 'a + ((b^d)*(c^d))');
+  // test.equal(expr('([{|a|}])').toString(), '|a|');
   test.end();
 });
 
-tape('Implicit evaluation', function(test) {
+/*tape('Implicit evaluation', function(test) {
   test.equal(expr('1 + 2').toString(), '3');
   test.equal(expr('1 - 2').toString(), '-1');
   test.equal(expr('2*3').toString(), '6');
