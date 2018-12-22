@@ -227,6 +227,16 @@ export class Point {
   static equals(p1, p2) {
     return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
   }
+
+  /**
+   * Creates a point from polar coordinates.
+   * @param r
+   * @param angle
+   * @returns {Point}
+   */
+  static fromPolar(angle, r=1) {
+    return new Point(r * Math.cos(angle), r * Math.sin(angle));
+  }
 }
 
 const origin = new Point(0,0);
