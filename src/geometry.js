@@ -46,6 +46,11 @@ export class Point {
     return new Point(this.y, this.x);
   }
 
+  /** @returns {Point} */
+  get perpendicular() {
+    return new Point(-this.y, this.x);
+  }
+
   /** @returns {number[]} */
   get array() {
     return [this.x, this.y];
@@ -508,6 +513,15 @@ export class Segment extends Line {
 
     const q = clamp(Point.dot(a, b) / square(this.length), 0, 1);
     return Point.sum(this.p1, a.scale(q));
+  }
+
+  /**
+   * Contracts (or expands) a line by a specific ratio.
+   * @param {number} x
+   * @returns {Segment}
+   */
+  contract(x) {
+    return new Segment(this.at(x), this.at(1 - x));
   }
 
   /**
