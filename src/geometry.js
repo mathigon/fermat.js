@@ -5,7 +5,7 @@
 
 
 
-import { total, square, clamp, flatten, toLinkedList } from '@mathigon/core';
+import { total, square, clamp, flatten, toLinkedList, tabulate } from '@mathigon/core';
 import { nearlyEquals, isBetween, roundTo } from './arithmetic';
 import { subsets } from './combinatorics';
 
@@ -221,6 +221,17 @@ export class Point {
    */
   static interpolate(p1, p2, t=0.5) {
     return new Point(p1.x + t * (p2.x - p1.x), p1.y + t * (p2.y - p1.y));
+  }
+
+  /**
+   * Interpolates a list of multiple points.
+   * @param {Point[]} points
+   * @param {?number} t
+   */
+  static interpolateList(points, t=0.5) {
+    const n = points.length - 1;
+    const a = Math.floor(clamp(t, 0, 1) * n);
+    return Point.interpolate(points[a], points[a + 1], n * t - a);
   }
 
   /**
@@ -807,8 +818,8 @@ export class Polygon {
     // TODO
   }
 
-  at(_t) {
-    // TODO
+  at(t) {
+    return Point.interpolateList([...this.points, this.points[0]], t);
   }
 
   /**
@@ -878,6 +889,17 @@ export class Polygon {
     for (let v of p2.points) if (p1.contains(v)) return true;
 
     return false;
+  }
+
+  /**
+   * Creates a regular polygon.
+   * @param {number} n
+   * @param {?number} radius
+   */
+  static regular(n, radius = 1) {
+    const points = tabulate((i) =>
+        Point.fromPolar(2 * Math.PI * i / n, radius), n);
+    return new Polygon(...points);
   }
 }
 
