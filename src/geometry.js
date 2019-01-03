@@ -693,6 +693,10 @@ export class Arc {
   // TODO rotate, reflect, scale, shift, translate, contains, equals
 }
 
+export class Sector extends Arc {
+  // TODO
+}
+
 
 // -----------------------------------------------------------------------------
 // Polygons
@@ -899,6 +903,18 @@ export class Polygon {
   static regular(n, radius = 1) {
     const points = tabulate((i) =>
         Point.fromPolar(2 * Math.PI * i / n, radius), n);
+    return new Polygon(...points);
+  }
+
+  /**
+   * Interpolates the points of two polygons
+   * @param {Polygon} p1
+   * @param {Polygon} p2
+   * @param {number} t
+   */
+  static interpolate(p1, p2, t) {
+    // TODO support interpolating polygons with different numbers of points
+    const points = p1.points.map((p, i) => Point.interpolate(p, p2.points[i], t));
     return new Polygon(...points);
   }
 }
