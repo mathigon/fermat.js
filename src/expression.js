@@ -504,7 +504,7 @@ function parseString(str) {
       clearBuffers();
     } else if (!varBuffer && /[\d.]/.test(s)) {  // Numbers
       numBuffer += s;
-    } else if (/\w/.test(s)) {  // Variable Names
+    } else if (/[\wπ]/.test(s)) {  // Variable Names
       varBuffer += s;
     } else {  // Operators
       clearBuffers();

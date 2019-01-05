@@ -10,6 +10,7 @@ import { nearlyEquals, isBetween, roundTo } from './arithmetic';
 import { subsets } from './combinatorics';
 
 
+
 // -----------------------------------------------------------------------------
 // Points
 
@@ -305,7 +306,7 @@ export class Angle {
     let phiC = Math.atan2(this.c.y - this.b.y, this.c.x - this.b.x);
     let phi = phiC - phiA;
 
-    if (phi < 0) phi += 2 * Math.PI;
+    if (phi < 0) phi += twoPi;
     return phi;
   }
 
@@ -318,20 +319,11 @@ export class Angle {
   }
 
   /**
-   * The smaller size of this angle, in radians, between 0 and Pi.
-   * @returns {number}
-   */
-  get size() {
-    let rad = this.rad;
-    return Math.min(rad, 2 * Math.PI - rad);
-  }
-
-  /**
    * Checks if this angle is right-angled.
    * @returns {boolean}
    */
   get isRight() {
-    return nearlyEquals(this.size, Math.PI/2, 0.01);
+    return nearlyEquals(this.rad, Math.PI/2, 0.01);
   }
 
   /**
@@ -351,6 +343,21 @@ export class Angle {
     return new Line(this.b, new Point(x, y));
   }
 
+  /**
+   * Returns the smaller one of this and its supplementary angle.
+   * @returns {Angle}
+   */
+  get sup() {
+    return (this.rad < Math.PI) ? this : new Angle(this.c, this.b, this.a);
+  }
+
+  /**
+   * Returns the Arc element corresponding to this angle.
+   * @returns {Arc}
+   */
+  get arc() {
+    return new Arc(this.b, this.a, this.rad);
+  }
 }
 
 function rad(p, c=origin) {
