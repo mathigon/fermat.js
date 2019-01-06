@@ -357,7 +357,9 @@ function mathML(expr) {
     case 'sqrt': return `<msqrt>${mathML(args[0])}</msqrt>`;
     case '/': return `<mfrac><mrow>${mathML(args[0])}</mrow><mrow>${mathML(args[1])}</mrow></mfrac>`;
     case '^': return `<msup>${argsStr[0]}<mrow>${mathML(args[1])}</mrow></msup>`;
-    case '*': return argsStr.join('<mo value="×">×</mo>');
+    case '*':
+      if (isNumber(args[0]) && isString(args[1])) return argsStr.join('');
+      return argsStr.join('<mo value="×">×</mo>');
     case '+': return argsStr.join('<mo value="+">+</mo>');
     case '-': return argsStr.join('<mo value="–">–</mo>');
     default: return `<mi>TODO</mi>`;
