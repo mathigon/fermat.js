@@ -32,7 +32,7 @@ export function nearlyEquals(x, y, t = tolerance) {
 export function isBetween(x, a, b, t = tolerance) {
   // TODO Simplify this code after https://github.com/babel/babel/issues/8528
   const [min, max] = (a > b) ? [b, a] : [a, b];
-  return x > min + t && x < max - t;
+  return x > min - t && x < max + t;
 }
 
 /**
