@@ -13,7 +13,7 @@ import { unique } from '@mathigon/core';
  * @param {...number} numbers
  * @returns {number}
  */
-export function gcd(numbers) {
+export function gcd(...numbers) {
   const [first, ...rest] = numbers;
   if (rest.length > 1) return gcd(first, gcd(...rest));
 
@@ -29,7 +29,7 @@ export function gcd(numbers) {
  * @param {...number} numbers
  * @returns {number}
  */
-export function lcm(numbers) {
+export function lcm(...numbers) {
   const [first, ...rest] = numbers;
   if (rest.length > 1) return lcm(first, lcm(...rest));
 
