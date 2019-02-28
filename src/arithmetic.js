@@ -85,6 +85,37 @@ export function numberFormat(n, places=0) {
   return addThousandSeparators(addPowerSuffix(n, places)).replace('-', '–');
 }
 
+// Numbers like 0,123 are decimals, even though they mach POINT_DECIMAL.
+const SPECIAL_DECIMAL = /^-?0,[0-9]+$/;
+
+// Points as decimal points, Commas as 1k separators, allow starting .
+const POINT_DECIMAL = /^-?([0-9]+(,[0-9]{3})*)?\.?[0-9]*$/;
+
+// Commas as decimal points, Points as 1k separators, don't allow starting ,
+const COMMA_DECIMAL = /^-?[0-9]+(\.[0-9]{3})*,?[0-9]*$/;
+
+/**
+ * Converts a number to a string, including . or , decimal points and
+ * thousands separators.
+ * @param {string} str
+ * @returns {number}
+ */
+export function parseNumber(str) {
+  str = str.replace(/^–/, '-').trim();
+  if (!str || str.match(/[^0-9.,-]/)) return NaN;
+
+  if (SPECIAL_DECIMAL.test(str))
+    return parseFloat(str.replace(/,/, '.'));
+
+  if (POINT_DECIMAL.test(str))
+    return parseFloat(str.replace(/,/g, ''));
+
+  if (COMMA_DECIMAL.test(str))
+    return parseFloat(str.replace(/\./g, '').replace(/,/, '.'));
+
+  return NaN;
+}
+
 /**
  * Converts a number to an ordinal.
  * @param {number} x
