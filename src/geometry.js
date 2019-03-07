@@ -648,6 +648,12 @@ export class Circle {
     const a = 2 * Math.PI * t;
     return this.c.shift(this.r * Math.cos(a), this.r * Math.sin(a));
   }
+
+  tangentAt(t) {
+    const p1 = this.at(t);
+    const p2 = this.c.rotate(Math.PI/2, p1);
+    return new Line(p1, p2);
+  }
 }
 
 /**
