@@ -700,7 +700,18 @@ export class Arc {
   }
 
   contract(p) {
-    return new Arc(this.c, this.at(p / 2), this.angle * (1 - p));
+    return new this.constructor(this.c, this.at(p / 2), this.angle * (1 - p));
+  }
+
+  get minor() {
+    if (this.angle <= Math.PI) return this;
+    return new this.constructor(this.c, this.end, 2 * Math.PI - this.angle);
+  }
+
+  get major() {
+    if (this.angle >= Math.PI) return this;
+    return new this.constructor(this.c, this.end, 2 * Math.PI - this.angle);
+  }
   }
 
   // TODO rotate, reflect, scale, shift, translate, contains, equals
