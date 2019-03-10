@@ -712,7 +712,6 @@ export class Arc {
     if (this.angle >= Math.PI) return this;
     return new this.constructor(this.c, this.end, 2 * Math.PI - this.angle);
   }
-  }
 
   // TODO rotate, reflect, scale, shift, translate, contains, equals
 }
