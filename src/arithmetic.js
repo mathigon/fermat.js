@@ -281,3 +281,16 @@ export function mod(a, m) {
 export function log(x, b = null) {
   return (b == null) ? Math.log(x) : Math.log(x) / Math.log(b);
 }
+
+/**
+ * Solves the quadratic equation a x^2 + b x + c = 0
+ * @param {number} a
+ * @param {number} b
+ * @param {number} c
+ * @returns {number[]}
+ */
+export function quadratic(a, b, c) {
+  const p = - b / 2 / a;
+  const q = Math.sqrt(b * b- 4 * a * c) / 2 / a;
+  return [p + q, p - q];
+}
