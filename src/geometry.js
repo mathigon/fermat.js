@@ -164,6 +164,10 @@ export class Point {
     return new Point(this.x % x, this.y % y);
   }
 
+  angle(c = origin) {
+    return rad(this, c);
+  }
+
   /**
    * Calculates the average of multiple points.
    * @param {...Point} points
