@@ -18,6 +18,7 @@ const tolerance = 0.000001;
  * @returns {boolean}
  */
 export function nearlyEquals(x, y, t = tolerance) {
+  if (isNaN(x) || isNaN(y)) return false;
   return Math.abs(x - y) < t;
 }
 
