@@ -1057,6 +1057,11 @@ export class Rectangle {
     return this.polygon.edges;
   }
 
+  /** @returns {Point[]} */
+  get points() {
+    return this.polygon.points;
+  }
+
   /**
    * A polygon class representing this rectangle.
    * @returns {Polygon}
@@ -1207,10 +1212,15 @@ export function intersections(...elements) {
   if (elements.length < 2) return [];
   if (elements.length > 2) return flatten(subsets(elements, 2).map(e => intersections(...e)));
 
-  const [a, b] = elements;
+  let [a, b] = elements;
 
-  if (a instanceof Polygon || a instanceof Rectangle) return intersections(b, ...a.edges);
-  if (b instanceof Polygon || a instanceof Rectangle) return intersections(a, ...b.edges);
+  if (b instanceof Polygon || b instanceof Rectangle) [a, b] = [b, a];
+  if (a instanceof Polygon || a instanceof Rectangle) {
+    // This hack is necessary to capture intersections between a line and a
+    // vertex of a polygon. There are more edge cases to consider!
+    const vertices = (b instanceof Line) ? a.points.filter(p => b.contains(p)) : [];
+    return [...vertices, ...intersections(b, ...a.edges)];
+  }
 
   let results = [];
 
