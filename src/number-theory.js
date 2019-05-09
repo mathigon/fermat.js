@@ -162,3 +162,15 @@ export function goldbach(x) {
     b += 2;
   }
 }
+
+/**
+ * Computes Euler's totient function (phi) for a given natural number x.
+ * @param {number} x
+ * @returns {number}
+ */
+export function eulerPhi(x) {
+  if (x <= 0) throw Error('Number should be greater than zero')
+  primeFactors(x).forEach((n) => x *= (n - 1) / n)
+
+  return x
+}
