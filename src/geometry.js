@@ -791,6 +791,13 @@ export class Polygon {
     return edges;
   }
 
+  /** @returns {number} */
+  get radius() {
+    const c = this.centroid;
+    const radii = this.points.map(p => Point.distance(p, c));
+    return Math.max(...radii);
+  }
+
   transform(m) {
     if (!m) return this;
     return new this.constructor(...this.points.map(p => p.transform(m)));
@@ -928,8 +935,10 @@ export class Polygon {
    * @param {?number} radius
    */
   static regular(n, radius = 1) {
-    const points = tabulate((i) =>
-        Point.fromPolar(2 * Math.PI * i / n, radius), n);
+    const da = 2 * Math.PI / n;
+    const a0 = Math.PI / 2 - da/2;
+
+    const points = tabulate((i) => Point.fromPolar(a0 + da * i, radius), n);
     return new Polygon(...points);
   }
 
@@ -1037,6 +1046,14 @@ export class Rectangle {
     this.h = h;
   }
 
+  static fromCorners(a, b) {
+    const x = Math.min(a.x, b.x);
+    const y = Math.min(a.y, b.y);
+    const w = Math.abs(a.x - b.x);
+    const h = Math.abs(a.y - b.y);
+    return new Rectangle(new Point(x, y), w, h);
+  }
+
   /** @returns {Point} */
   get center() {
     return new Point(this.p.x + this.w / 2, this.p.y + this.h / 2);
@@ -1098,8 +1115,12 @@ export class Rectangle {
     return new Rectangle(this.p.translate(p), this.w, this.h);
   }
 
-  contains(_p) {
-    // TODO
+  /**
+   * @param {Point} p
+   * @returns {boolean}
+   */
+  contains(p) {
+    return isBetween(p.x, this.p.x, this.p.x + this.w) && isBetween(p.y, this.p.y, this.p.y + this.h);
   }
 
   equals(_other) {
@@ -1135,6 +1156,10 @@ export class Rectangle {
 
   at(_t) {
     // TODO
+  }
+
+  static intersect(rect1, rect2) {
+    return !((rect1.p.x + rect1.w <= rect2.x || rect1.p.x > rect2.p.x + rect2.w) && (rect1.p.y + rect1.h <= rect2.y || rect1.p.y > rect2.p.y + rect2.h));
   }
 }
 
