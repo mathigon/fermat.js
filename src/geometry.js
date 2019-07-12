@@ -1046,11 +1046,14 @@ export class Rectangle {
     this.h = h;
   }
 
-  static fromCorners(a, b) {
-    const x = Math.min(a.x, b.x);
-    const y = Math.min(a.y, b.y);
-    const w = Math.abs(a.x - b.x);
-    const h = Math.abs(a.y - b.y);
+  static aroundPoints(...points) {
+    const xs = points.map(p => p.x);
+    const ys = points.map(p => p.y);
+
+    const x = Math.min(...xs);
+    const w = Math.max(...xs) - x;
+    const y = Math.min(...ys);
+    const h = Math.max(...ys) - y;
     return new Rectangle(new Point(x, y), w, h);
   }
 
@@ -1156,10 +1159,6 @@ export class Rectangle {
 
   at(_t) {
     // TODO
-  }
-
-  static intersect(rect1, rect2) {
-    return !((rect1.p.x + rect1.w <= rect2.x || rect1.p.x > rect2.p.x + rect2.w) && (rect1.p.y + rect1.h <= rect2.y || rect1.p.y > rect2.p.y + rect2.h));
   }
 }
 
