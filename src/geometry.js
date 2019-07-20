@@ -136,10 +136,6 @@ export class Point {
     return new Point(this.x + x, this.y + y);
   }
 
-  translate(p) {
-    return this.shift(p.x, p.y);
-  }
-
   changeCoordinates(originCoords, targetCoords) {
     const x = targetCoords.xMin + (this.x - originCoords.xMin) / (originCoords.dx) * (targetCoords.dx);
     const y = targetCoords.yMin + (this.y - originCoords.yMin) / (originCoords.dy) * (targetCoords.dy);
@@ -147,6 +143,7 @@ export class Point {
   }
 
   add(p) { return Point.sum(this, p); }
+  translate(p) { return this.add(p); }  // alias
 
   subtract(p) { return Point.difference(this, p); }
 
@@ -264,7 +261,7 @@ const origin = new Point(0,0);
 
 
 // -----------------------------------------------------------------------------
-// Angles
+// Bounds
 
 export class Bounds {
 
@@ -715,6 +712,10 @@ export class Arc {
   get major() {
     if (this.angle >= Math.PI) return this;
     return new this.constructor(this.c, this.end, 2 * Math.PI - this.angle);
+  }
+
+  get center() {
+    return this.at(0.5);
   }
 
   // TODO rotate, reflect, scale, shift, translate, contains, equals

@@ -134,6 +134,8 @@ export function toOrdinal(x) {
   }
 }
 
+// TODO Translate this function into other languages.
+
 const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven',
   'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen',
   'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
