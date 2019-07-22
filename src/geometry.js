@@ -29,6 +29,7 @@ export class Point {
 
   /** @returns {Point} */
   get normal() {
+    if (nearlyEquals(this.length, 0)) return new Point(1, 0);
     return this.scale(1/this.length);
   }
 
