@@ -1224,9 +1224,26 @@ function circleCircleIntersection(c1, c2) {
   return [new Point(px, py), new Point(qx, qy)]
 }
 
-function lineCircleIntersection(_l, _c) {
-  // TODO
-  return [];
+// From http://mathworld.wolfram.com/Circle-LineIntersection.html
+function lineCircleIntersection(l, c) {
+  const dx = l.p2.x - l.p1.x;
+  const dy = l.p2.y - l.p1.y;
+  const dr2 = square(dx) + square(dy);
+
+  const cx = c.c.x;
+  const cy = c.c.y;
+  const D = (l.p1.x - cx) * (l.p2.y - cy) - (l.p2.x - cx) * (l.p1.y - cy);
+
+  const disc = square(c.r) * dr2 - square(D);
+  if (disc < 0) return [];  // No solution
+
+  const xa = D * dy / dr2;
+  const ya = -D * dx / dr2;
+  if (nearlyEquals(disc, 0)) return [c.c.shift(xa, ya)];  // One solution
+
+  const xb = dx * (dy < 0 ? -1 : 1) * Math.sqrt(disc) / dr2;
+  const yb = Math.abs(dy) * Math.sqrt(disc) / dr2;
+  return [c.c.shift(xa + xb, ya + yb), c.c.shift(xa - xb, ya - yb)];
 }
 
 /**
@@ -1248,6 +1265,15 @@ export function intersections(...elements) {
     return [...vertices, ...intersections(b, ...a.edges)];
   }
 
+  return simpleIntersection(a, b);
+}
+
+/**
+ * Finds the intersection of two lines or circles.
+ * @param {Line|Circle} a
+ * @param {Line|Circle} b
+ */
+export function simpleIntersection(a, b) {
   let results = [];
 
   // TODO Handle Arcs and Rays
@@ -1261,11 +1287,10 @@ export function intersections(...elements) {
     results = circleCircleIntersection(a, b);
   }
 
-  if (a instanceof Segment) results = results.filter(i => liesOnSegment(a, i));
-  if (b instanceof Segment) results = results.filter(i => liesOnSegment(b, i));
-
-  if (a instanceof Ray) results = results.filter(i => liesOnRay(a, i));
-  if (b instanceof Ray) results = results.filter(i => liesOnRay(b, i));
+  for (const x of [a, b]) {
+    if (x instanceof Segment) results = results.filter(i => liesOnSegment(x, i));
+    if (x instanceof Ray) results = results.filter(i => liesOnRay(x, i));
+  }
 
   return results;
 }
