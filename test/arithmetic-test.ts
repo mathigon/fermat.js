@@ -4,12 +4,11 @@
 // =============================================================================
 
 
+import * as tape from 'tape';
+import {parseNumber} from '../src/arithmetic';
 
-const tape = require('tape');
-const {parseNumber} = require('../');
 
-
-tape('parseNumber', function(test) {
+tape('parseNumber', (test) => {
   test.equal(parseNumber('1234'), 1234);
   test.equal(parseNumber('1.234,56'), 1234.56);
   test.equal(parseNumber('1,234.56'), 1234.56);

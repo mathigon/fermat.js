@@ -1,47 +1,34 @@
 // ============================================================================
-// Fermat.js | Number Theory
+// Fermat.js | Utility Functions
 // (c) Mathigon
 // ============================================================================
 
 
+const PRECISION = 0.000001;
+
 
 // -----------------------------------------------------------------------------
-// Simple Functions
+// Checks and Comparisons
 
-const tolerance = 0.000001;
-
-/**
- * Checks if two numbers are nearly equals.
- * @param {number} x
- * @param {number} y
- * @param {?number} t The allowed tolerance
- * @returns {boolean}
- */
-export function nearlyEquals(x, y, t = tolerance) {
+/** Checks if two numbers are nearly equals. */
+export function nearlyEquals(x: number, y: number, t = PRECISION) {
   if (isNaN(x) || isNaN(y)) return false;
   return Math.abs(x - y) < t;
 }
 
-/**
- * Checks if a number x is between two numbers a and b.
- * @param {number} x
- * @param {number} a
- * @param {number} b
- * @param {?number} t
- * @returns {boolean}
- */
-export function isBetween(x, a, b, t = tolerance) {
+/* Checks if an object is an integer. */
+export function isInteger(x: number, t = PRECISION) {
+  return nearlyEquals(x % 1, 0, t);
+}
+
+/** Checks if a number x is between two numbers a and b. */
+export function isBetween(x: number, a: number, b: number, t = PRECISION) {
   if (a > b) [a, b] = [b, a];
   return x > a + t && x < b - t;
 }
 
-/**
- * Returns the sign of a number x, as +1, 0 or –1.
- * @param {number} x
- * @param {?number} t
- * @returns {number}
- */
-export function sign(x, t = tolerance) {
+/** Returns the sign of a number x, as +1, 0 or –1. */
+export function sign(x: number, t = PRECISION) {
   return nearlyEquals(x, 0, t) ? 0 : (x > 0 ? 1 : -1);
 }
 
@@ -52,16 +39,15 @@ export function sign(x, t = tolerance) {
 const NUM_REGEX = /(\d+)(\d{3})/;
 const POWER_SUFFIX = ['', 'k', 'm', 'b', 't', 'q'];
 
-function addThousandSeparators(x) {
-  x = ('' + x).split('.');
-  let n = x[0];
+function addThousandSeparators(x: number | string) {
+  let [n, dec] = ('' + x).split('.');
   while (NUM_REGEX.test(n)) {
     n = n.replace(NUM_REGEX, '$1,$2');
   }
-  return n + (x.length > 1 ? '.' + x[1] : '');
+  return n + (dec ? '.' + dec : '');
 }
 
-function addPowerSuffix(n, places) {
+function addPowerSuffix(n: number, places = 6) {
   if (!places) return n;
 
   // Trim short numbers to the appropriate number of decimal places.
@@ -72,17 +58,15 @@ function addPowerSuffix(n, places) {
   // Append a power suffix to longer numbers.
   const x = Math.floor(Math.log10(Math.abs(n)) / 3);
   return (round(n / Math.pow(10, 3 * x), places - ((d % 3) || 3) - m - 1))
-      + POWER_SUFFIX[x];
+    + POWER_SUFFIX[x];
 }
 
 /**
  * Converts a number to a clean string, by rounding, adding power suffixes, and
- * adding thousand separators.
- * @param {number} n
- * @param {number=} places The number of digits to show in the result.
- * @returns {string}
+ * adding thousand separators. `places` is the number of digits to show in the
+ * result.
  */
-export function numberFormat(n, places=0) {
+export function numberFormat(n: number, places = 0) {
   return addThousandSeparators(addPowerSuffix(n, places)).replace('-', '–');
 }
 
@@ -101,7 +85,7 @@ const COMMA_DECIMAL = /^-?[0-9]+(\.[0-9]{3})*,?[0-9]*$/;
  * @param {string} str
  * @returns {number}
  */
-export function parseNumber(str) {
+export function parseNumber(str: string) {
   str = str.replace(/^–/, '-').trim();
   if (!str || str.match(/[^0-9.,-]/)) return NaN;
 
@@ -122,15 +106,19 @@ export function parseNumber(str) {
  * @param {number} x
  * @returns {string}
  */
-export function toOrdinal(x) {
+export function toOrdinal(x: number) {
   if (Math.abs(x) % 100 >= 11 && Math.abs(x) % 100 <= 13)
     return x + 'th';
 
-  switch(x % 10) {
-    case 1: return x + 'st';
-    case 2: return x + 'nd';
-    case 3: return x + 'rd';
-    default: return x + 'th';
+  switch (x % 10) {
+    case 1:
+      return x + 'st';
+    case 2:
+      return x + 'nd';
+    case 3:
+      return x + 'rd';
+    default:
+      return x + 'th';
   }
 }
 
@@ -146,25 +134,21 @@ const TENS = ['', '', 'twenty', 'thirty', 'fourty', 'fifty', 'sixty',
 const MULTIPLIERS = ['', 'thousand', 'million', 'billion', 'trillion',
   'quadrillion', 'quintillion', 'sextillion'];
 
-function fmt(n) {
-  let [h, t, o] = ('00' + n).substr(-3);
+function fmt(n: number) {
+  let [h, t, o] = ('00' + n).substr(-3).split('');
   return [
-    Number(h) === 0 ? '' : ONES[h] + ' hundred ',
-    Number(o) === 0 ? TENS[t] : TENS[t] && TENS[t] + '-' || '',
-    ONES[t+o] || ONES[o]
+    +h === 0 ? '' : ONES[+h] + ' hundred ',
+    +o === 0 ? TENS[+t] : TENS[+t] && TENS[+t] + '-' || '',
+    ONES[(+t) + (+o)] || ONES[+o]
   ].join('');
 }
 
-function cons(xs, x, g) {
+function cons(xs: string, x: string, g: string) {
   return x ? [x, g && ' ' + g || '', ' ', xs].join('') : xs;
 }
 
-/**
- * Spells a number as an English word.
- * @param {number} n
- * @returns {string}
- */
-export function toWord(n) {
+/** Spells a number as an English word. */
+export function toWord(n: number) {
   if (n === 0) return 'zero';
 
   let str = '';
@@ -183,76 +167,38 @@ export function toWord(n) {
 // -----------------------------------------------------------------------------
 // Rounding, Decimals and Decimals
 
-/**
- * Returns the digits of a number n.
- * @param {number} n
- * @returns {number[]}
- */
-export function digits(n) {
+/** Returns the digits of a number n. */
+export function digits(n: number) {
   let str = '' + Math.abs(n);
   return str.split('').reverse().map(x => +x);
 }
 
-/**
- * Returns the decimal digits of a number n.
- * @param {number} n
- * @returns {number[]}
- */
-export function fractionalDigits(n) {
-  let str = '' + Math.abs(n - Math.floor(n));
-  return str.split('').map(x => +x);
-}
-
-/**
- * Returns the number of decimal places in a number n.
- * @param {number} n
- * @returns {number}
- */
-export function decimalPlaces(n) {
-  let str = '' + Math.abs(n);
-  str = str.split('.');
-  return str.length === 1 ? 0 : str[1].length;
-}
-
-/**
- * Rounds a number `n` to `precision` decimal places.
- * @param {number} n
- * @param {?number} precision
- * @returns {number}
- */
-export function round(n, precision = 0) {
+/** Rounds a number `n` to `precision` decimal places. */
+export function round(n: number, precision = 0) {
   let factor = Math.pow(10, precision);
   return Math.round(n * factor) / factor;
 }
 
-/**
- * Round a number `n` to the nearest multiple of `increment`.
- * @param {number} n
- * @param {number} increment
- * @returns {number}
- */
-export function roundTo(n, increment = 1) {
+/** Round a number `n` to the nearest multiple of `increment`. */
+export function roundTo(n: number, increment = 1) {
   return Math.round(n / increment) * increment;
 }
 
 /**
  * Returns an [numerator, denominator] array that approximated a `decimal` to
  * `precision`. See http://en.wikipedia.org/wiki/Continued_fraction
- * @param {number} decimal
- * @param {number} precision
- * @returns {number[]}
  */
-export function toFraction(decimal, precision = 0.0001) {
+export function toFraction(decimal: number, precision = PRECISION) {
   let n = [1, 0], d = [0, 1];
   let a = Math.floor(decimal);
   let rem = decimal - a;
 
-  while (d[0] <= 1/precision) {
+  while (d[0] <= 1 / precision) {
     if (nearlyEquals(n[0] / d[0], precision)) return [n[0], d[0]];
     n = [a * n[0] + n[1], n[0]];
     d = [a * d[0] + d[1], d[0]];
     a = Math.floor(1 / rem);
-    rem = 1/rem - a;
+    rem = 1 / rem - a;
   }
 
   // No nice rational representation so return an irrational "fraction"
@@ -261,39 +207,45 @@ export function toFraction(decimal, precision = 0.0001) {
 
 
 // -----------------------------------------------------------------------------
-// Operations
+// Simple Operations
+
+/** Bounds a number between a lower and an upper limit. */
+export function clamp(x: number, min = -Infinity, max = Infinity) {
+  return Math.min(max, Math.max(min, x));
+}
+
+/** Linear interpolation */
+export function lerp(a: number, b: number, t = 0.5) {
+  return a + (b - a) * t;
+}
+
+/** Squares a number. */
+export function square(x: number) {
+  return x * x;
+}
+
+/** Cubes a number. */
+export function cube(x: number) {
+  return x * x * x;
+}
 
 /**
  * Calculates `a mod m`. The JS implementation of the % operator returns the
  * symmetric modulo. Both are identical if a >= 0 and m >= 0 but the results
  * differ if a or m < 0.
- * @param {number} a
- * @param {number} m
- * @returns {number}
  */
-export function mod(a, m) {
+export function mod(a: number, m: number) {
   return ((a % m) + a) % m;
 }
 
-/**
- * Calculates the logarithm of `x` with base `b`.
- * @param {number} x
- * @param {number} b
- * @returns {number}
- */
-export function log(x, b = null) {
-  return (b == null) ? Math.log(x) : Math.log(x) / Math.log(b);
+/** Calculates the logarithm of `x` with base `b`. */
+export function log(x: number, b?: number) {
+  return (b === undefined) ? Math.log(x) : Math.log(x) / Math.log(b);
 }
 
-/**
- * Solves the quadratic equation a x^2 + b x + c = 0
- * @param {number} a
- * @param {number} b
- * @param {number} c
- * @returns {number[]}
- */
-export function quadratic(a, b, c) {
-  const p = - b / 2 / a;
-  const q = Math.sqrt(b * b- 4 * a * c) / 2 / a;
+/** Solves the quadratic equation a x^2 + b x + c = 0 */
+export function quadratic(a: number, b: number, c: number) {
+  const p = -b / 2 / a;
+  const q = Math.sqrt(b * b - 4 * a * c) / 2 / a;
   return [p + q, p - q];
 }

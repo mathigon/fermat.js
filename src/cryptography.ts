@@ -4,11 +4,13 @@
 // ============================================================================
 
 
+import {repeat} from '@mathigon/core';
+
 
 const LOWER_CASE = 'abcdefghijklmnopqrstuvwxyz';
 const UPPER_CASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-const ENGLISH_FREQUENCY = {
+const ENGLISH_FREQUENCY: { [key: string]: number } = {
   a: 0.08167, b: 0.01492, c: 0.02782, d: 0.04253, e: 0.12702, f: 0.02228,
   g: 0.02015, h: 0.06094, i: 0.06966, j: 0.00154, k: 0.00772, l: 0.04024,
   m: 0.02406, n: 0.06749, o: 0.07507, p: 0.01929, q: 0.00095, r: 0.05987,
@@ -17,17 +19,11 @@ const ENGLISH_FREQUENCY = {
 };
 
 
-// -----------------------------------------------------------------------------
-// Ciphers
-
 /**
  * Enciphers a string by shifting every letter by a certain offset through the
  * alphabet.
- * @param {string} msg
- * @param {number} shift
- * @returns {string}
  */
-export function caesarCipher(msg, shift = 0) {
+export function caesarCipher(msg: string, shift = 0) {
   let cipher = '';
 
   for (let l of msg) {
@@ -43,13 +39,9 @@ export function caesarCipher(msg, shift = 0) {
   return cipher;
 }
 
-/**
- * Enciphers a string using a Vigenere cipher with a give key.
- * @param {string} msg
- * @param {string} key
- * @returns {string}
- */
-export function vigenereCipher(msg, key) {
+
+/** Enciphers a string using a Vigenere cipher with a give key. */
+export function vigenereCipher(msg: string, key: string) {
   let cipher = '';
   let count = 0;
   let keyLength = key.length;
@@ -74,26 +66,16 @@ export function vigenereCipher(msg, key) {
 }
 
 
-// -----------------------------------------------------------------------------
-// Letter Frequency Utilities
-
-/**
- * Returns the relative frequency of a given letter in the English language.
- * @param {string} letter
- * @returns {number}
- */
-export function letterFrequency(letter) {
-  return ENGLISH_FREQUENCY[letter.toLowerCase()];
+/** Returns the relative frequency of a given letter in the English language. */
+export function letterFrequency(letter: string) {
+  return ENGLISH_FREQUENCY[letter.toLowerCase()] || 0;
 }
 
-/**
- * Counts how often every letter occurs in a given cipher.
- * @param {str} cipher
- * @returns {number[]}
- */
-export function cipherLetterFreq(cipher) {
+
+/** Counts how often every letter occurs in a given cipher. */
+export function cipherLetterFreq(cipher: string) {
   let msg = cipher.toLowerCase();
-  let freq = new Array(26).fill(0);
+  let freq = repeat(0, 26);
 
   for (let l of msg) {
     if (l >= 'a' && l <= 'z') freq[LOWER_CASE.indexOf(l)] += 1;
