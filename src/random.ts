@@ -162,7 +162,8 @@ export namespace Random {
   /**
    * Riemann-integrates a function from xMin to xMax, with an interval size dx.
    */
-  export function integrate(fn: (x: number) => number, xMin: number, xMax: number, dx = 1) {
+  export function integrate(fn: (x: number) => number, xMin: number,
+                            xMax: number, dx = 1) {
     let result = 0;
     for (let x = xMin; x < xMax; x += dx) {
       result += (fn(x) * dx || 0);
@@ -177,7 +178,8 @@ export namespace Random {
    * @returns {number}
    */
   export function chiCDF(chi: number, deg: number) {
-    let int = integrate(t => Math.pow(t, (deg - 2) / 2) * Math.exp(-t / 2), 0, chi);
+    let int = integrate(t => Math.pow(t, (deg - 2) / 2) * Math.exp(-t / 2), 0,
+        chi);
     return 1 - int / Math.pow(2, deg / 2) / gamma(deg / 2);
   }
 }

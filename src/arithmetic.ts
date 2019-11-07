@@ -39,7 +39,7 @@ export function sign(x: number, t = PRECISION) {
 const NUM_REGEX = /(\d+)(\d{3})/;
 const POWER_SUFFIX = ['', 'k', 'm', 'b', 't', 'q'];
 
-function addThousandSeparators(x: number | string) {
+function addThousandSeparators(x: number|string) {
   let [n, dec] = ('' + x).split('.');
   while (NUM_REGEX.test(n)) {
     n = n.replace(NUM_REGEX, '$1,$2');
@@ -58,7 +58,7 @@ function addPowerSuffix(n: number, places = 6) {
   // Append a power suffix to longer numbers.
   const x = Math.floor(Math.log10(Math.abs(n)) / 3);
   return (round(n / Math.pow(10, 3 * x), places - ((d % 3) || 3) - m - 1))
-    + POWER_SUFFIX[x];
+         + POWER_SUFFIX[x];
 }
 
 /**

@@ -76,7 +76,8 @@ export namespace Regression {
       sum[3] += Math.pow(Math.log(d[0]), 2);
     }
 
-    const b = (len * sum[1] - sum[2] * sum[0]) / (len * sum[3] - sum[0] * sum[0]);
+    const b = (len * sum[1] - sum[2] * sum[0]) /
+              (len * sum[3] - sum[0] * sum[0]);
     const a = (sum[2] - b * sum[0]) / len;
     return [a, b];
   }
@@ -96,7 +97,8 @@ export namespace Regression {
       sum[3] += Math.pow(Math.log(d[0]), 2);
     }
 
-    const b = (len * sum[1] - sum[2] * sum[0]) / (len * sum[3] - sum[0] * sum[0]);
+    const b = (len * sum[1] - sum[2] * sum[0]) /
+              (len * sum[3] - sum[0] * sum[0]);
     const a = Math.exp((sum[2] - b * sum[0]) / len);
     return [a, b];
   }
@@ -163,7 +165,8 @@ export namespace Regression {
   }, {
     name: 'cubic',
     regression: (data: Coordinate[]) => polynomial(data, 3),
-    fn: (p: number[], x: number) => p[0] + x * p[1] + x * x * p[2] + x * x * x * p[3]
+    fn: (p: number[], x: number) => p[0] + x * p[1] + x * x * p[2] + x * x * x *
+                                    p[3]
   }, {
     name: 'exponential',
     regression: exponential,

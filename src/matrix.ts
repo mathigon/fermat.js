@@ -75,7 +75,8 @@ export namespace Matrix {
     let [M1, ...rest] = matrices;
     let M2 = rest.length > 1 ? product(...rest) : rest[0];
 
-    if (M1[0].length !== M2.length) throw new Error('Matrix sizes don’t match.');
+    if (M1[0].length !== M2.length)
+      throw new Error('Matrix sizes don’t match.');
 
     let P = [];
     for (let i = 0; i < M1.length; ++i) {

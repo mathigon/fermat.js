@@ -18,7 +18,8 @@ export function median(values: number[]) {
   if (!n) return 0;
 
   let sorted = values.slice(0).sort();
-  return (n % 2 === 1) ? sorted[Math.floor(n / 2)] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+  return (n % 2 === 1) ? sorted[Math.floor(n / 2)] :
+         (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
 }
 
 /**
@@ -29,7 +30,7 @@ export function mode(values: number[]) {
   const counts = new Map<number, number>();
 
   let maxCount = -1;
-  let result: number | null = null;
+  let result: number|null = null;
 
   for (const v of values) {
     if (!counts.has(v)) {

@@ -106,8 +106,10 @@ export class Point {
   }
 
   changeCoordinates(originCoords: Bounds, targetCoords: Bounds) {
-    const x = targetCoords.xMin + (this.x - originCoords.xMin) / (originCoords.dx) * (targetCoords.dx);
-    const y = targetCoords.yMin + (this.y - originCoords.yMin) / (originCoords.dy) * (targetCoords.dy);
+    const x = targetCoords.xMin + (this.x - originCoords.xMin) /
+              (originCoords.dx) * (targetCoords.dx);
+    const y = targetCoords.yMin + (this.y - originCoords.yMin) /
+              (originCoords.dy) * (targetCoords.dy);
     return new Point(x, y);
   }
 
@@ -219,15 +221,15 @@ export class Bounds {
 
 const TWO_PI = 2 * Math.PI;
 
-/**
- * A 2-dimensional angle class, defined by three points.
- */
+/** A 2-dimensional angle class, defined by three points. */
 export class Angle {
+  readonly type = 'angle';
 
   constructor(readonly a: Point, readonly b: Point, readonly c: Point) {}
 
   transform(m: number[][]) {
-    return new Angle(this.a.transform(m), this.b.transform(m), this.c.transform(m));
+    return new Angle(this.a.transform(m), this.b.transform(m),
+        this.c.transform(m));
   }
 
   /** The size, in radians, of this angle. */
@@ -326,7 +328,8 @@ export class Line {
 
   /** The point representing the perpendicular vector of this line. */
   get perpendicularVector() {
-    return new Point(this.p2.y - this.p1.y, this.p1.x - this.p2.x).perpendicular;
+    return new Point(this.p2.y - this.p1.y,
+        this.p1.x - this.p2.x).perpendicular;
   }
 
   /** Finds the line parallel to this one, going though point p. */
@@ -357,7 +360,7 @@ export class Line {
   contains(p: Point) {
     // det([[p.x, p.y, 1],[p1.x, p1.y, 1],[p2.x, ,p2.y 1]])
     const det = p.x * (this.p1.y - this.p2.y) + this.p1.x * (this.p2.y - p.y)
-      + this.p2.x * (p.y - this.p1.y);
+                + this.p2.x * (p.y - this.p1.y);
     return nearlyEquals(det, 0);
   }
 
@@ -366,11 +369,13 @@ export class Line {
   }
 
   transform(m: number[][]) {
-    return new (<any>this.constructor)(this.p1.transform(m), this.p2.transform(m));
+    return new (<any>this.constructor)(this.p1.transform(m),
+        this.p2.transform(m));
   }
 
   rotate(a: number, c = ORIGIN) {
-    return new (<any>this.constructor)(this.p1.rotate(a, c), this.p2.rotate(a, c));
+    return new (<any>this.constructor)(this.p1.rotate(a, c),
+        this.p2.rotate(a, c));
   }
 
   reflect(l: Line) {
@@ -435,7 +440,8 @@ export class Segment extends Line {
   /** Checks if two line segments l1 and l2 are equal. */
   static equals(l1: Segment, l2: Segment, oriented = false) {
     return (Point.equals(l1.p1, l2.p1) && Point.equals(l1.p2, l2.p2)) ||
-      (!oriented && Point.equals(l1.p1, l2.p2) && Point.equals(l1.p2, l2.p1));
+           (!oriented && Point.equals(l1.p1, l2.p2) &&
+            Point.equals(l1.p2, l2.p1));
   }
 
   /** Finds the intersection of two line segments l1 and l2 (or null). */
@@ -450,6 +456,7 @@ export class Segment extends Line {
 
 /** A circle with a given center and radius. */
 export class Circle {
+  readonly type = 'circle';
 
   constructor(readonly c = ORIGIN, readonly r = 1) {}
 
@@ -520,8 +527,10 @@ export class Circle {
 
 /** An arc segment of a circle, with given center, start point and angle. */
 export class Arc {
+  readonly type: string = 'arc';
 
-  constructor(readonly c: Point, readonly start: Point, readonly angle: number) {
+  constructor(readonly c: Point, readonly start: Point,
+              readonly angle: number) {
   }
 
   get radius() {
@@ -533,7 +542,8 @@ export class Arc {
   }
 
   transform(m: number[][]) {
-    return new (<any>this.constructor)(this.c.transform(m), this.start.transform(m), this.angle);
+    return new (<any>this.constructor)(this.c.transform(m),
+        this.start.transform(m), this.angle);
   }
 
   get startAngle() {
@@ -556,17 +566,20 @@ export class Arc {
   }
 
   contract(p: number) {
-    return new (<any>this.constructor)(this.c, this.at(p / 2), this.angle * (1 - p));
+    return new (<any>this.constructor)(this.c, this.at(p / 2),
+        this.angle * (1 - p));
   }
 
   get minor() {
     if (this.angle <= Math.PI) return this;
-    return new (<any>this.constructor)(this.c, this.end, 2 * Math.PI - this.angle);
+    return new (<any>this.constructor)(this.c, this.end,
+        2 * Math.PI - this.angle);
   }
 
   get major() {
     if (this.angle >= Math.PI) return this;
-    return new (<any>this.constructor)(this.c, this.end, 2 * Math.PI - this.angle);
+    return new (<any>this.constructor)(this.c, this.end,
+        2 * Math.PI - this.angle);
   }
 
   get center() {
@@ -577,7 +590,7 @@ export class Arc {
 }
 
 export class Sector extends Arc {
-  // TODO
+  readonly type = 'sector';
 }
 
 
@@ -586,6 +599,7 @@ export class Sector extends Arc {
 
 /** A polygon defined by its vertex points. */
 export class Polygon {
+  readonly type: string = 'polygon';
 
   readonly points: Point[];
 
@@ -778,13 +792,15 @@ export class Polygon {
   /** Interpolates the points of two polygons */
   static interpolate(p1: Polygon, p2: Polygon, t = 0.5) {
     // TODO support interpolating polygons with different numbers of points
-    const points = p1.points.map((p, i) => Point.interpolate(p, p2.points[i], t));
+    const points = p1.points.map(
+        (p, i) => Point.interpolate(p, p2.points[i], t));
     return new Polygon(...points);
   }
 }
 
 /** A polyline defined by its vertex points. */
 export class Polyline extends Polygon {
+  readonly type = 'polyline';
 
   /** @returns {Segment[]} */
   get edges() {
@@ -800,6 +816,7 @@ export class Polyline extends Polygon {
 
 /** A triangle defined by its three vertices. */
 export class Triangle extends Polygon {
+  readonly type = 'triangle';
 
   get circumcircle() {
     const [a, b, c] = this.points;
@@ -807,12 +824,12 @@ export class Triangle extends Polygon {
     const d = 2 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));
 
     const ux = (a.x ** 2 + a.y ** 2) * (b.y - c.y) +
-      (b.x ** 2 + b.y ** 2) * (c.y - a.y) +
-      (c.x ** 2 + c.y ** 2) * (a.y - b.y);
+               (b.x ** 2 + b.y ** 2) * (c.y - a.y) +
+               (c.x ** 2 + c.y ** 2) * (a.y - b.y);
 
     const uy = (a.x ** 2 + a.y ** 2) * (c.x - b.x) +
-      (b.x ** 2 + b.y ** 2) * (a.x - c.x) +
-      (c.x ** 2 + c.y ** 2) * (b.x - a.x);
+               (b.x ** 2 + b.y ** 2) * (a.x - c.x) +
+               (c.x ** 2 + c.y ** 2) * (b.x - a.x);
 
     const center = new Point(ux / d, uy / d);
     const radius = Point.distance(center, this.points[0]);
@@ -849,6 +866,7 @@ export class Triangle extends Polygon {
 
 /** A rectangle, defined by its top left vertex, width and height. */
 export class Rectangle {
+  readonly type = 'rectangle';
 
   constructor(readonly p: Point, readonly w = 1, readonly h = w) {}
 
@@ -922,7 +940,7 @@ export class Rectangle {
 
   contains(p: Point) {
     return isBetween(p.x, this.p.x, this.p.x + this.w) &&
-      isBetween(p.y, this.p.y, this.p.y + this.h);
+           isBetween(p.y, this.p.y, this.p.y + this.h);
   }
 
   equals(other: Polygon) {
@@ -966,7 +984,7 @@ export class Rectangle {
 // -----------------------------------------------------------------------------
 // Intersections
 
-type GeoShape = (Line | Ray | Segment | Circle | Polygon | Polyline | Triangle | Rectangle);
+type GeoShape = (Line|Ray|Segment|Circle|Polygon|Polyline|Triangle|Rectangle);
 
 function liesOnSegment(s: Segment, p: Point) {
   if (nearlyEquals(s.p1.x, s.p2.x)) return isBetween(p.y, s.p1.y, s.p2.y);
@@ -974,7 +992,8 @@ function liesOnSegment(s: Segment, p: Point) {
 }
 
 function liesOnRay(r: Ray, p: Point) {
-  if (nearlyEquals(r.p1.x, r.p2.x)) return (p.y - r.p1.y) / (r.p2.y - r.p1.y) > 0;
+  if (nearlyEquals(r.p1.x, r.p2.x)) return (p.y - r.p1.y) / (r.p2.y - r.p1.y) >
+                                           0;
   return (p.x - r.p1.x) / (r.p2.x - r.p1.x) > 0;
 }
 
@@ -1047,7 +1066,8 @@ function lineCircleIntersection(l: Line, c: Circle) {
 /** Returns the intersection of two or more geometry objects. */
 export function intersections(...elements: GeoShape[]): Point[] {
   if (elements.length < 2) return [];
-  if (elements.length > 2) return flatten(subsets(elements, 2).map(e => intersections(...e)));
+  if (elements.length > 2) return flatten(
+      subsets(elements, 2).map(e => intersections(...e)));
 
   let [a, b] = elements;
 
@@ -1056,15 +1076,16 @@ export function intersections(...elements: GeoShape[]): Point[] {
   if (a instanceof Polygon || a instanceof Rectangle) {
     // This hack is necessary to capture intersections between a line and a
     // vertex of a polygon. There are more edge cases to consider!
-    const vertices = (b instanceof Line) ? a.points.filter(p => b.contains(p)) : [];
+    const vertices = (b instanceof Line) ? a.points.filter(p => b.contains(p)) :
+        [];
     return [...vertices, ...intersections(b, ...a.edges)];
   }
 
-  return simpleIntersection(a, b as (Line | Ray | Segment | Circle));
+  return simpleIntersection(a, b as (Line|Ray|Segment|Circle));
 }
 
 /** Finds the intersection of two lines or circles. */
-export function simpleIntersection(a: Line | Circle, b: Line | Circle): Point[] {
+export function simpleIntersection(a: Line|Circle, b: Line|Circle): Point[] {
   let results: Point[] = [];
 
   // TODO Handle Arcs and Rays
@@ -1079,7 +1100,8 @@ export function simpleIntersection(a: Line | Circle, b: Line | Circle): Point[] 
   }
 
   for (const x of [a, b]) {
-    if (x instanceof Segment) results = results.filter(i => liesOnSegment(x, i));
+    if (x instanceof Segment) results =
+        results.filter(i => liesOnSegment(x, i));
     if (x instanceof Ray) results = results.filter(i => liesOnRay(x, i));
   }
 

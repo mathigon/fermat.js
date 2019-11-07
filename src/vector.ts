@@ -63,7 +63,8 @@ export class Vector extends Array<number> {
     if (v1.length !== 3 || v2.length !== 3)
       throw new Error('Cross product requires vectors of size 3.');
     return new Vector(v1[1] * v2[2] - v1[2] * v2[1],
-      v1[2] * v2[0] - v1[0] * v2[2], v1[0] * v2[1] - v1[1] * v2[0]);
+        v1[2] * v2[0] - v1[0] * v2[2],
+        v1[0] * v2[1] - v1[1] * v2[0]);
   }
 
   /** Checks if two vectors are equal. */

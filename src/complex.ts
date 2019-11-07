@@ -30,7 +30,7 @@ export class Complex {
   // ---------------------------------------------------------------------------
 
   /** Calculates the sum of two complex numbers c1 and c2. */
-  static sum(c1: Complex | number, c2: Complex | number) {
+  static sum(c1: Complex|number, c2: Complex|number) {
     if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
     if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
 
@@ -38,7 +38,7 @@ export class Complex {
   }
 
   /** Calculates the difference of two complex numbers c1 and c2. */
-  static difference(c1: Complex | number, c2: Complex | number) {
+  static difference(c1: Complex|number, c2: Complex|number) {
     if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
     if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
 
@@ -46,7 +46,7 @@ export class Complex {
   }
 
   /** Calculates the product of two complex numbers c1 and c2. */
-  static product(c1: Complex | number, c2: Complex | number) {
+  static product(c1: Complex|number, c2: Complex|number) {
     if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
     if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
 
@@ -56,7 +56,7 @@ export class Complex {
   }
 
   /** Calculates the sum of two quotient numbers c1 and c2. */
-  static quotient(c1: Complex | number, c2: Complex | number) {
+  static quotient(c1: Complex|number, c2: Complex|number) {
     if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
     if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
 
