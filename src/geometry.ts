@@ -21,8 +21,10 @@ interface Coordinates {
 // -----------------------------------------------------------------------------
 // Points
 
+export type SimplePoint = {x: number, y: number};
+
 /** A single point class defined by two coordinates x and y. */
-export class Point {
+export class Point implements SimplePoint {
   readonly type = 'point';
 
   constructor(readonly x = 0, readonly y = 0) {}

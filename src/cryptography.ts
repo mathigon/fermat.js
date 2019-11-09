@@ -4,13 +4,13 @@
 // ============================================================================
 
 
-import {repeat} from '@mathigon/core';
+import {repeat, Obj} from '@mathigon/core';
 
 
 const LOWER_CASE = 'abcdefghijklmnopqrstuvwxyz';
 const UPPER_CASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-const ENGLISH_FREQUENCY: {[key: string]: number} = {
+const ENGLISH_FREQUENCY: Obj<number> = {
   a: 0.08167, b: 0.01492, c: 0.02782, d: 0.04253, e: 0.12702, f: 0.02228,
   g: 0.02015, h: 0.06094, i: 0.06966, j: 0.00154, k: 0.00772, l: 0.04024,
   m: 0.02406, n: 0.06749, o: 0.07507, p: 0.01929, q: 0.00095, r: 0.05987,
