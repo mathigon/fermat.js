@@ -359,6 +359,14 @@ class Complex {
 function uid(n = 10) {
     return Math.random().toString(36).substr(2, n);
 }
+/** Checks if x is strictly equal to any one of the following arguments. */
+function isOneOf(x, ...values) {
+    for (let v of values) {
+        if (x === v)
+            return true;
+    }
+    return false;
+}
 
 // =============================================================================
 // Core.ts | Array Functions
@@ -511,6 +519,8 @@ function cipherLetterFreq(cipher) {
 }
 
 // =============================================================================
+// -----------------------------------------------------------------------------
+// Points
 /** A single point class defined by two coordinates x and y. */
 class Point {
     constructor(x = 0, y = 0) {
@@ -716,6 +726,9 @@ class Angle {
     /** Returns the Arc element corresponding to this angle. */
     get arc() {
         return new Arc(this.b, this.a, this.rad);
+    }
+    equals(a) {
+        return false; // TODO
     }
 }
 function rad(p, c = ORIGIN) {
@@ -966,6 +979,10 @@ class Arc {
     get center() {
         return this.at(0.5);
     }
+    equals() {
+        // TODO Implement
+        return false;
+    }
 }
 class Sector extends Arc {
     constructor() {
@@ -1066,9 +1083,11 @@ class Polygon {
     }
     equals(other) {
         // TODO Implement
+        return false;
     }
     project(p) {
         // TODO Implement
+        return ORIGIN;
     }
     at(t) {
         return Point.interpolateList([...this.points, this.points[0]], t);
@@ -1265,6 +1284,7 @@ class Rectangle {
     }
     equals(other) {
         // TODO Implement
+        return false;
     }
     project(p) {
         // TODO Use the generic intersections() function
@@ -1297,6 +1317,8 @@ class Rectangle {
         // TODO Implement
     }
 }
+// -----------------------------------------------------------------------------
+// Intersections
 function liesOnSegment(s, p) {
     if (nearlyEquals(s.p1.x, s.p2.x))
         return isBetween(p.y, s.p1.y, s.p2.y);
@@ -1363,6 +1385,15 @@ function lineCircleIntersection(l, c) {
     const yb = Math.abs(dy) * Math.sqrt(disc) / dr2;
     return [c.c.shift(xa + xb, ya + yb), c.c.shift(xa - xb, ya - yb)];
 }
+function isPolygonLike(shape) {
+    return isOneOf(shape.type, 'polygon', 'polyline', 'rectangle');
+}
+function isLineLike(shape) {
+    return isOneOf(shape.type, 'line', 'ray', 'segment');
+}
+function isCircle(shape) {
+    return shape.type === 'circle';
+}
 /** Returns the intersection of two or more geometry objects. */
 function intersections(...elements) {
     if (elements.length < 2)
@@ -1370,39 +1401,39 @@ function intersections(...elements) {
     if (elements.length > 2)
         return flatten(subsets(elements, 2).map(e => intersections(...e)));
     let [a, b] = elements;
-    // TODO Fix these type annotations!
-    if (b instanceof Polygon || b instanceof Rectangle)
+    if (isPolygonLike(b))
         [a, b] = [b, a];
-    if (a instanceof Polygon || a instanceof Rectangle) {
+    if (isPolygonLike(a)) {
         // This hack is necessary to capture intersections between a line and a
         // vertex of a polygon. There are more edge cases to consider!
-        const vertices = (b instanceof Line) ? a.points.filter(p => b.contains(p)) :
-            [];
+        const vertices = isLineLike(b) ?
+            a.points.filter(p => b.contains(p)) : [];
         return [...vertices, ...intersections(b, ...a.edges)];
     }
+    // TODO Handle arcs, sectors and angles!
     return simpleIntersection(a, b);
 }
 /** Finds the intersection of two lines or circles. */
 function simpleIntersection(a, b) {
     let results = [];
     // TODO Handle Arcs and Rays
-    if (a instanceof Line && b instanceof Line) {
+    if (isLineLike(a) && isLineLike(b)) {
         results = lineLineIntersection(a, b);
     }
-    else if (a instanceof Line && b instanceof Circle) {
+    else if (isLineLike(a) && isCircle(b)) {
         results = lineCircleIntersection(a, b);
     }
-    else if (a instanceof Circle && b instanceof Line) {
+    else if (isCircle(a) && isLineLike(b)) {
         results = lineCircleIntersection(b, a);
     }
-    else if (a instanceof Circle && b instanceof Circle) {
+    else if (isCircle(a) && isCircle(b)) {
         results = circleCircleIntersection(a, b);
     }
     for (const x of [a, b]) {
-        if (x instanceof Segment)
+        if (x.type === 'segment')
             results =
                 results.filter(i => liesOnSegment(x, i));
-        if (x instanceof Ray)
+        if (x.type === 'ray')
             results = results.filter(i => liesOnRay(x, i));
     }
     return results;
