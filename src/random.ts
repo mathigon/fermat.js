@@ -10,7 +10,7 @@ import {uid, total, repeat} from '@mathigon/core';
 export namespace Random {
 
   /** Randomly shuffles the elements in an array a. */
-  export function shuffle(a: Array<any>) {
+  export function shuffle<T = any>(a: T[]): T[] {
     a = a.slice(0); // create copy
     for (let i = a.length - 1; i > 0; --i) {
       let j = Math.floor(Math.random() * (i + 1));

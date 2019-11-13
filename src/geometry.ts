@@ -4,7 +4,7 @@
 // =============================================================================
 
 
-import {total, flatten, toLinkedList, tabulate} from '@mathigon/core';
+import {total, flatten, toLinkedList, tabulate, isOneOf} from '@mathigon/core';
 import {nearlyEquals, isBetween, roundTo, square, clamp, lerp} from './arithmetic';
 import {subsets} from './combinatorics';
 
@@ -12,16 +12,13 @@ import {subsets} from './combinatorics';
 // -----------------------------------------------------------------------------
 // Interfaces
 
-interface Coordinates {
-  x: number;
-  y: number;
-}
+export type TransformMatrix = [[number, number, number], [number, number, number]];
+export type SimplePoint = {x: number, y: number};
 
 
 // -----------------------------------------------------------------------------
 // Points
 
-export type SimplePoint = {x: number, y: number};
 
 /** A single point class defined by two coordinates x and y. */
 export class Point implements SimplePoint {
@@ -65,7 +62,7 @@ export class Point implements SimplePoint {
   }
 
   /** Transforms this point using a 2x3 matrix m. */
-  transform(m: number[][]) {
+  transform(m: TransformMatrix) {
     const x = m[0][0] * this.x + m[0][1] * this.y + m[0][2];
     const y = m[1][0] * this.x + m[1][1] * this.y + m[1][2];
     return new Point(x, y);
@@ -115,15 +112,15 @@ export class Point implements SimplePoint {
     return new Point(x, y);
   }
 
-  add(p: Point) {
+  add(p: SimplePoint) {
     return Point.sum(this, p);
   }
 
-  subtract(p: Point) {
+  subtract(p: SimplePoint) {
     return Point.difference(this, p);
   }
 
-  equals(p: Point) {
+  equals(p: SimplePoint) {
     return Point.equals(this, p);
   }
 
@@ -144,49 +141,49 @@ export class Point implements SimplePoint {
   }
 
   /** Calculates the average of multiple points. */
-  static average(...points: Point[]) {
+  static average(...points: SimplePoint[]) {
     let x = total(points.map(p => p.x)) / points.length;
     let y = total(points.map(p => p.y)) / points.length;
     return new Point(x, y);
   }
 
   /** Calculates the dot product of two points p1 and p2. */
-  static dot(p1: Point, p2: Point) {
+  static dot(p1: SimplePoint, p2: SimplePoint) {
     return p1.x * p2.x + p1.y * p2.y;
   }
 
-  static sum(p1: Point, p2: Point) {
+  static sum(p1: SimplePoint, p2: SimplePoint) {
     return new Point(p1.x + p2.x, p1.y + p2.y);
   }
 
-  static difference(p1: Point, p2: Point) {
+  static difference(p1: SimplePoint, p2: SimplePoint) {
     return new Point(p1.x - p2.x, p1.y - p2.y);
   }
 
   /** Returns the Euclidean distance between two points p1 and p2. */
-  static distance(p1: Point, p2: Point) {
+  static distance(p1: SimplePoint, p2: SimplePoint) {
     return Math.sqrt(square(p1.x - p2.x) + square(p1.y - p2.y));
   }
 
   /** Returns the Manhattan distance between two points p1 and p2. */
-  static manhattan(p1: Point, p2: Point) {
+  static manhattan(p1: SimplePoint, p2: SimplePoint) {
     return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
   }
 
   /** Interpolates two points p1 and p2 by a factor of t. */
-  static interpolate(p1: Point, p2: Point, t = 0.5) {
+  static interpolate(p1: SimplePoint, p2: SimplePoint, t = 0.5) {
     return new Point(lerp(p1.x, p2.x, t), lerp(p1.y, p2.y, t));
   }
 
   /** Interpolates a list of multiple points. */
-  static interpolateList(points: Point[], t = 0.5) {
+  static interpolateList(points: SimplePoint[], t = 0.5) {
     const n = points.length - 1;
     const a = Math.floor(clamp(t, 0, 1) * n);
     return Point.interpolate(points[a], points[a + 1], n * t - a);
   }
 
   /** Checks if two points p1 and p2 are equal. */
-  static equals(p1: Point, p2: Point) {
+  static equals(p1: SimplePoint, p2: SimplePoint) {
     return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
   }
 
@@ -204,8 +201,8 @@ const ORIGIN = new Point(0, 0);
 
 export class Bounds {
 
-  constructor(readonly xMin: number, readonly xMax: number,
-              readonly yMin: number, readonly yMax: number) {
+  constructor(public xMin: number, public xMax: number,
+              public yMin: number, public yMax: number) {
   }
 
   get dx() {
@@ -229,7 +226,7 @@ export class Angle {
 
   constructor(readonly a: Point, readonly b: Point, readonly c: Point) {}
 
-  transform(m: number[][]) {
+  transform(m: TransformMatrix) {
     return new Angle(this.a.transform(m), this.b.transform(m),
         this.c.transform(m));
   }
@@ -276,6 +273,10 @@ export class Angle {
   /** Returns the Arc element corresponding to this angle. */
   get arc() {
     return new Arc(this.b, this.a, this.rad);
+  }
+
+  equals(a: Angle) {
+    return false;  // TODO
   }
 }
 
@@ -370,7 +371,7 @@ export class Line {
     return Point.interpolate(this.p1, this.p2, t);
   }
 
-  transform(m: number[][]) {
+  transform(m: TransformMatrix) {
     return new (<any>this.constructor)(this.p1.transform(m),
         this.p2.transform(m));
   }
@@ -477,7 +478,7 @@ export class Circle {
     return new Arc(this.c, start, TWO_PI);
   }
 
-  transform(m: number[][]) {
+  transform(m: TransformMatrix) {
     return new Circle(this.c.transform(m), this.r * (m[0][0] + m[1][1]) / 2);
   }
 
@@ -543,7 +544,7 @@ export class Arc {
     return this.start.rotate(this.angle, this.c);
   }
 
-  transform(m: number[][]) {
+  transform(m: TransformMatrix) {
     return new (<any>this.constructor)(this.c.transform(m),
         this.start.transform(m), this.angle);
   }
@@ -586,6 +587,11 @@ export class Arc {
 
   get center() {
     return this.at(0.5);
+  }
+
+  equals() {
+    // TODO Implement
+    return false;
   }
 
   // TODO rotate, reflect, scale, shift, translate, contains, equals
@@ -665,7 +671,7 @@ export class Polygon {
     return Math.max(...radii);
   }
 
-  transform(m: number[][]) {
+  transform(m: TransformMatrix) {
     return new (<any>this.constructor)(...this.points.map(p => p.transform(m)));
   }
 
@@ -712,10 +718,12 @@ export class Polygon {
 
   equals(other: Polygon) {
     // TODO Implement
+    return false;
   }
 
   project(p: Point) {
     // TODO Implement
+    return ORIGIN;
   }
 
   at(t: number) {
@@ -916,7 +924,7 @@ export class Rectangle {
     return new Polygon(this.p, b, c, d);
   }
 
-  transform(m: number[][]) {
+  transform(m: TransformMatrix) {
     return this.polygon.transform(m);
   }
 
@@ -947,9 +955,10 @@ export class Rectangle {
 
   equals(other: Polygon) {
     // TODO Implement
+    return false;
   }
 
-  project(p: Point) {
+  project(p: SimplePoint) {
     // TODO Use the generic intersections() function
     // bottom right corner of rect
     let rect1 = {x: this.p.x + this.w, y: this.p.y + this.h};
@@ -985,8 +994,6 @@ export class Rectangle {
 
 // -----------------------------------------------------------------------------
 // Intersections
-
-type GeoShape = (Line|Ray|Segment|Circle|Polygon|Polyline|Triangle|Rectangle);
 
 function liesOnSegment(s: Segment, p: Point) {
   if (nearlyEquals(s.p1.x, s.p2.x)) return isBetween(p.y, s.p1.y, s.p2.y);
@@ -1065,25 +1072,41 @@ function lineCircleIntersection(l: Line, c: Circle) {
   return [c.c.shift(xa + xb, ya + yb), c.c.shift(xa - xb, ya - yb)];
 }
 
+
+type Shape = (Line|Ray|Segment|Circle|Polygon|Polyline|Triangle|Rectangle|Arc|Sector|Angle);
+
+function isPolygonLike(shape: Shape): shape is Polygon|Rectangle {
+  return isOneOf(shape.type, 'polygon', 'polyline', 'rectangle');
+}
+
+function isLineLike(shape: Shape): shape is Line {
+  return isOneOf(shape.type, 'line', 'ray', 'segment');
+}
+
+function isCircle(shape: Shape): shape is Circle {
+  return shape.type === 'circle';
+}
+
 /** Returns the intersection of two or more geometry objects. */
-export function intersections(...elements: GeoShape[]): Point[] {
+export function intersections(...elements: Shape[]): Point[] {
   if (elements.length < 2) return [];
   if (elements.length > 2) return flatten(
       subsets(elements, 2).map(e => intersections(...e)));
 
   let [a, b] = elements;
 
-  // TODO Fix these type annotations!
-  if (b instanceof Polygon || b instanceof Rectangle) [a, b] = [b, a];
-  if (a instanceof Polygon || a instanceof Rectangle) {
+  if (isPolygonLike(b)) [a, b] = [b, a];
+
+  if (isPolygonLike(a)) {
     // This hack is necessary to capture intersections between a line and a
     // vertex of a polygon. There are more edge cases to consider!
-    const vertices = (b instanceof Line) ? a.points.filter(p => b.contains(p)) :
-        [];
+    const vertices = isLineLike(b) ?
+                     a.points.filter(p => (b as Line).contains(p)) : [];
     return [...vertices, ...intersections(b, ...a.edges)];
   }
 
-  return simpleIntersection(a, b as (Line|Ray|Segment|Circle));
+  // TODO Handle arcs, sectors and angles!
+  return simpleIntersection(a as (Line|Circle), b as (Line|Circle));
 }
 
 /** Finds the intersection of two lines or circles. */
@@ -1091,20 +1114,20 @@ export function simpleIntersection(a: Line|Circle, b: Line|Circle): Point[] {
   let results: Point[] = [];
 
   // TODO Handle Arcs and Rays
-  if (a instanceof Line && b instanceof Line) {
+  if (isLineLike(a) && isLineLike(b)) {
     results = lineLineIntersection(a, b);
-  } else if (a instanceof Line && b instanceof Circle) {
+  } else if (isLineLike(a) && isCircle(b)) {
     results = lineCircleIntersection(a, b);
-  } else if (a instanceof Circle && b instanceof Line) {
+  } else if (isCircle(a) && isLineLike(b)) {
     results = lineCircleIntersection(b, a);
-  } else if (a instanceof Circle && b instanceof Circle) {
+  } else if (isCircle(a) && isCircle(b)) {
     results = circleCircleIntersection(a, b);
   }
 
   for (const x of [a, b]) {
-    if (x instanceof Segment) results =
-        results.filter(i => liesOnSegment(x, i));
-    if (x instanceof Ray) results = results.filter(i => liesOnRay(x, i));
+    if (x.type === 'segment') results =
+        results.filter(i => liesOnSegment(x as Segment, i));
+    if (x.type === 'ray') results = results.filter(i => liesOnRay(x as Ray, i));
   }
 
   return results;
