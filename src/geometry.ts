@@ -104,6 +104,10 @@ export class Point implements SimplePoint {
     return new Point(this.x + x, this.y + y);
   }
 
+  translate(p: Point) {
+    return this.shift(p.x, p.y);  // Alias for .add()
+  }
+
   changeCoordinates(originCoords: Bounds, targetCoords: Bounds) {
     const x = targetCoords.xMin + (this.x - originCoords.xMin) /
               (originCoords.dx) * (targetCoords.dx);
@@ -1075,15 +1079,15 @@ function lineCircleIntersection(l: Line, c: Circle) {
 
 type Shape = (Line|Ray|Segment|Circle|Polygon|Polyline|Triangle|Rectangle|Arc|Sector|Angle);
 
-function isPolygonLike(shape: Shape): shape is Polygon|Rectangle {
+export function isPolygonLike(shape: Shape): shape is Polygon|Rectangle {
   return isOneOf(shape.type, 'polygon', 'polyline', 'rectangle');
 }
 
-function isLineLike(shape: Shape): shape is Line {
+export function isLineLike(shape: Shape): shape is Line {
   return isOneOf(shape.type, 'line', 'ray', 'segment');
 }
 
-function isCircle(shape: Shape): shape is Circle {
+export function isCircle(shape: Shape): shape is Circle {
   return shape.type === 'circle';
 }
 
