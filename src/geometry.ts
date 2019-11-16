@@ -451,9 +451,9 @@ export class Segment extends Line {
             Point.equals(l1.p2, l2.p1));
   }
 
-  /** Finds the intersection of two line segments l1 and l2 (or null). */
+  /** Finds the intersection of two line segments l1 and l2 (or undefined). */
   static intersect(s1: Segment, s2: Segment) {
-    return intersections(s1, s2)[0] || null;
+    return intersections(s1, s2)[0] || undefined;
   }
 }
 
@@ -756,7 +756,7 @@ export class Polygon {
 
     let which = 0;
     let active = points[which].find(p => polygon.contains(p.val))!;
-    if (!active) return null;  // No intersection
+    if (!active) return undefined;  // No intersection
 
     while (active.val !== result[0] && result.length < max) {
       result.push(active.val);

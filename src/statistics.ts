@@ -23,14 +23,14 @@ export function median(values: number[]) {
 }
 
 /**
- * Calculates the mode of an array of numbers. Returns null if no mode exists,
- * i.e. there are multiple values with the same largest count.
+ * Calculates the mode of an array of numbers. Returns undefined if no mode
+ * exists, i.e. there are multiple values with the same largest count.
  */
 export function mode(values: number[]) {
   const counts = new Map<number, number>();
 
   let maxCount = -1;
-  let result: number|null = null;
+  let result: number|undefined = undefined;
 
   for (const v of values) {
     if (!counts.has(v)) {
@@ -39,7 +39,7 @@ export function mode(values: number[]) {
       let newCount = counts.get(v)! + 1;
       counts.set(v, newCount);
       if (newCount === maxCount) {
-        result = null;
+        result = undefined;
       } else if (newCount > maxCount) {
         maxCount = newCount;
         result = v;
@@ -52,7 +52,7 @@ export function mode(values: number[]) {
 
 /** Calculates the variance of an array of numbers. */
 export function variance(values: number[]) {
-  if (!values.length) return null;
+  if (!values.length) return undefined;
   const m = mean(values);
 
   const sum = values.reduce((a, v) => a + (v - m) ** 2, 0);

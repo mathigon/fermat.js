@@ -178,12 +178,12 @@ export namespace Regression {
     if (data.length > 1) {
       for (const t of types) {
         const params = t.regression(data);
-        const fn = t.fn.bind(null, params);
+        const fn = t.fn.bind(undefined, params);
         const coeff = coefficient(data, fn);
         if (coeff > threshold) return {type: t.name, fn, params, coeff};
       }
     }
 
-    return {type: null, fn: () => {}, params: [], coeff: null};
+    return {type: undefined, fn: () => {}, params: [], coeff: undefined};
   }
 }

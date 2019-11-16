@@ -111,7 +111,7 @@ export namespace Random {
 
   /** Generates a geometric random variable. */
   export function geometric(p = 0.5) {
-    if (p <= 0 || p > 1) return null;
+    if (p <= 0 || p > 1) return undefined;
     return Math.floor(Math.log(Math.random()) / Math.log(1 - p));
   }
 
