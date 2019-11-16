@@ -1079,15 +1079,15 @@ function lineCircleIntersection(l: Line, c: Circle) {
 
 type Shape = (Line|Ray|Segment|Circle|Polygon|Polyline|Triangle|Rectangle|Arc|Sector|Angle);
 
-export function isPolygonLike(shape: Shape): shape is Polygon|Rectangle {
+export function isPolygonLike(shape: Point|Shape): shape is Polygon|Rectangle {
   return isOneOf(shape.type, 'polygon', 'polyline', 'rectangle');
 }
 
-export function isLineLike(shape: Shape): shape is Line {
+export function isLineLike(shape: Point|Shape): shape is Line {
   return isOneOf(shape.type, 'line', 'ray', 'segment');
 }
 
-export function isCircle(shape: Shape): shape is Circle {
+export function isCircle(shape: Point|Shape): shape is Circle {
   return shape.type === 'circle';
 }
 

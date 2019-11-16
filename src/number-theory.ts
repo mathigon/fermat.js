@@ -27,20 +27,14 @@ export function lcm(...numbers: number[]): number {
   return Math.abs(first * rest[0]) / gcd(first, rest[0]);
 }
 
-/**
- * Checks if a number n is prime. Contains no dependencies, so that this
- * function can easily be stringified and run in a web worker.
- * @param {number} n
- * @returns {boolean}
- */
+/** Checks if a number n is prime. */
 export function isPrime(n: number) {
-  const M = Math;
   if (n % 1 !== 0 || n < 2) return false;
 
   if (n % 2 === 0) return (n === 2);
   if (n % 3 === 0) return (n === 3);
 
-  let m = M.sqrt(n);
+  const m = Math.sqrt(n);
   for (let i = 5; i <= m; i += 6) {
     if (n % i === 0) return false;
     if (n % (i + 2) === 0) return false;
@@ -85,49 +79,22 @@ export function listPrimes(n = 100) {
   return result;
 }
 
-/**
- * Generates a random prime number with d digits, where 2 <= d <= 16. Contains
- * no dependencies, so that this function can easily be stringified and run in
- * a web worker.
- */
+/** Generates a random prime number with d digits, where 2 <= d <= 16. */
 export function generatePrime(d: number) {
-  const M = Math;
   if (d < 2 || d > 16) throw new Error('Invalid number of digits.');
 
-  let lastDigit = [1, 3, 7, 9];
+  const lastDigit = [1, 3, 7, 9];
+  const pow = Math.pow(10, d - 2);
 
-  function randomInt(d: number) {
-    let pow = M.pow(10, d - 2);
-    let n = M.floor(M.random() * 9 * pow) + pow;
-    return 10 * n + lastDigit[M.floor(4 * M.random())];
+  while (true) {
+    const n = Math.floor(Math.random() * 9 * pow) + pow;
+    const x = 10 * n + lastDigit[Math.floor(4 * Math.random())];
+    if (isPrime(x)) return x;
   }
-
-  function isPrime(n: number) {
-    let sqrt = M.sqrt(n);
-    for (let i = 3; i <= sqrt; i += 2) if (n % i === 0) return false;
-    return true;
-  }
-
-  let x;
-  do {
-    x = randomInt(d);
-  } while (!isPrime(x));
-  return x;
 }
 
-/**
- * Tries to write a number x as the sum of two primes. Contains no dependencies,
- * so that this function can easily be stringified and run in a web worker.
- */
+/** Tries to write a number x as the sum of two primes. */
 export function goldbach(x: number) {
-  const M = Math;
-
-  function isPrime(n: number) {
-    let sqrt = M.sqrt(n);
-    for (let i = 3; i <= sqrt; i += 2) if (n % i === 0) return false;
-    return true;
-  }
-
   if (x === 4) return [2, 2];
 
   let a = x / 2;
