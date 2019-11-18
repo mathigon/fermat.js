@@ -1,6 +1,6 @@
 {
   "name": "@mathigon/fermat",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Powerful mathematics, statistics and geometry library for JavaScript.",
   "keywords": [
     "mathematics",
@@ -25,7 +25,7 @@
     "build": "rollup --config"
   },
   "dependencies": {
-    "@mathigon/core": "^0.3.3"
+    "@mathigon/core": "^0.3.4"
   },
   "devDependencies": {
     "@types/tape": "^4.2.33",

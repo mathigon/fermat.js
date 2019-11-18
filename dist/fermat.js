@@ -442,7 +442,7 @@ function flatten(array) {
 }
 /** Converts an array to a linked list data structure. */
 function toLinkedList(array) {
-    const result = array.map(a => ({ val: a, next: null }));
+    const result = array.map(a => ({ val: a, next: undefined }));
     const n = result.length;
     for (let i = 0; i < n - 1; ++i) {
         result[i].next = result[i + 1];
@@ -589,6 +589,9 @@ class Point {
     shift(x, y = x) {
         return new Point(this.x + x, this.y + y);
     }
+    translate(p) {
+        return this.shift(p.x, p.y); // Alias for .add()
+    }
     changeCoordinates(originCoords, targetCoords) {
         const x = targetCoords.xMin + (this.x - originCoords.xMin) /
             (originCoords.dx) * (targetCoords.dx);
@@ -602,8 +605,8 @@ class Point {
     subtract(p) {
         return Point.difference(this, p);
     }
-    equals(p) {
-        return Point.equals(this, p);
+    equals(other) {
+        return nearlyEquals(this.x, other.x) && nearlyEquals(this.y, other.y);
     }
     round(inc = 1) {
         return new Point(roundTo(this.x, inc), roundTo(this.y, inc));
@@ -650,10 +653,6 @@ class Point {
         const n = points.length - 1;
         const a = Math.floor(clamp(t, 0, 1) * n);
         return Point.interpolate(points[a], points[a + 1], n * t - a);
-    }
-    /** Checks if two points p1 and p2 are equal. */
-    static equals(p1, p2) {
-        return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
     }
     /** Creates a point from polar coordinates. */
     static fromPolar(angle, r = 1) {
@@ -767,13 +766,13 @@ class Line {
     get angle() {
         return rad(this.p2, this.p1);
     }
-    /** The point representing the normal vector of this line. */
+    /** The point representing a unit vector along this line. */
     get unitVector() {
         return this.p2.subtract(this.p1).unitVector;
     }
     /** The point representing the perpendicular vector of this line. */
     get perpendicularVector() {
-        return new Point(this.p2.y - this.p1.y, this.p1.x - this.p2.x).perpendicular;
+        return new Point(this.p2.y - this.p1.y, this.p1.x - this.p2.x).unitVector;
     }
     /** Finds the line parallel to this one, going though point p. */
     parallel(p) {
@@ -824,11 +823,7 @@ class Line {
         return this.shift(p.x, p.y);
     }
     equals(other) {
-        return Line.equals(this, other);
-    }
-    /** Checks if two lines l1 and l2 are equal. */
-    static equals(l1, l2) {
-        return l1.contains(l2.p1) && l1.contains(l2.p2);
+        return this.contains(other.p1) && this.contains(other.p2);
     }
 }
 /** An infinite ray defined by an endpoint and another point on the ray. */
@@ -836,6 +831,14 @@ class Ray extends Line {
     constructor() {
         super(...arguments);
         this.type = 'ray';
+    }
+    make(p1, p2) {
+        return new Ray(p1, p2);
+    }
+    equals(other) {
+        if (other.type !== 'ray')
+            return false;
+        return this.p1.equals(other.p1) && this.contains(other.p2);
     }
 }
 /** A finite line segment defined by its two endpoints. */
@@ -845,8 +848,14 @@ class Segment extends Line {
         this.type = 'segment';
     }
     contains(p) {
-        // TODO Implement!
-        return true;
+        if (!Line.prototype.contains.call(this, p))
+            return false;
+        if (nearlyEquals(this.p1.x, this.p2.x)) {
+            return isBetween(p.y, this.p1.y, this.p2.y);
+        }
+        else {
+            return isBetween(p.x, this.p1.x, this.p2.x);
+        }
     }
     make(p1, p2) {
         return new Segment(p1, p2);
@@ -861,15 +870,15 @@ class Segment extends Line {
     contract(x) {
         return new Segment(this.at(x), this.at(1 - x));
     }
-    /** Checks if two line segments l1 and l2 are equal. */
-    static equals(l1, l2, oriented = false) {
-        return (Point.equals(l1.p1, l2.p1) && Point.equals(l1.p2, l2.p2)) ||
-            (!oriented && Point.equals(l1.p1, l2.p2) &&
-                Point.equals(l1.p2, l2.p1));
+    equals(other, oriented = false) {
+        if (other.type !== 'segment')
+            return false;
+        return (this.p1.equals(other.p1) && this.p2.equals(other.p2)) ||
+            (!oriented && this.p1.equals(other.p2) && this.p2.equals(other.p1));
     }
-    /** Finds the intersection of two line segments l1 and l2 (or null). */
+    /** Finds the intersection of two line segments l1 and l2 (or undefined). */
     static intersect(s1, s2) {
-        return intersections(s1, s2)[0] || null;
+        return intersections(s1, s2)[0] || undefined;
     }
 }
 // -----------------------------------------------------------------------------
@@ -918,7 +927,7 @@ class Circle {
         return nearlyEquals(this.r, other.r) && this.c.equals(other.c);
     }
     project(p) {
-        const proj = Point.difference(p, this.c).perpendicular.scale(this.r);
+        const proj = p.subtract(this.c).unitVector.scale(this.r);
         return Point.sum(this.c, proj);
     }
     at(t) {
@@ -1113,7 +1122,7 @@ class Polygon {
         let which = 0;
         let active = points[which].find(p => polygon.contains(p.val));
         if (!active)
-            return null; // No intersection
+            return undefined; // No intersection
         while (active.val !== result[0] && result.length < max) {
             result.push(active.val);
             const nextEdge = new Segment(active.val, active.next.val);
@@ -1624,21 +1633,15 @@ function lcm(...numbers) {
         return lcm(first, lcm(...rest));
     return Math.abs(first * rest[0]) / gcd(first, rest[0]);
 }
-/**
- * Checks if a number n is prime. Contains no dependencies, so that this
- * function can easily be stringified and run in a web worker.
- * @param {number} n
- * @returns {boolean}
- */
+/** Checks if a number n is prime. */
 function isPrime(n) {
-    const M = Math;
     if (n % 1 !== 0 || n < 2)
         return false;
     if (n % 2 === 0)
         return (n === 2);
     if (n % 3 === 0)
         return (n === 3);
-    let m = M.sqrt(n);
+    const m = Math.sqrt(n);
     for (let i = 5; i <= m; i += 6) {
         if (n % i === 0)
             return false;
@@ -1680,47 +1683,21 @@ function listPrimes(n = 100) {
     }
     return result;
 }
-/**
- * Generates a random prime number with d digits, where 2 <= d <= 16. Contains
- * no dependencies, so that this function can easily be stringified and run in
- * a web worker.
- */
+/** Generates a random prime number with d digits, where 2 <= d <= 16. */
 function generatePrime(d) {
-    const M = Math;
     if (d < 2 || d > 16)
         throw new Error('Invalid number of digits.');
-    let lastDigit = [1, 3, 7, 9];
-    function randomInt(d) {
-        let pow = M.pow(10, d - 2);
-        let n = M.floor(M.random() * 9 * pow) + pow;
-        return 10 * n + lastDigit[M.floor(4 * M.random())];
+    const lastDigit = [1, 3, 7, 9];
+    const pow = Math.pow(10, d - 2);
+    while (true) {
+        const n = Math.floor(Math.random() * 9 * pow) + pow;
+        const x = 10 * n + lastDigit[Math.floor(4 * Math.random())];
+        if (isPrime(x))
+            return x;
     }
-    function isPrime(n) {
-        let sqrt = M.sqrt(n);
-        for (let i = 3; i <= sqrt; i += 2)
-            if (n % i === 0)
-                return false;
-        return true;
-    }
-    let x;
-    do {
-        x = randomInt(d);
-    } while (!isPrime(x));
-    return x;
 }
-/**
- * Tries to write a number x as the sum of two primes. Contains no dependencies,
- * so that this function can easily be stringified and run in a web worker.
- */
+/** Tries to write a number x as the sum of two primes. */
 function goldbach(x) {
-    const M = Math;
-    function isPrime(n) {
-        let sqrt = M.sqrt(n);
-        for (let i = 3; i <= sqrt; i += 2)
-            if (n % i === 0)
-                return false;
-        return true;
-    }
     if (x === 4)
         return [2, 2];
     let a = x / 2;
@@ -1848,7 +1825,7 @@ function eulerPhi(x) {
     /** Generates a geometric random variable. */
     function geometric(p = 0.5) {
         if (p <= 0 || p > 1)
-            return null;
+            return undefined;
         return Math.floor(Math.log(Math.random()) / Math.log(1 - p));
     }
     Random.geometric = geometric;
@@ -1892,9 +1869,7 @@ function eulerPhi(x) {
         let t = z + G + 0.5;
         return Math.sqrt(2 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
     }
-    /**
-     * Riemann-integrates a function from xMin to xMax, with an interval size dx.
-     */
+    /** Riemann-integrates fn(x) from xMin to xMax with an interval size dx. */
     function integrate(fn, xMin, xMax, dx = 1) {
         let result = 0;
         for (let x = xMin; x < xMax; x += dx) {
@@ -1903,12 +1878,7 @@ function eulerPhi(x) {
         return result;
     }
     Random.integrate = integrate;
-    /**
-     * The chi CDF function.
-     * @param {number} chi
-     * @param {number} deg
-     * @returns {number}
-     */
+    /** The chi CDF function. */
     function chiCDF(chi, deg) {
         let int = integrate(t => Math.pow(t, (deg - 2) / 2) * Math.exp(-t / 2), 0, chi);
         return 1 - int / Math.pow(2, deg / 2) / gamma(deg / 2);
@@ -2054,13 +2024,13 @@ function eulerPhi(x) {
         if (data.length > 1) {
             for (const t of types) {
                 const params = t.regression(data);
-                const fn = t.fn.bind(null, params);
+                const fn = t.fn.bind(undefined, params);
                 const coeff = coefficient(data, fn);
                 if (coeff > threshold)
                     return { type: t.name, fn, params, coeff };
             }
         }
-        return { type: null, fn: () => { }, params: [], coeff: null };
+        return { type: undefined, fn: () => { }, params: [], coeff: undefined };
     }
     Regression.find = find;
 })(exports.Regression || (exports.Regression = {}));
@@ -2080,13 +2050,13 @@ function median(values) {
         (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
 }
 /**
- * Calculates the mode of an array of numbers. Returns null if no mode exists,
- * i.e. there are multiple values with the same largest count.
+ * Calculates the mode of an array of numbers. Returns undefined if no mode
+ * exists, i.e. there are multiple values with the same largest count.
  */
 function mode(values) {
     const counts = new Map();
     let maxCount = -1;
-    let result = null;
+    let result = undefined;
     for (const v of values) {
         if (!counts.has(v)) {
             counts.set(v, 1);
@@ -2095,7 +2065,7 @@ function mode(values) {
             let newCount = counts.get(v) + 1;
             counts.set(v, newCount);
             if (newCount === maxCount) {
-                result = null;
+                result = undefined;
             }
             else if (newCount > maxCount) {
                 maxCount = newCount;
@@ -2108,7 +2078,7 @@ function mode(values) {
 /** Calculates the variance of an array of numbers. */
 function variance(values) {
     if (!values.length)
-        return null;
+        return undefined;
     const m = mean(values);
     const sum = values.reduce((a, v) => a + (v - m) ** 2, 0);
     return sum / (values.length - 1);
@@ -2229,7 +2199,10 @@ exports.generatePrime = generatePrime;
 exports.goldbach = goldbach;
 exports.intersections = intersections;
 exports.isBetween = isBetween;
+exports.isCircle = isCircle;
 exports.isInteger = isInteger;
+exports.isLineLike = isLineLike;
+exports.isPolygonLike = isPolygonLike;
 exports.isPrime = isPrime;
 exports.lcm = lcm;
 exports.lerp = lerp;
