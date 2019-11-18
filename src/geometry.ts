@@ -124,8 +124,8 @@ export class Point implements SimplePoint {
     return Point.difference(this, p);
   }
 
-  equals(p: SimplePoint) {
-    return Point.equals(this, p);
+  equals(other: SimplePoint) {
+    return nearlyEquals(this.x, other.x) && nearlyEquals(this.y, other.y);
   }
 
   round(inc = 1) {
@@ -184,11 +184,6 @@ export class Point implements SimplePoint {
     const n = points.length - 1;
     const a = Math.floor(clamp(t, 0, 1) * n);
     return Point.interpolate(points[a], points[a + 1], n * t - a);
-  }
-
-  /** Checks if two points p1 and p2 are equal. */
-  static equals(p1: SimplePoint, p2: SimplePoint) {
-    return nearlyEquals(p1.x, p2.x) && nearlyEquals(p1.y, p2.y);
   }
 
   /** Creates a point from polar coordinates. */
@@ -328,7 +323,7 @@ export class Line {
     return rad(this.p2, this.p1);
   }
 
-  /** The point representing the normal vector of this line. */
+  /** The point representing a unit vector along this line. */
   get unitVector() {
     return this.p2.subtract(this.p1).unitVector;
   }
@@ -336,7 +331,7 @@ export class Line {
   /** The point representing the perpendicular vector of this line. */
   get perpendicularVector() {
     return new Point(this.p2.y - this.p1.y,
-        this.p1.x - this.p2.x).perpendicular;
+        this.p1.x - this.p2.x).unitVector;
   }
 
   /** Finds the line parallel to this one, going though point p. */
@@ -402,12 +397,7 @@ export class Line {
   }
 
   equals(other: Line) {
-    return Line.equals(this, other);
-  }
-
-  /** Checks if two lines l1 and l2 are equal. */
-  static equals(l1: Line, l2: Line) {
-    return l1.contains(l2.p1) && l1.contains(l2.p2);
+    return this.contains(other.p1) && this.contains(other.p2);
   }
 }
 
@@ -415,6 +405,15 @@ export class Line {
 /** An infinite ray defined by an endpoint and another point on the ray. */
 export class Ray extends Line {
   readonly type = 'ray';
+
+  protected make(p1: Point, p2: Point) {
+    return new Ray(p1, p2);
+  }
+
+  equals(other: Ray) {
+    if (other.type !== 'ray') return false;
+    return this.p1.equals(other.p1) && this.contains(other.p2);
+  }
 }
 
 
@@ -423,8 +422,12 @@ export class Segment extends Line {
   readonly type = 'segment';
 
   contains(p: Point) {
-    // TODO Implement!
-    return true;
+    if (!Line.prototype.contains.call(this, p)) return false;
+    if (nearlyEquals(this.p1.x, this.p2.x)) {
+      return isBetween(p.y, this.p1.y, this.p2.y);
+    } else {
+      return isBetween(p.x, this.p1.x, this.p2.x);
+    }
   }
 
   protected make(p1: Point, p2: Point) {
@@ -444,11 +447,10 @@ export class Segment extends Line {
     return new Segment(this.at(x), this.at(1 - x));
   }
 
-  /** Checks if two line segments l1 and l2 are equal. */
-  static equals(l1: Segment, l2: Segment, oriented = false) {
-    return (Point.equals(l1.p1, l2.p1) && Point.equals(l1.p2, l2.p2)) ||
-           (!oriented && Point.equals(l1.p1, l2.p2) &&
-            Point.equals(l1.p2, l2.p1));
+  equals(other: Segment, oriented = false) {
+    if (other.type !== 'segment') return false;
+    return (this.p1.equals(other.p1) && this.p2.equals(other.p2)) ||
+           (!oriented && this.p1.equals(other.p2) && this.p2.equals(other.p1));
   }
 
   /** Finds the intersection of two line segments l1 and l2 (or undefined). */
@@ -515,7 +517,7 @@ export class Circle {
   }
 
   project(p: Point) {
-    const proj = Point.difference(p, this.c).perpendicular.scale(this.r);
+    const proj = p.subtract(this.c).unitVector.scale(this.r);
     return Point.sum(this.c, proj);
   }
 
