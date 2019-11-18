@@ -1,7 +1,7 @@
-# Fermat.js
+# Fermat.ts
 
-Fermat.js is a powerful mathematics, statistics and geometry library for
-JavaScript. It contains everything from number theory to random numbers,
+Fermat.ts is a powerful mathematics, statistics and geometry library for
+TypeScript. It contains everything from number theory to random numbers,
 expression parsing and linear algebra classes. It was developed for
 [Mathigon.org](https://mathigon.org), an award-winning mathematics education
 project.
@@ -16,38 +16,32 @@ project.
 * Combinatorics: `factorial()`, `binomial()`, `permutations()`, `subsets()`
 * Complex numbers: `Complex()`
 * Cryptography: `caesarCipher()`, `vigenereCipher()`, `letterFrequency()`
-* Expression parsing: `Expression()`
 * Geometry: `Point()`, `Line()`, `Polygon()`, `Circle()`, `Angle()`, as well as
   methods for geometric properties, projections, intersections and much more
-* Matrices: `matrix.product()`, `matrix.determinant()`, `matrix.inverse()`, …
+* Matrices: `Matrix.product()`, `Matrix.determinant()`, `Matrix.inverse()`, …
 * Number theory: `gcd()`, `isPrime()`, `generatePrime()`, `goldbach()`, …
 * Numeric: `bisect()`, `integrate()`
-* Random: `random.shuffle()`, `random.binomial()`, `random.normalPDF()`, …
-* Regression: `regression.linear()`, `regression.coefficient()`, …
+* Random: `Random.shuffle()`, `Random.binomial()`, `Random.normalPDF()`, …
+* Regression: `Regression.linear()`, `Regression.coefficient()`, …
 * Statistics: `mean()`, `variance()`, `linearRegression()`, …
-* Units: `convert()`, `define()`
 * Vector: `Vector()`
 
 
 ## Usage
 
-First, install fermat.js from [NPM](https://www.npmjs.com/package/@mathigon/fermat)
+First, install Fermat.ts from [NPM](https://www.npmjs.com/package/@mathigon/fermat)
 using
 
-```npm install @mathigon/fermat --save```
+```npm install @mathigon/fermat```
 
-Fermat.js uses [ES6 imports](http://2ality.com/2014/09/es6-modules-final.html).
-While some browsers and platforms now support this feature, we recommend using
-a transpiler such as [Babel](http://babeljs.io/) or [Rollup](https://rollupjs.org/). 
-Make sure that you configure your compiler to correctly resolve these imports.
-For Rollup, we recommend using the
-[rollup-plugin-node-resolve](https://github.com/rollup/rollup-plugin-node-resolve)
+We recommend using Fermat.ts together with [Rollup](https://rollupjs.org/), using
+using the [rollup-plugin-node-resolve](https://github.com/rollup/rollup-plugin-node-resolve)
 plugin.
 
 Now, simply import all functions and classes you need, using
 
 ```js
-import { Complex, gcd } from '@mathigon/fermat'
+import {Complex, gcd} from '@mathigon/fermat'
 ```
 
 
