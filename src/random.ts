@@ -26,13 +26,6 @@ export namespace Random {
     return start + Math.floor(length * Math.random());
   }
 
-  /** Generates an array of the integers from 0 to n in random order. */
-  export function intArray(n: number) {
-    let a: number[] = [];
-    for (let i = 0; i < n; ++i) a.push(i);
-    return shuffle(a);
-  }
-
   /** Chooses a random index value from weights [2, 5, 3] */
   export function weighted(weights: number[]) {
     const x = Math.random() * total(weights);
