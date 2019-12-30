@@ -39,8 +39,8 @@ export function sign(x: number, t = PRECISION) {
 const NUM_REGEX = /(\d+)(\d{3})/;
 const POWER_SUFFIX = ['', 'k', 'm', 'b', 't', 'q'];
 
-function addThousandSeparators(x: number|string) {
-  let [n, dec] = ('' + x).split('.');
+function addThousandSeparators(x: string) {
+  let [n, dec] = x.split('.');
   while (NUM_REGEX.test(n)) {
     n = n.replace(NUM_REGEX, '$1,$2');
   }
@@ -48,12 +48,12 @@ function addThousandSeparators(x: number|string) {
 }
 
 function addPowerSuffix(n: number, places = 6) {
-  if (!places) return n;
+  if (!places) return '' + n;
 
   // Trim short numbers to the appropriate number of decimal places.
   const d = ('' + Math.abs(Math.floor(n))).length;
   const m = n < 0 ? 1 : 0;
-  if (d <= places - m) return round(n, places - d - m - 1);
+  if (d <= places - m) return '' + round(n, places - d - m - 1);
 
   // Append a power suffix to longer numbers.
   const x = Math.floor(Math.log10(Math.abs(n)) / 3);
@@ -63,11 +63,12 @@ function addPowerSuffix(n: number, places = 6) {
 
 /**
  * Converts a number to a clean string, by rounding, adding power suffixes, and
- * adding thousand separators. `places` is the number of digits to show in the
+ * adding thousands separators. `places` is the number of digits to show in the
  * result.
  */
-export function numberFormat(n: number, places = 0) {
-  return addThousandSeparators(addPowerSuffix(n, places)).replace('-', '–');
+export function numberFormat(n: number, places = 0, seperators = true) {
+  const str = addPowerSuffix(n, places).replace('-', '–');
+  return seperators ? addThousandSeparators(str) : str;
 }
 
 // Numbers like 0,123 are decimals, even though they mach POINT_DECIMAL.
