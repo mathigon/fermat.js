@@ -19,14 +19,15 @@ tape('parseNumber', (test) => {
   test.equal(parseNumber('1.234'), 1.234);  // ambiguous!
   test.equal(parseNumber('1,234'), 1234);  // ambiguous!
   test.equal(parseNumber('0,123'), 0.123);  // ambiguous!
+  test.equal(parseNumber('1,23'), 1.23);
   test.equal(parseNumber('1.2345'), 1.2345);
   test.equal(parseNumber('.123'), 0.123);
 
   test.equal(parseNumber('-123'), -123);
   test.equal(parseNumber('–123'), -123);
 
-  test.equal(parseNumber('-123,456'), -123456);
-  test.equal(parseNumber('-123.456'), -123.456);
+  test.equal(parseNumber('-123,456'), -123456);  // ambiguous!
+  test.equal(parseNumber('-123.456'), -123.456);  // ambiguous!
 
   test.ok(isNaN(parseNumber('1,2345,678')));
   test.ok(isNaN(parseNumber('1.2345.678')));

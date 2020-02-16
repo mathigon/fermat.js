@@ -789,7 +789,7 @@ export class Polygon {
       }
     }
 
-    // Check if one of the vertices is in one of the the polygons.
+    // Check if one of the vertices is in one of the polygons.
     for (let v of p1.points) if (p2.contains(v)) return true;
     for (let v of p2.points) if (p1.contains(v)) return true;
 

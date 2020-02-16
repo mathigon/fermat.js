@@ -71,7 +71,7 @@ export function numberFormat(n: number, places = 0, seperators = true) {
   return seperators ? addThousandSeparators(str) : str;
 }
 
-// Numbers like 0,123 are decimals, even though they mach POINT_DECIMAL.
+// Numbers like 0,123 are decimals, even though they match POINT_DECIMAL.
 const SPECIAL_DECIMAL = /^-?0,[0-9]+$/;
 
 // Points as decimal points, Commas as 1k separators, allow starting .
@@ -88,7 +88,7 @@ const COMMA_DECIMAL = /^-?[0-9]+(\.[0-9]{3})*,?[0-9]*$/;
  */
 export function parseNumber(str: string) {
   str = str.replace(/^–/, '-').trim();
-  if (!str || str.match(/[^0-9.,-]/)) return NaN;
+  if (!str || str.match(/[^0-9.,\-]/)) return NaN;
 
   if (SPECIAL_DECIMAL.test(str))
     return parseFloat(str.replace(/,/, '.'));
