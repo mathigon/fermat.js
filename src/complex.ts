@@ -9,16 +9,23 @@ export class Complex {
 
   constructor(public re = 0, public im = 0) {}
 
-  get magnitude() {
+  get modulus() {
     return Math.sqrt(this.re * this.re + this.im * this.im);
   }
 
-  get phase() {
+  get argument() {
     return Math.atan2(this.im, this.re);
   }
 
   get conjugate() {
     return new Complex(this.re, -this.im);
+  }
+
+  /** Returns the ith nth-root of this complex number. */
+  root(n: number, i = 0) {
+    const r = Math.pow(this.modulus, 1/n);
+    const th = (this.argument + i * 2 * Math.PI) / n;
+    return new Complex(r * Math.cos(th), r * Math.sin(th));
   }
 
   toString() {
@@ -68,5 +75,12 @@ export class Complex {
     let im = (c1.im * c2.re - c1.re * c2.im) / denominator;
 
     return new Complex(re, im);
+  }
+
+  /** Calculates e^c for a complex number c. */
+  static exp(c: Complex|number) {
+    if (!(c instanceof Complex)) c = new Complex(c, 0);
+    const r = Math.exp(c.re);
+    return new Complex(r * Math.cos(c.im), r * Math.sin(c.im));
   }
 }
