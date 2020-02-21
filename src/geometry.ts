@@ -247,7 +247,8 @@ export class Angle {
 
   /** Checks if this angle is right-angled. */
   get isRight() {
-    return nearlyEquals(this.rad, Math.PI / 2, 0.01);
+    // Within 1 deg of 90 deg.
+    return nearlyEquals(this.rad, Math.PI / 2, Math.PI/360);
   }
 
   /** The bisector of this angle. */
