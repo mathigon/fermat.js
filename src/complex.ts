@@ -38,24 +38,24 @@ export class Complex {
 
   /** Calculates the sum of two complex numbers c1 and c2. */
   static sum(c1: Complex|number, c2: Complex|number) {
-    if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
-    if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
+    if (typeof c1 === 'number') c1 = new Complex(c1, 0);
+    if (typeof c2 === 'number') c2 = new Complex(c2, 0);
 
     return new Complex(c1.re + c2.re, c1.im + c2.im);
   }
 
   /** Calculates the difference of two complex numbers c1 and c2. */
   static difference(c1: Complex|number, c2: Complex|number) {
-    if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
-    if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
+    if (typeof c1 === 'number') c1 = new Complex(c1, 0);
+    if (typeof c2 === 'number') c2 = new Complex(c2, 0);
 
     return new Complex(c1.re - c2.re, c1.im - c2.im);
   }
 
   /** Calculates the product of two complex numbers c1 and c2. */
   static product(c1: Complex|number, c2: Complex|number) {
-    if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
-    if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
+    if (typeof c1 === 'number') c1 = new Complex(c1, 0);
+    if (typeof c2 === 'number') c2 = new Complex(c2, 0);
 
     let re = c1.re * c2.re - c1.im * c2.im;
     let im = c1.im * c2.re + c1.re * c2.im;
@@ -64,8 +64,8 @@ export class Complex {
 
   /** Calculates the sum of two quotient numbers c1 and c2. */
   static quotient(c1: Complex|number, c2: Complex|number) {
-    if (!(c1 instanceof Complex)) c1 = new Complex(c1, 0);
-    if (!(c2 instanceof Complex)) c2 = new Complex(c2, 0);
+    if (typeof c1 === 'number') c1 = new Complex(c1, 0);
+    if (typeof c2 === 'number') c2 = new Complex(c2, 0);
 
     if (Math.abs(c2.re) < Number.EPSILON || Math.abs(c2.im) < Number.EPSILON)
       return new Complex(Infinity, Infinity);
@@ -79,7 +79,7 @@ export class Complex {
 
   /** Calculates e^c for a complex number c. */
   static exp(c: Complex|number) {
-    if (!(c instanceof Complex)) c = new Complex(c, 0);
+    if (typeof c === 'number') c = new Complex(c, 0);
     const r = Math.exp(c.re);
     return new Complex(r * Math.cos(c.im), r * Math.sin(c.im));
   }
