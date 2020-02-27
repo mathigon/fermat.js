@@ -56,9 +56,11 @@ export class Point implements SimplePoint {
     return Point.distance(this, l.project(this));
   }
 
-  /** Clamps this point between given x and y values. */
-  clamp(xMin: number, xMax: number, yMin: number, yMax: number) {
-    return new Point(clamp(this.x, xMin, xMax), clamp(this.y, yMin, yMax));
+  /** Clamps this point to specific bounds. */
+  clamp(bounds: Bounds, padding = 0) {
+    const x = clamp(this.x, bounds.xMin + padding, bounds.xMax - padding);
+    const y = clamp(this.y, bounds.yMin + padding, bounds.yMax - padding);
+    return new Point(x, y);
   }
 
   /** Transforms this point using a 2x3 matrix m. */
@@ -211,6 +213,18 @@ export class Bounds {
   get dy() {
     return this.yMax - this.yMin;
   }
+
+  get xRange(): [number, number] {
+    return [this.xMin, this.xMax];
+  }
+
+  get yRange(): [number, number] {
+    return [this.yMin, this.yMax];
+  }
+
+  get rect() {
+    return new Rectangle(new Point(this.xMin, this.xMin), this.dx, this.dy);
+  }
 }
 
 
@@ -253,6 +267,9 @@ export class Angle {
 
   /** The bisector of this angle. */
   get bisector() {
+    if (this.b.equals(this.a)) return undefined;
+    if (this.b.equals(this.c)) return undefined;
+
     let phiA = Math.atan2(this.a.y - this.b.y, this.a.x - this.b.x);
     let phiC = Math.atan2(this.c.y - this.b.y, this.c.x - this.b.x);
     let phi = (phiA + phiC) / 2;
@@ -278,6 +295,10 @@ export class Angle {
   equals(a: Angle) {
     return false;  // TODO
   }
+
+  // Only required to have a common API with Line, Polygon, etc.
+  project() { return this.b; }
+  at() { return this.b; }
 }
 
 function rad(p: Point, c = ORIGIN) {
@@ -486,7 +507,8 @@ export class Circle {
   }
 
   transform(m: TransformMatrix) {
-    return new Circle(this.c.transform(m), this.r * (m[0][0] + m[1][1]) / 2);
+    const scale = Math.abs(m[0][0]) + Math.abs(m[1][1]);
+    return new Circle(this.c.transform(m), this.r * scale / 2);
   }
 
   rotate(a: number, c = ORIGIN) {
@@ -729,8 +751,19 @@ export class Polygon {
   }
 
   project(p: Point) {
-    // TODO Implement
-    return ORIGIN;
+    let q: Point|undefined = undefined;
+    let d = Infinity;
+
+    for (const e of this.edges) {
+      const q1 = e.project(p);
+      const d1 = Point.distance(p, q1);
+      if (d1 < d) {
+        q = q1;
+        d = d1
+      }
+    }
+
+    return q || this.points[0];
   }
 
   at(t: number) {
@@ -902,6 +935,10 @@ export class Rectangle {
     return new Point(this.p.x + this.w / 2, this.p.y + this.h / 2);
   }
 
+  get centroid() {
+    return this.center;
+  }
+
   get circumference() {
     return 2 * Math.abs(this.w) + 2 * Math.abs(this.h);
   }
@@ -965,7 +1002,7 @@ export class Rectangle {
     return false;
   }
 
-  project(p: SimplePoint) {
+  project(p: SimplePoint): Point {
     // TODO Use the generic intersections() function
     // bottom right corner of rect
     let rect1 = {x: this.p.x + this.w, y: this.p.y + this.h};
@@ -991,11 +1028,47 @@ export class Rectangle {
       let x = (rect1.y - p.y) / m + p.x;
       if (this.p.x < x && x < rect1.x) return new Point(x, rect1.y);
     }
+
+    return this.p;
   }
 
   at(t: number) {
     // TODO Implement
   }
+}
+
+
+// -----------------------------------------------------------------------------
+// Type Checking
+
+type Shape = (Line|Ray|Segment|Circle|Polygon|Polyline|Triangle|Rectangle|Arc|Sector|Angle);
+
+export function isPolygonLike(shape: Point|Shape): shape is Polygon|Rectangle {
+  return isOneOf(shape.type, 'polygon', 'polyline', 'rectangle');
+}
+
+export function isLineLike(shape: Point|Shape): shape is Line {
+  return isOneOf(shape.type, 'line', 'ray', 'segment');
+}
+
+export function isCircle(shape: Point|Shape): shape is Circle {
+  return shape.type === 'circle';
+}
+
+export function isArc(shape: Point|Shape): shape is Arc {
+  return shape.type === 'arc';
+}
+
+export function isSector(shape: Point|Shape): shape is Sector {
+  return shape.type === 'sector';
+}
+
+export function isAngle(shape: Point|Shape): shape is Angle {
+  return shape.type === 'angle';
+}
+
+export function isPoint(shape: Point|Shape): shape is Point {
+  return shape.type === 'point';
 }
 
 
@@ -1077,21 +1150,6 @@ function lineCircleIntersection(l: Line, c: Circle) {
   const xb = dx * (dy < 0 ? -1 : 1) * Math.sqrt(disc) / dr2;
   const yb = Math.abs(dy) * Math.sqrt(disc) / dr2;
   return [c.c.shift(xa + xb, ya + yb), c.c.shift(xa - xb, ya - yb)];
-}
-
-
-type Shape = (Line|Ray|Segment|Circle|Polygon|Polyline|Triangle|Rectangle|Arc|Sector|Angle);
-
-export function isPolygonLike(shape: Point|Shape): shape is Polygon|Rectangle {
-  return isOneOf(shape.type, 'polygon', 'polyline', 'rectangle');
-}
-
-export function isLineLike(shape: Point|Shape): shape is Line {
-  return isOneOf(shape.type, 'line', 'ray', 'segment');
-}
-
-export function isCircle(shape: Point|Shape): shape is Circle {
-  return shape.type === 'circle';
 }
 
 /** Returns the intersection of two or more geometry objects. */
