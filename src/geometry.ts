@@ -477,7 +477,7 @@ export class Segment extends Line {
 
   /** Finds the intersection of two line segments l1 and l2 (or undefined). */
   static intersect(s1: Segment, s2: Segment) {
-    return intersections(s1, s2)[0] || undefined;
+    return simpleIntersection(s1, s2)[0] || undefined;
   }
 }
 
@@ -1175,7 +1175,7 @@ export function intersections(...elements: Shape[]): Point[] {
 }
 
 /** Finds the intersection of two lines or circles. */
-export function simpleIntersection(a: Line|Circle, b: Line|Circle): Point[] {
+function simpleIntersection(a: Line|Circle, b: Line|Circle): Point[] {
   let results: Point[] = [];
 
   // TODO Handle Arcs and Rays

@@ -34,7 +34,7 @@ function sign(x, t = PRECISION) {
 const NUM_REGEX = /(\d+)(\d{3})/;
 const POWER_SUFFIX = ['', 'k', 'm', 'b', 't', 'q'];
 function addThousandSeparators(x) {
-    let [n, dec] = ('' + x).split('.');
+    let [n, dec] = x.split('.');
     while (NUM_REGEX.test(n)) {
         n = n.replace(NUM_REGEX, '$1,$2');
     }
@@ -42,12 +42,12 @@ function addThousandSeparators(x) {
 }
 function addPowerSuffix(n, places = 6) {
     if (!places)
-        return n;
+        return '' + n;
     // Trim short numbers to the appropriate number of decimal places.
     const d = ('' + Math.abs(Math.floor(n))).length;
     const m = n < 0 ? 1 : 0;
     if (d <= places - m)
-        return round(n, places - d - m - 1);
+        return '' + round(n, places - d - m - 1);
     // Append a power suffix to longer numbers.
     const x = Math.floor(Math.log10(Math.abs(n)) / 3);
     return (round(n / Math.pow(10, 3 * x), places - ((d % 3) || 3) - m - 1))
@@ -55,13 +55,14 @@ function addPowerSuffix(n, places = 6) {
 }
 /**
  * Converts a number to a clean string, by rounding, adding power suffixes, and
- * adding thousand separators. `places` is the number of digits to show in the
+ * adding thousands separators. `places` is the number of digits to show in the
  * result.
  */
-function numberFormat(n, places = 0) {
-    return addThousandSeparators(addPowerSuffix(n, places)).replace('-', '–');
+function numberFormat(n, places = 0, seperators = true) {
+    const str = addPowerSuffix(n, places).replace('-', '–');
+    return seperators ? addThousandSeparators(str) : str;
 }
-// Numbers like 0,123 are decimals, even though they mach POINT_DECIMAL.
+// Numbers like 0,123 are decimals, even though they match POINT_DECIMAL.
 const SPECIAL_DECIMAL = /^-?0,[0-9]+$/;
 // Points as decimal points, Commas as 1k separators, allow starting .
 const POINT_DECIMAL = /^-?([0-9]+(,[0-9]{3})*)?\.?[0-9]*$/;
@@ -75,7 +76,7 @@ const COMMA_DECIMAL = /^-?[0-9]+(\.[0-9]{3})*,?[0-9]*$/;
  */
 function parseNumber(str) {
     str = str.replace(/^–/, '-').trim();
-    if (!str || str.match(/[^0-9.,-]/))
+    if (!str || str.match(/[^0-9.,\-]/))
         return NaN;
     if (SPECIAL_DECIMAL.test(str))
         return parseFloat(str.replace(/,/, '.'));
@@ -293,14 +294,20 @@ class Complex {
         this.re = re;
         this.im = im;
     }
-    get magnitude() {
+    get modulus() {
         return Math.sqrt(this.re * this.re + this.im * this.im);
     }
-    get phase() {
+    get argument() {
         return Math.atan2(this.im, this.re);
     }
     get conjugate() {
         return new Complex(this.re, -this.im);
+    }
+    /** Returns the ith nth-root of this complex number. */
+    root(n, i = 0) {
+        const r = Math.pow(this.modulus, 1 / n);
+        const th = (this.argument + i * 2 * Math.PI) / n;
+        return new Complex(r * Math.cos(th), r * Math.sin(th));
     }
     toString() {
         if (!this.re)
@@ -312,25 +319,25 @@ class Complex {
     // ---------------------------------------------------------------------------
     /** Calculates the sum of two complex numbers c1 and c2. */
     static sum(c1, c2) {
-        if (!(c1 instanceof Complex))
+        if (typeof c1 === 'number')
             c1 = new Complex(c1, 0);
-        if (!(c2 instanceof Complex))
+        if (typeof c2 === 'number')
             c2 = new Complex(c2, 0);
         return new Complex(c1.re + c2.re, c1.im + c2.im);
     }
     /** Calculates the difference of two complex numbers c1 and c2. */
     static difference(c1, c2) {
-        if (!(c1 instanceof Complex))
+        if (typeof c1 === 'number')
             c1 = new Complex(c1, 0);
-        if (!(c2 instanceof Complex))
+        if (typeof c2 === 'number')
             c2 = new Complex(c2, 0);
         return new Complex(c1.re - c2.re, c1.im - c2.im);
     }
     /** Calculates the product of two complex numbers c1 and c2. */
     static product(c1, c2) {
-        if (!(c1 instanceof Complex))
+        if (typeof c1 === 'number')
             c1 = new Complex(c1, 0);
-        if (!(c2 instanceof Complex))
+        if (typeof c2 === 'number')
             c2 = new Complex(c2, 0);
         let re = c1.re * c2.re - c1.im * c2.im;
         let im = c1.im * c2.re + c1.re * c2.im;
@@ -338,9 +345,9 @@ class Complex {
     }
     /** Calculates the sum of two quotient numbers c1 and c2. */
     static quotient(c1, c2) {
-        if (!(c1 instanceof Complex))
+        if (typeof c1 === 'number')
             c1 = new Complex(c1, 0);
-        if (!(c2 instanceof Complex))
+        if (typeof c2 === 'number')
             c2 = new Complex(c2, 0);
         if (Math.abs(c2.re) < Number.EPSILON || Math.abs(c2.im) < Number.EPSILON)
             return new Complex(Infinity, Infinity);
@@ -348,6 +355,13 @@ class Complex {
         let re = (c1.re * c2.re + c1.im * c2.im) / denominator;
         let im = (c1.im * c2.re - c1.re * c2.im) / denominator;
         return new Complex(re, im);
+    }
+    /** Calculates e^c for a complex number c. */
+    static exp(c) {
+        if (typeof c === 'number')
+            c = new Complex(c, 0);
+        const r = Math.exp(c.re);
+        return new Complex(r * Math.cos(c.im), r * Math.sin(c.im));
     }
 }
 
@@ -361,11 +375,7 @@ function uid(n = 10) {
 }
 /** Checks if x is strictly equal to any one of the following arguments. */
 function isOneOf(x, ...values) {
-    for (let v of values) {
-        if (x === v)
-            return true;
-    }
-    return false;
+    return values.includes(x);
 }
 
 // =============================================================================
@@ -552,9 +562,11 @@ class Point {
     distanceFromLine(l) {
         return Point.distance(this, l.project(this));
     }
-    /** Clamps this point between given x and y values. */
-    clamp(xMin, xMax, yMin, yMax) {
-        return new Point(clamp(this.x, xMin, xMax), clamp(this.y, yMin, yMax));
+    /** Clamps this point to specific bounds. */
+    clamp(bounds, padding = 0) {
+        const x = clamp(this.x, bounds.xMin + padding, bounds.xMax - padding);
+        const y = clamp(this.y, bounds.yMin + padding, bounds.yMax - padding);
+        return new Point(x, y);
     }
     /** Transforms this point using a 2x3 matrix m. */
     transform(m) {
@@ -675,6 +687,15 @@ class Bounds {
     get dy() {
         return this.yMax - this.yMin;
     }
+    get xRange() {
+        return [this.xMin, this.xMax];
+    }
+    get yRange() {
+        return [this.yMin, this.yMax];
+    }
+    get rect() {
+        return new Rectangle(new Point(this.xMin, this.xMin), this.dx, this.dy);
+    }
 }
 // -----------------------------------------------------------------------------
 // Angles
@@ -705,10 +726,15 @@ class Angle {
     }
     /** Checks if this angle is right-angled. */
     get isRight() {
-        return nearlyEquals(this.rad, Math.PI / 2, 0.01);
+        // Within 1 deg of 90 deg.
+        return nearlyEquals(this.rad, Math.PI / 2, Math.PI / 360);
     }
     /** The bisector of this angle. */
     get bisector() {
+        if (this.b.equals(this.a))
+            return undefined;
+        if (this.b.equals(this.c))
+            return undefined;
         let phiA = Math.atan2(this.a.y - this.b.y, this.a.x - this.b.x);
         let phiC = Math.atan2(this.c.y - this.b.y, this.c.x - this.b.x);
         let phi = (phiA + phiC) / 2;
@@ -729,6 +755,9 @@ class Angle {
     equals(a) {
         return false; // TODO
     }
+    // Only required to have a common API with Line, Polygon, etc.
+    project() { return this.b; }
+    at() { return this.b; }
 }
 function rad(p, c = ORIGIN) {
     const a = Math.atan2(p.y - c.y, p.x - c.x);
@@ -878,7 +907,7 @@ class Segment extends Line {
     }
     /** Finds the intersection of two line segments l1 and l2 (or undefined). */
     static intersect(s1, s2) {
-        return intersections(s1, s2)[0] || undefined;
+        return simpleIntersection(s1, s2)[0] || undefined;
     }
 }
 // -----------------------------------------------------------------------------
@@ -903,7 +932,8 @@ class Circle {
         return new Arc(this.c, start, TWO_PI);
     }
     transform(m) {
-        return new Circle(this.c.transform(m), this.r * (m[0][0] + m[1][1]) / 2);
+        const scale = Math.abs(m[0][0]) + Math.abs(m[1][1]);
+        return new Circle(this.c.transform(m), this.r * scale / 2);
     }
     rotate(a, c = ORIGIN) {
         return new Circle(this.c.rotate(a, c), this.r);
@@ -1095,8 +1125,17 @@ class Polygon {
         return false;
     }
     project(p) {
-        // TODO Implement
-        return ORIGIN;
+        let q = undefined;
+        let d = Infinity;
+        for (const e of this.edges) {
+            const q1 = e.project(p);
+            const d1 = Point.distance(p, q1);
+            if (d1 < d) {
+                q = q1;
+                d = d1;
+            }
+        }
+        return q || this.points[0];
     }
     at(t) {
         return Point.interpolateList([...this.points, this.points[0]], t);
@@ -1148,7 +1187,7 @@ class Polygon {
                     return true;
             }
         }
-        // Check if one of the vertices is in one of the the polygons.
+        // Check if one of the vertices is in one of the polygons.
         for (let v of p1.points)
             if (p2.contains(v))
                 return true;
@@ -1245,6 +1284,9 @@ class Rectangle {
     get center() {
         return new Point(this.p.x + this.w / 2, this.p.y + this.h / 2);
     }
+    get centroid() {
+        return this.center;
+    }
     get circumference() {
         return 2 * Math.abs(this.w) + 2 * Math.abs(this.h);
     }
@@ -1321,10 +1363,32 @@ class Rectangle {
             if (this.p.x < x && x < rect1.x)
                 return new Point(x, rect1.y);
         }
+        return this.p;
     }
     at(t) {
         // TODO Implement
     }
+}
+function isPolygonLike(shape) {
+    return isOneOf(shape.type, 'polygon', 'polyline', 'rectangle');
+}
+function isLineLike(shape) {
+    return isOneOf(shape.type, 'line', 'ray', 'segment');
+}
+function isCircle(shape) {
+    return shape.type === 'circle';
+}
+function isArc(shape) {
+    return shape.type === 'arc';
+}
+function isSector(shape) {
+    return shape.type === 'sector';
+}
+function isAngle(shape) {
+    return shape.type === 'angle';
+}
+function isPoint(shape) {
+    return shape.type === 'point';
 }
 // -----------------------------------------------------------------------------
 // Intersections
@@ -1393,15 +1457,6 @@ function lineCircleIntersection(l, c) {
     const xb = dx * (dy < 0 ? -1 : 1) * Math.sqrt(disc) / dr2;
     const yb = Math.abs(dy) * Math.sqrt(disc) / dr2;
     return [c.c.shift(xa + xb, ya + yb), c.c.shift(xa - xb, ya - yb)];
-}
-function isPolygonLike(shape) {
-    return isOneOf(shape.type, 'polygon', 'polyline', 'rectangle');
-}
-function isLineLike(shape) {
-    return isOneOf(shape.type, 'line', 'ray', 'segment');
-}
-function isCircle(shape) {
-    return shape.type === 'circle';
 }
 /** Returns the intersection of two or more geometry objects. */
 function intersections(...elements) {
@@ -1742,14 +1797,6 @@ function eulerPhi(x) {
         return start + Math.floor(length * Math.random());
     }
     Random.integer = integer;
-    /** Generates an array of the integers from 0 to n in random order. */
-    function intArray(n) {
-        let a = [];
-        for (let i = 0; i < n; ++i)
-            a.push(i);
-        return shuffle(a);
-    }
-    Random.intArray = intArray;
     /** Chooses a random index value from weights [2, 5, 3] */
     function weighted(weights) {
         const x = Math.random() * total(weights);
@@ -2198,12 +2245,16 @@ exports.gcd = gcd;
 exports.generatePrime = generatePrime;
 exports.goldbach = goldbach;
 exports.intersections = intersections;
+exports.isAngle = isAngle;
+exports.isArc = isArc;
 exports.isBetween = isBetween;
 exports.isCircle = isCircle;
 exports.isInteger = isInteger;
 exports.isLineLike = isLineLike;
+exports.isPoint = isPoint;
 exports.isPolygonLike = isPolygonLike;
 exports.isPrime = isPrime;
+exports.isSector = isSector;
 exports.lcm = lcm;
 exports.lerp = lerp;
 exports.letterFrequency = letterFrequency;
@@ -2223,7 +2274,6 @@ exports.quadratic = quadratic;
 exports.round = round;
 exports.roundTo = roundTo;
 exports.sign = sign;
-exports.simpleIntersection = simpleIntersection;
 exports.square = square;
 exports.stdDev = stdDev;
 exports.subsets = subsets;
