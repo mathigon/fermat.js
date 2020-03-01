@@ -5,7 +5,7 @@
 
 
 import * as tape from 'tape';
-import {parseNumber} from '../src/arithmetic';
+import {parseNumber, toWord} from '../src/arithmetic';
 
 
 tape('parseNumber', (test) => {
@@ -36,6 +36,24 @@ tape('parseNumber', (test) => {
 
   test.ok(isNaN(parseNumber('1.234,56A')));
   test.ok(isNaN(parseNumber('123A456')));
+
+  test.end();
+});
+
+
+tape('parseNumber', (test) => {
+  test.equal(toWord(0), 'zero');
+  test.equal(toWord(1), 'one');
+  test.equal(toWord(2), 'two');
+  test.equal(toWord(10), 'ten');
+  test.equal(toWord(11), 'eleven');
+  test.equal(toWord(20), 'twenty');
+  test.equal(toWord(45), 'forty-five');
+  test.equal(toWord(99), 'ninety-nine');
+  test.equal(toWord(105), 'one hundred five');
+  test.equal(toWord(35783), 'thirty-five thousand seven hundred eighty-three');
+  test.equal(toWord(1000000), 'one million');
+  test.equal(toWord(10000011), 'ten million eleven');
 
   test.end();
 });

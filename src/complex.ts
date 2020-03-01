@@ -4,6 +4,11 @@
 // =============================================================================
 
 
+import {nearlyEquals} from './arithmetic';
+
+const absStr = (n: number) => n < 0 ? '–' + (-n) : '' + n;
+
+
 /**  Complex number class. */
 export class Complex {
 
@@ -29,9 +34,10 @@ export class Complex {
   }
 
   toString() {
-    if (!this.re) return this.im + 'i';
-    if (!this.im) return this.re;
-    return this.re + ' + ' + this.im + 'i';
+    if (nearlyEquals(this.im, 0)) return absStr(this.re);
+    if (nearlyEquals(this.re, 0)) return absStr(this.im) + 'i';
+    if (this.im < 0) return `${this.re} – ${-this.im}i`;
+    return `${absStr(this.re)} + ${this.im}i`;
   }
 
   // ---------------------------------------------------------------------------

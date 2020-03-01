@@ -129,39 +129,38 @@ const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven',
   'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen',
   'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
 
-const TENS = ['', '', 'twenty', 'thirty', 'fourty', 'fifty', 'sixty',
+const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty',
   'seventy', 'eighty', 'ninety'];
 
-const MULTIPLIERS = ['', 'thousand', 'million', 'billion', 'trillion',
-  'quadrillion', 'quintillion', 'sextillion'];
+const MULTIPLIERS = ['', ' thousand', ' million', ' billion', ' trillion',
+  ' quadrillion', ' quintillion', ' sextillion'];
 
-function fmt(n: number) {
-  let [h, t, o] = ('00' + n).substr(-3).split('');
-  return [
-    +h === 0 ? '' : ONES[+h] + ' hundred ',
-    +o === 0 ? TENS[+t] : TENS[+t] && TENS[+t] + '-' || '',
-    ONES[(+t) + (+o)] || ONES[+o]
-  ].join('');
-}
-
-function cons(xs: string, x: string, g: string) {
-  return x ? [x, g && ' ' + g || '', ' ', xs].join('') : xs;
+function toWordSingle(number: string) {
+  let [h, t, o] = number.split('');
+  const hundreds = (h === '0') ? '' : ' ' + ONES[+h] + ' hundred';
+  if (t + o === '00') return hundreds;
+  if (+t < 2) return hundreds + ' ' + ONES[+(t + o)];
+  if (o === '0') return hundreds + ' ' + TENS[+t];
+  return hundreds + ' ' + TENS[+t] + '-' + ONES[+o];
 }
 
 /** Spells a number as an English word. */
 export function toWord(n: number) {
   if (n === 0) return 'zero';
 
-  let str = '';
-  let i = 0;
+  const str = Math.round(Math.abs(n)).toString();
+  const chunks = Math.ceil(str.length / 3);
 
-  while (n) {
-    str = cons(str, fmt(n % 1000), MULTIPLIERS[i]);
-    i += 1;
-    n = n / 1000 | 0;
+  const padded = str.padStart(3 * chunks, '0');
+  let result = '';
+
+  for (let i = 0; i < chunks; i += 1) {
+    const chunk = padded.substr(i * 3, 3);
+    if (chunk === '000') continue;
+    result += toWordSingle(chunk) + MULTIPLIERS[chunks - 1 - i];
   }
 
-  return str.trim();
+  return result.trim();
 }
 
 
