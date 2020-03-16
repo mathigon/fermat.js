@@ -4,9 +4,11 @@
 // =============================================================================
 
 
-import {nearlyEquals} from './arithmetic';
+import {nearlyEquals, round} from './arithmetic';
 
-const absStr = (n: number) => n < 0 ? '–' + (-n) : '' + n;
+
+const absStr = (n: number, precision: number) =>
+    n < 0 ? '–' + round(-n, precision) : '' + round(n, precision);
 
 
 /**  Complex number class. */
@@ -33,11 +35,11 @@ export class Complex {
     return new Complex(r * Math.cos(th), r * Math.sin(th));
   }
 
-  toString() {
-    if (nearlyEquals(this.im, 0)) return absStr(this.re);
-    if (nearlyEquals(this.re, 0)) return absStr(this.im) + 'i';
-    if (this.im < 0) return `${this.re} – ${-this.im}i`;
-    return `${absStr(this.re)} + ${this.im}i`;
+  toString(precision = 2) {
+    if (nearlyEquals(this.im, 0)) return absStr(this.re, precision);
+    if (nearlyEquals(this.re, 0)) return absStr(this.im, precision) + 'i';
+    if (this.im < 0) return `${absStr(this.re, precision)} – ${round(-this.im, precision)}i`;
+    return `${absStr(this.re, precision)} + ${round(this.im, precision)}i`;
   }
 
   // ---------------------------------------------------------------------------
