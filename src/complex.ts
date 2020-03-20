@@ -7,8 +7,11 @@
 import {nearlyEquals, round} from './arithmetic';
 
 
-const absStr = (n: number, precision: number) =>
-    n < 0 ? '–' + round(-n, precision) : '' + round(n, precision);
+const absStr = (n: number, suffix?: string) => {
+  const prefix = n < 0 ? '–' : '';
+  if (Math.abs(n) === 1 && suffix) return prefix + suffix;
+  return prefix + Math.abs(n) + (suffix || '');
+};
 
 
 /**  Complex number class. */
@@ -36,10 +39,12 @@ export class Complex {
   }
 
   toString(precision = 2) {
-    if (nearlyEquals(this.im, 0)) return absStr(this.re, precision);
-    if (nearlyEquals(this.re, 0)) return absStr(this.im, precision) + 'i';
-    if (this.im < 0) return `${absStr(this.re, precision)} – ${round(-this.im, precision)}i`;
-    return `${absStr(this.re, precision)} + ${round(this.im, precision)}i`;
+    const re = round(this.re, precision);
+    const im = round(this.im, precision);
+
+    if (im === 0) return absStr(re);
+    if (re === 0) return absStr(im, 'i');
+    return [absStr(re), im < 0 ? '–' : '+', absStr(Math.abs(im), 'i')].join(' ');
   }
 
   // ---------------------------------------------------------------------------
