@@ -17,18 +17,13 @@ export function factorial(x: number) {
 
 /** Calculates the binomial coefficient nCk of two numbers n and k. */
 export function binomial(n: number, k: number): number {
-  if (k === 0) {
-    return 1;
-  } else if (2 * k > n) {
-    return binomial(n, n - k);
-  } else {
-    let coeff = 1;
-    for (let i = k; i > 0; --i) {
-      coeff *= (n - i + 1);
-      coeff /= i;
-    }
-    return coeff;
-  }
+  if (k < 0 || k > n) return 0;
+  if (k === 0) return 1;
+  if (2 * k > n) return binomial(n, n - k);
+
+  let coeff = 1;
+  for (let i = 1; i <= k; ++i) coeff *= ((n - i + 1) / i);
+  return Math.round(coeff);
 }
 
 

@@ -700,26 +700,26 @@ export class Polygon {
     return Math.max(...radii);
   }
 
-  transform(m: TransformMatrix) {
+  transform(m: TransformMatrix): Polygon {
     return new (<any>this.constructor)(...this.points.map(p => p.transform(m)));
   }
 
-  rotate(a: number, center = ORIGIN) {
+  rotate(a: number, center = ORIGIN): Polygon {
     const points = this.points.map(p => p.rotate(a, center));
     return new (<any>this.constructor)(...points);
   }
 
-  reflect(line: Line) {
+  reflect(line: Line): Polygon {
     const points = this.points.map(p => p.reflect(line));
     return new (<any>this.constructor)(...points);
   }
 
-  scale(sx: number, sy = sx) {
+  scale(sx: number, sy = sx): Polygon {
     const points = this.points.map(p => p.scale(sx, sy));
     return new (<any>this.constructor)(...points);
   }
 
-  shift(x: number, y = x) {
+  shift(x: number, y = x): Polygon {
     const points = this.points.map(p => p.shift(x, y));
     return new (<any>this.constructor)(...points);
   }
