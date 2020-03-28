@@ -109,33 +109,36 @@ function toOrdinal(x) {
 const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven',
     'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen',
     'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
-const TENS = ['', '', 'twenty', 'thirty', 'fourty', 'fifty', 'sixty',
+const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty',
     'seventy', 'eighty', 'ninety'];
-const MULTIPLIERS = ['', 'thousand', 'million', 'billion', 'trillion',
-    'quadrillion', 'quintillion', 'sextillion'];
-function fmt(n) {
-    let [h, t, o] = ('00' + n).substr(-3).split('');
-    return [
-        +h === 0 ? '' : ONES[+h] + ' hundred ',
-        +o === 0 ? TENS[+t] : TENS[+t] && TENS[+t] + '-' || '',
-        ONES[(+t) + (+o)] || ONES[+o]
-    ].join('');
-}
-function cons(xs, x, g) {
-    return x ? [x, g && ' ' + g || '', ' ', xs].join('') : xs;
+const MULTIPLIERS = ['', ' thousand', ' million', ' billion', ' trillion',
+    ' quadrillion', ' quintillion', ' sextillion'];
+function toWordSingle(number) {
+    let [h, t, o] = number.split('');
+    const hundreds = (h === '0') ? '' : ' ' + ONES[+h] + ' hundred';
+    if (t + o === '00')
+        return hundreds;
+    if (+t < 2)
+        return hundreds + ' ' + ONES[+(t + o)];
+    if (o === '0')
+        return hundreds + ' ' + TENS[+t];
+    return hundreds + ' ' + TENS[+t] + '-' + ONES[+o];
 }
 /** Spells a number as an English word. */
 function toWord(n) {
     if (n === 0)
         return 'zero';
-    let str = '';
-    let i = 0;
-    while (n) {
-        str = cons(str, fmt(n % 1000), MULTIPLIERS[i]);
-        i += 1;
-        n = n / 1000 | 0;
+    const str = Math.round(Math.abs(n)).toString();
+    const chunks = Math.ceil(str.length / 3);
+    const padded = str.padStart(3 * chunks, '0');
+    let result = '';
+    for (let i = 0; i < chunks; i += 1) {
+        const chunk = padded.substr(i * 3, 3);
+        if (chunk === '000')
+            continue;
+        result += toWordSingle(chunk) + MULTIPLIERS[chunks - 1 - i];
     }
-    return str.trim();
+    return result.trim();
 }
 // -----------------------------------------------------------------------------
 // Rounding, Decimals and Decimals
@@ -226,20 +229,16 @@ function factorial(x) {
 }
 /** Calculates the binomial coefficient nCk of two numbers n and k. */
 function binomial(n, k) {
-    if (k === 0) {
+    if (k < 0 || k > n)
+        return 0;
+    if (k === 0)
         return 1;
-    }
-    else if (2 * k > n) {
+    if (2 * k > n)
         return binomial(n, n - k);
-    }
-    else {
-        let coeff = 1;
-        for (let i = k; i > 0; --i) {
-            coeff *= (n - i + 1);
-            coeff /= i;
-        }
-        return coeff;
-    }
+    let coeff = 1;
+    for (let i = 1; i <= k; ++i)
+        coeff *= ((n - i + 1) / i);
+    return Math.round(coeff);
 }
 /**
  * Returns an array of all possible permutations of an input array arr. In this
@@ -285,9 +284,12 @@ function subsetsHelper(array) {
 }
 
 // =============================================================================
-// Fermat.js | Complex Numbers
-// (c) Mathigon
-// =============================================================================
+const absStr = (n, suffix) => {
+    const prefix = n < 0 ? '–' : '';
+    if (Math.abs(n) === 1 && suffix)
+        return prefix + suffix;
+    return prefix + Math.abs(n) + (suffix || '');
+};
 /**  Complex number class. */
 class Complex {
     constructor(re = 0, im = 0) {
@@ -309,12 +311,14 @@ class Complex {
         const th = (this.argument + i * 2 * Math.PI) / n;
         return new Complex(r * Math.cos(th), r * Math.sin(th));
     }
-    toString() {
-        if (!this.re)
-            return this.im + 'i';
-        if (!this.im)
-            return this.re;
-        return this.re + ' + ' + this.im + 'i';
+    toString(precision = 2) {
+        const re = round(this.re, precision);
+        const im = round(this.im, precision);
+        if (im === 0)
+            return absStr(re);
+        if (re === 0)
+            return absStr(im, 'i');
+        return [absStr(re), im < 0 ? '–' : '+', absStr(Math.abs(im), 'i')].join(' ');
     }
     // ---------------------------------------------------------------------------
     /** Calculates the sum of two complex numbers c1 and c2. */
