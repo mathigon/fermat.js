@@ -392,17 +392,17 @@ export class Line {
     return Point.interpolate(this.p1, this.p2, t);
   }
 
-  transform(m: TransformMatrix) {
+  transform(m: TransformMatrix): this {
     return new (<any>this.constructor)(this.p1.transform(m),
         this.p2.transform(m));
   }
 
-  rotate(a: number, c = ORIGIN) {
+  rotate(a: number, c = ORIGIN): this {
     return new (<any>this.constructor)(this.p1.rotate(a, c),
         this.p2.rotate(a, c));
   }
 
-  reflect(l: Line) {
+  reflect(l: Line): this {
     return new (<any>this.constructor)(this.p1.reflect(l), this.p2.reflect(l));
   }
 
@@ -573,9 +573,33 @@ export class Arc {
     return this.start.rotate(this.angle, this.c);
   }
 
-  transform(m: TransformMatrix) {
+  transform(m: TransformMatrix): this {
     return new (<any>this.constructor)(this.c.transform(m),
         this.start.transform(m), this.angle);
+  }
+
+  rotate(a: number, c = ORIGIN): this {
+    return new (<any>this.constructor)(this.c.rotate(a, c),
+        this.start.rotate(a, c), this.angle);
+  }
+
+  reflect(l: Line): this {
+    return new (<any>this.constructor)(this.c.reflect(l),
+        this.start.reflect(l), this.angle);
+  }
+
+  scale(sx: number, sy = sx): this {
+    return new (<any>this.constructor)(this.c.scale(sx, sy),
+        this.start.scale(sx, sy), this.angle);
+  }
+
+  shift(x: number, y = x): this {
+    return new (<any>this.constructor)(this.c.shift(x, y),
+        this.start.shift(x, y), this.angle);
+  }
+
+  translate(p: Point) {
+    return this.shift(p.x, p.y);
   }
 
   get startAngle() {
@@ -597,18 +621,18 @@ export class Arc {
     return this.start.rotate(this.angle * t, this.c);
   }
 
-  contract(p: number) {
+  contract(p: number): this {
     return new (<any>this.constructor)(this.c, this.at(p / 2),
         this.angle * (1 - p));
   }
 
-  get minor() {
+  get minor(): this {
     if (this.angle <= Math.PI) return this;
     return new (<any>this.constructor)(this.c, this.end,
         2 * Math.PI - this.angle);
   }
 
-  get major() {
+  get major(): this {
     if (this.angle >= Math.PI) return this;
     return new (<any>this.constructor)(this.c, this.end,
         2 * Math.PI - this.angle);
@@ -700,26 +724,26 @@ export class Polygon {
     return Math.max(...radii);
   }
 
-  transform(m: TransformMatrix): Polygon {
+  transform(m: TransformMatrix): this {
     return new (<any>this.constructor)(...this.points.map(p => p.transform(m)));
   }
 
-  rotate(a: number, center = ORIGIN): Polygon {
+  rotate(a: number, center = ORIGIN): this {
     const points = this.points.map(p => p.rotate(a, center));
     return new (<any>this.constructor)(...points);
   }
 
-  reflect(line: Line): Polygon {
+  reflect(line: Line): this {
     const points = this.points.map(p => p.reflect(line));
     return new (<any>this.constructor)(...points);
   }
 
-  scale(sx: number, sy = sx): Polygon {
+  scale(sx: number, sy = sx): this {
     const points = this.points.map(p => p.scale(sx, sy));
     return new (<any>this.constructor)(...points);
   }
 
-  shift(x: number, y = x): Polygon {
+  shift(x: number, y = x): this {
     const points = this.points.map(p => p.shift(x, y));
     return new (<any>this.constructor)(...points);
   }
@@ -771,7 +795,7 @@ export class Polygon {
   }
 
   /** The oriented version of this polygon (vertices in clockwise order). */
-  get oriented() {
+  get oriented(): this {
     if (this.signedArea >= 0) return this;
     const points = [...this.points].reverse();
     return new (<any>this.constructor)(...points);
