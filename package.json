@@ -18,6 +18,7 @@
   },
   "main": "dist/fermat.cjs.js",
   "module": "dist/fermat.esm.js",
+  "sideEffects": false,
   "repository": "mathigon/fermat.js",
   "scripts": {
     "test": "ts-node node_modules/tape/bin/tape test/**/*.ts",
