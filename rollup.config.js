@@ -1,11 +1,23 @@
-const typescript = require('rollup-plugin-typescript');
+import typescript from 'rollup-plugin-typescript2';
 
-module.exports = {
+const baseBundle = {
   input: './index.ts',
-  plugins: [typescript(require('./tsconfig.json').compilerOptions)],
-  output: {
-    file: 'dist/fermat.js',
-    format: 'cjs',
-    name: 'app'
-  }
+  plugins: [typescript()],
 };
+
+export default [
+  {
+    ...baseBundle,
+    output: {
+      file: 'dist/fermat.cjs.js',
+      format: 'cjs'
+    }
+  },
+  {
+    ...baseBundle,
+    output: {
+      file: 'dist/fermat.esm.js',
+      format: 'esm'
+    }
+  }
+];
