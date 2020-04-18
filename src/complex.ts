@@ -4,7 +4,7 @@
 // =============================================================================
 
 
-import {nearlyEquals, round} from './arithmetic';
+import {round} from './arithmetic';
 
 
 const absStr = (n: number, suffix?: string) => {
@@ -49,6 +49,22 @@ export class Complex {
 
   // ---------------------------------------------------------------------------
 
+  add(a: Complex|number) {
+    return Complex.sum(this, a);
+  }
+
+  subtract(a: Complex|number) {
+    return Complex.difference(this, a);
+  }
+
+  multiply(a: Complex|number) {
+    return Complex.product(this, a);
+  }
+
+  divide(a: Complex|number) {
+    return Complex.quotient(this, a);
+  }
+
   /** Calculates the sum of two complex numbers c1 and c2. */
   static sum(c1: Complex|number, c2: Complex|number) {
     if (typeof c1 === 'number') c1 = new Complex(c1, 0);
@@ -75,7 +91,7 @@ export class Complex {
     return new Complex(re, im);
   }
 
-  /** Calculates the sum of two quotient numbers c1 and c2. */
+  /** Calculates the quotient of two complex numbers c1 and c2. */
   static quotient(c1: Complex|number, c2: Complex|number) {
     if (typeof c1 === 'number') c1 = new Complex(c1, 0);
     if (typeof c2 === 'number') c2 = new Complex(c2, 0);
