@@ -752,18 +752,20 @@ export class Polygon {
     return this.shift(p.x, p.y);
   }
 
-  /** Checks if a point p lies inside this polygon. */
+  /**
+   * Checks if a point p lies inside this polygon, by using a ray-casting
+   * algorithm and calculating the number of intersections.
+   */
   contains(p: Point) {
-    let n = this.points.length;
     let inside = false;
 
-    for (let i = 0; i < n; ++i) {
-      const q1 = this.points[i];
-      const q2 = this.points[(i + 1) % n];
+    for (const e of this.edges) {
+      // Exclude points lying *on* the edge.
+      if (e.p1.equals(p) || e.contains(p)) return false;
+      if ((e.p1.y > p.y) === (e.p2.y > p.y)) continue;
 
-      const x = (q1.y > p.y) !== (q2.y > p.y);
-      const y = p.x < (q2.x - q1.x) * (p.y - q1.y) / (q2.y - q1.y) + q1.x;
-      if (x && y) inside = !inside;
+      const det = (e.p2.x - e.p1.x) / (e.p2.y - e.p1.y);
+      if (p.x < det * (p.y - e.p1.y) + e.p1.x) inside = !inside;
     }
 
     return inside;
@@ -848,10 +850,7 @@ export class Polygon {
     }
 
     // Check if one of the vertices is in one of the polygons.
-    for (let v of p1.points) if (p2.contains(v)) return true;
-    for (let v of p2.points) if (p1.contains(v)) return true;
-
-    return false;
+    return p2.contains(p1.points[0]) || p1.contains(p2.points[0]);
   }
 
   /** Creates a regular polygon. */
