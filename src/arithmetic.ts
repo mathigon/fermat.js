@@ -235,7 +235,7 @@ export function cube(x: number) {
  * differ if a or m < 0.
  */
 export function mod(a: number, m: number) {
-  return ((a % m) + a) % m;
+  return ((a % m) + m) % m;
 }
 
 /** Calculates the logarithm of `x` with base `b`. */
