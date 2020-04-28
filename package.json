@@ -1,6 +1,6 @@
 {
   "name": "@mathigon/fermat",
-  "version": "0.3.6",
+  "version": "0.5.0",
   "description": "Powerful mathematics, statistics and geometry library for JavaScript.",
   "keywords": [
     "mathematics",
@@ -20,8 +20,9 @@
     "email": "dev@mathigon.org",
     "url": "https://mathigon.org"
   },
-  "main": "dist/fermat.js",
-  "module": "index.ts",
+  "main": "dist/fermat.cjs.js",
+  "module": "dist/fermat.esm.js",
+  "main:ts": "index.ts",
   "repository": "mathigon/fermat.js",
   "scripts": {
     "test": "ts-node node_modules/tape/bin/tape test/**/*.ts",
@@ -29,12 +30,12 @@
     "build": "rollup --config"
   },
   "dependencies": {
-    "@mathigon/core": "^0.3.6"
+    "@mathigon/core": "^0.5.0"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^3.1.1",
     "@types/tape": "^4.2.33",
-    "rollup": "^1.26.4",
-    "rollup-plugin-typescript": "^1.0.1",
+    "rollup": "^2.3.4",
     "tape": "^4.11.0",
     "ts-node": "^8.4.1",
     "tslib": "^1.10.0",
