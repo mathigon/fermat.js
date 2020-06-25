@@ -8,6 +8,16 @@ import {list} from '@mathigon/core';
 import {Matrix} from './matrix';
 
 
+function evaluatePolynomial(regression: number[], x: number) {
+  let xs = 1;
+  let t = regression[0];
+  for (let i = 1; i < regression.length; ++i) {
+    xs *= x;
+    t += xs * regression[i];
+  }
+  return t;
+}
+
 export namespace Regression {
 
   type Coordinate = [number, number];
@@ -148,42 +158,17 @@ export namespace Regression {
   // ---------------------------------------------------------------------------
   // Multi-Regression
 
-  interface Regression {
-    name: string;
-    regression: (data: Coordinate[]) => number[];
-    fn: (p: number[], x: number) => number;
-  }
+  /** Finds the most suitable polynomial regression for a given dataset. */
+  export function bestPolynomial(data: Coordinate[], threshold = 0.85, maxOrder = 8) {
+    if (data.length <= 1) return undefined;
 
-  const types: Regression[] = [{
-    name: 'linear',
-    regression: linear,
-    fn: (p: number[], x: number) => p[0] + x * p[1]
-  }, {
-    name: 'quadratic',
-    regression: polynomial,
-    fn: (p: number[], x: number) => p[0] + x * p[1] + x * x * p[2]
-  }, {
-    name: 'cubic',
-    regression: (data: Coordinate[]) => polynomial(data, 3),
-    fn: (p: number[], x: number) => p[0] + x * p[1] + x * x * p[2] + x * x * x *
-                                    p[3]
-  }, {
-    name: 'exponential',
-    regression: exponential,
-    fn: (p: number[], x: number) => p[0] * Math.pow(Math.E, p[1] * x)
-  }];
-
-  /** Finds the most suitable regression for a given dataset. */
-  export function find(data: Coordinate[], threshold = 0.9) {
-    if (data.length > 1) {
-      for (const t of types) {
-        const params = t.regression(data);
-        const fn = t.fn.bind(undefined, params);
-        const coeff = coefficient(data, fn);
-        if (coeff > threshold) return {type: t.name, fn, params, coeff};
-      }
+    for (let i = 1; i < maxOrder; ++i) {
+      const reg = polynomial(data, i);
+      const fn = (x: number) => evaluatePolynomial(reg, x);
+      const coeff = coefficient(data, fn);
+      if (coeff >= threshold) return {order: i, coefficients: reg, fn}
     }
 
-    return {type: undefined, fn: () => {}, params: [], coeff: undefined};
+    return undefined;
   }
 }
