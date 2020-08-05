@@ -26,7 +26,7 @@
   "repository": "mathigon/fermat.js",
   "scripts": {
     "test": "ts-node node_modules/tape/bin/tape test/**/*.ts",
-    "prepublish": "npm test && npm lint && npm run build",
+    "prepublish": "npm test && npm run lint && npm run build",
     "build": "rollup --config",
     "lint": "eslint . --ext .ts --fix"
   },
