@@ -34,18 +34,18 @@
     "@mathigon/core": "^0.5.1"
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "^3.1.1",
-    "@types/tape": "^4.2.33",
-    "rollup": "^2.3.4",
-    "tape": "^4.11.0",
-    "ts-node": "^8.4.1",
-    "tslib": "^1.10.0",
-    "typescript": "^3.7.2",
-    "@typescript-eslint/eslint-plugin": "^3.8.0",
-    "@typescript-eslint/parser": "^3.6.1",
-    "eslint": "^7.4.0",
-    "eslint-config-google": "^0.14.0",
-    "eslint-plugin-import": "^2.22.0"
+    "@rollup/plugin-typescript": "3.1.1",
+    "@types/tape": "4.13.0",
+    "rollup": "2.23.0",
+    "tape": "4.13.3",
+    "ts-node": "8.10.2",
+    "tslib": "1.13.0",
+    "typescript": "3.9.7",
+    "@typescript-eslint/eslint-plugin": "3.8.0",
+    "@typescript-eslint/parser": "3.8.0",
+    "eslint": "7.6.0",
+    "eslint-config-google": "0.14.0",
+    "eslint-plugin-import": "2.22.0"
   },
   "renovate": {
     "extends": [
