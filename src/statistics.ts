@@ -14,10 +14,10 @@ export function mean(values: number[]) {
 
 /** Calculates the median of an array of numbers. */
 export function median(values: number[]) {
-  let n = values.length;
+  const n = values.length;
   if (!n) return 0;
 
-  let sorted = values.slice(0).sort();
+  const sorted = values.slice(0).sort();
   return (n % 2 === 1) ? sorted[Math.floor(n / 2)] :
          (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
 }
@@ -36,7 +36,7 @@ export function mode(values: number[]) {
     if (!counts.has(v)) {
       counts.set(v, 1);
     } else {
-      let newCount = counts.get(v)! + 1;
+      const newCount = counts.get(v)! + 1;
       counts.set(v, newCount);
       if (newCount === maxCount) {
         result = undefined;

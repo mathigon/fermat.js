@@ -57,8 +57,8 @@ function addPowerSuffix(n: number, places = 6) {
 
   // Append a power suffix to longer numbers.
   const x = Math.floor(Math.log10(Math.abs(n)) / 3);
-  return (round(n / Math.pow(10, 3 * x), places - ((d % 3) || 3) - m - 1))
-         + POWER_SUFFIX[x];
+  return (round(n / Math.pow(10, 3 * x), places - ((d % 3) || 3) - m - 1)) +
+         POWER_SUFFIX[x];
 }
 
 /**
@@ -88,16 +88,19 @@ const COMMA_DECIMAL = /^-?[0-9]+(\.[0-9]{3})*,?[0-9]*$/;
  */
 export function parseNumber(str: string) {
   str = str.replace(/^–/, '-').trim();
-  if (!str || str.match(/[^0-9.,\-]/)) return NaN;
+  if (!str || str.match(/[^0-9.,-]/)) return NaN;
 
-  if (SPECIAL_DECIMAL.test(str))
+  if (SPECIAL_DECIMAL.test(str)) {
     return parseFloat(str.replace(/,/, '.'));
+  }
 
-  if (POINT_DECIMAL.test(str))
+  if (POINT_DECIMAL.test(str)) {
     return parseFloat(str.replace(/,/g, ''));
+  }
 
-  if (COMMA_DECIMAL.test(str))
+  if (COMMA_DECIMAL.test(str)) {
     return parseFloat(str.replace(/\./g, '').replace(/,/, '.'));
+  }
 
   return NaN;
 }
@@ -108,8 +111,9 @@ export function parseNumber(str: string) {
  * @returns {string}
  */
 export function toOrdinal(x: number) {
-  if (Math.abs(x) % 100 >= 11 && Math.abs(x) % 100 <= 13)
+  if (Math.abs(x) % 100 >= 11 && Math.abs(x) % 100 <= 13) {
     return x + 'th';
+  }
 
   switch (x % 10) {
     case 1:
@@ -136,7 +140,7 @@ const MULTIPLIERS = ['', ' thousand', ' million', ' billion', ' trillion',
   ' quadrillion', ' quintillion', ' sextillion'];
 
 function toWordSingle(number: string) {
-  let [h, t, o] = number.split('');
+  const [h, t, o] = number.split('');
   const hundreds = (h === '0') ? '' : ' ' + ONES[+h] + ' hundred';
   if (t + o === '00') return hundreds;
   if (+t < 2) return hundreds + ' ' + ONES[+(t + o)];
@@ -169,13 +173,13 @@ export function toWord(n: number) {
 
 /** Returns the digits of a number n. */
 export function digits(n: number) {
-  let str = '' + Math.abs(n);
+  const str = '' + Math.abs(n);
   return str.split('').reverse().map(x => +x);
 }
 
 /** Rounds a number `n` to `precision` decimal places. */
 export function round(n: number, precision = 0) {
-  let factor = Math.pow(10, precision);
+  const factor = Math.pow(10, precision);
   return Math.round(n * factor) / factor;
 }
 
@@ -189,7 +193,7 @@ export function roundTo(n: number, increment = 1) {
  * `precision`. See http://en.wikipedia.org/wiki/Continued_fraction
  */
 export function toFraction(decimal: number, precision = PRECISION) {
-  let n = [1, 0], d = [0, 1];
+  let n = [1, 0]; let d = [0, 1];
   let a = Math.floor(decimal);
   let rem = decimal - a;
 

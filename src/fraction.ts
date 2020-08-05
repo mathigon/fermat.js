@@ -35,13 +35,13 @@ export class Fraction {
   }
 
   toMathML() {
-    return `<mfrac><mn>${this.n}</mn><mn>${this.d}</mn></mfrac>`
+    return `<mfrac><mn>${this.n}</mn><mn>${this.d}</mn></mfrac>`;
   }
 
   toString() {
     const minus = this.sign < 0 ? '–' : '';
     if (Math.abs(this.d) === 1) return `${minus}${Math.abs(this.n)}`;
-    return `${minus}${Math.abs(this.n)}/${Math.abs(this.d)}`
+    return `${minus}${Math.abs(this.n)}/${Math.abs(this.d)}`;
   }
 
   // ---------------------------------------------------------------------------

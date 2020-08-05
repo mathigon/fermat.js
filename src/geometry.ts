@@ -85,16 +85,16 @@ export class Point implements SimplePoint {
 
   /** Reflects this point across a line l. */
   reflect(l: Line) {
-    let v = l.p2.x - l.p1.x;
-    let w = l.p2.y - l.p1.y;
+    const v = l.p2.x - l.p1.x;
+    const w = l.p2.y - l.p1.y;
 
-    let x0 = this.x - l.p1.x;
-    let y0 = this.y - l.p1.y;
+    const x0 = this.x - l.p1.x;
+    const y0 = this.y - l.p1.y;
 
-    let mu = (v * y0 - w * x0) / (v * v + w * w);
+    const mu = (v * y0 - w * x0) / (v * v + w * w);
 
-    let x = this.x + 2 * mu * w;
-    let y = this.y - 2 * mu * v;
+    const x = this.x + 2 * mu * w;
+    const y = this.y - 2 * mu * v;
     return new Point(x, y);
   }
 
@@ -148,8 +148,8 @@ export class Point implements SimplePoint {
 
   /** Calculates the average of multiple points. */
   static average(...points: SimplePoint[]) {
-    let x = total(points.map(p => p.x)) / points.length;
-    let y = total(points.map(p => p.y)) / points.length;
+    const x = total(points.map(p => p.x)) / points.length;
+    const y = total(points.map(p => p.y)) / points.length;
     return new Point(x, y);
   }
 
@@ -246,8 +246,8 @@ export class Angle {
 
   /** The size, in radians, of this angle. */
   get rad() {
-    let phiA = Math.atan2(this.a.y - this.b.y, this.a.x - this.b.x);
-    let phiC = Math.atan2(this.c.y - this.b.y, this.c.x - this.b.x);
+    const phiA = Math.atan2(this.a.y - this.b.y, this.a.x - this.b.x);
+    const phiC = Math.atan2(this.c.y - this.b.y, this.c.x - this.b.x);
     let phi = phiC - phiA;
 
     if (phi < 0) phi += TWO_PI;
@@ -270,14 +270,14 @@ export class Angle {
     if (this.b.equals(this.a)) return undefined;
     if (this.b.equals(this.c)) return undefined;
 
-    let phiA = Math.atan2(this.a.y - this.b.y, this.a.x - this.b.x);
-    let phiC = Math.atan2(this.c.y - this.b.y, this.c.x - this.b.x);
+    const phiA = Math.atan2(this.a.y - this.b.y, this.a.x - this.b.x);
+    const phiC = Math.atan2(this.c.y - this.b.y, this.c.x - this.b.x);
     let phi = (phiA + phiC) / 2;
 
     if (phiA > phiC) phi += Math.PI;
 
-    let x = Math.cos(phi) + this.b.x;
-    let y = Math.sin(phi) + this.b.y;
+    const x = Math.cos(phi) + this.b.x;
+    const y = Math.sin(phi) + this.b.y;
 
     return new Line(this.b, new Point(x, y));
   }
@@ -292,13 +292,18 @@ export class Angle {
     return new Arc(this.b, this.a, this.rad);
   }
 
-  equals(a: Angle) {
+  equals(_a: Angle) {
     return false;  // TODO
   }
 
   // Only required to have a common API with Line, Polygon, etc.
-  project() { return this.b; }
-  at() { return this.b; }
+  project() {
+    return this.b;
+  }
+
+  at() {
+    return this.b;
+  }
 }
 
 function rad(p: Point, c = ORIGIN) {
@@ -383,8 +388,8 @@ export class Line {
   /** Checks if a point p lies on this line. */
   contains(p: Point) {
     // det([[p.x, p.y, 1],[p1.x, p1.y, 1],[p2.x, ,p2.y 1]])
-    const det = p.x * (this.p1.y - this.p2.y) + this.p1.x * (this.p2.y - p.y)
-                + this.p2.x * (p.y - this.p1.y);
+    const det = p.x * (this.p1.y - this.p2.y) + this.p1.x * (this.p2.y - p.y) +
+                this.p2.x * (p.y - this.p1.y);
     return nearlyEquals(det, 0);
   }
 
@@ -393,17 +398,17 @@ export class Line {
   }
 
   transform(m: TransformMatrix): this {
-    return new (<any>this.constructor)(this.p1.transform(m),
+    return new (<any> this.constructor)(this.p1.transform(m),
         this.p2.transform(m));
   }
 
   rotate(a: number, c = ORIGIN): this {
-    return new (<any>this.constructor)(this.p1.rotate(a, c),
+    return new (<any> this.constructor)(this.p1.rotate(a, c),
         this.p2.rotate(a, c));
   }
 
   reflect(l: Line): this {
-    return new (<any>this.constructor)(this.p1.reflect(l), this.p2.reflect(l));
+    return new (<any> this.constructor)(this.p1.reflect(l), this.p2.reflect(l));
   }
 
   scale(sx: number, sy = sx) {
@@ -502,7 +507,7 @@ export class Circle {
   }
 
   get arc() {
-    let start = this.c.shift(this.r, 0);
+    const start = this.c.shift(this.r, 0);
     return new Arc(this.c, start, TWO_PI);
   }
 
@@ -574,27 +579,27 @@ export class Arc {
   }
 
   transform(m: TransformMatrix): this {
-    return new (<any>this.constructor)(this.c.transform(m),
+    return new (<any> this.constructor)(this.c.transform(m),
         this.start.transform(m), this.angle);
   }
 
   rotate(a: number, c = ORIGIN): this {
-    return new (<any>this.constructor)(this.c.rotate(a, c),
+    return new (<any> this.constructor)(this.c.rotate(a, c),
         this.start.rotate(a, c), this.angle);
   }
 
   reflect(l: Line): this {
-    return new (<any>this.constructor)(this.c.reflect(l),
+    return new (<any> this.constructor)(this.c.reflect(l),
         this.start.reflect(l), this.angle);
   }
 
   scale(sx: number, sy = sx): this {
-    return new (<any>this.constructor)(this.c.scale(sx, sy),
+    return new (<any> this.constructor)(this.c.scale(sx, sy),
         this.start.scale(sx, sy), this.angle);
   }
 
   shift(x: number, y = x): this {
-    return new (<any>this.constructor)(this.c.shift(x, y),
+    return new (<any> this.constructor)(this.c.shift(x, y),
         this.start.shift(x, y), this.angle);
   }
 
@@ -607,8 +612,8 @@ export class Arc {
   }
 
   project(p: Point) {
-    let start = this.startAngle;
-    let end = start + this.angle;
+    const start = this.startAngle;
+    const end = start + this.angle;
 
     let angle = rad(p, this.c);
     if (end > TWO_PI && angle < end - TWO_PI) angle += TWO_PI;
@@ -622,19 +627,19 @@ export class Arc {
   }
 
   contract(p: number): this {
-    return new (<any>this.constructor)(this.c, this.at(p / 2),
+    return new (<any> this.constructor)(this.c, this.at(p / 2),
         this.angle * (1 - p));
   }
 
   get minor(): this {
     if (this.angle <= Math.PI) return this;
-    return new (<any>this.constructor)(this.c, this.end,
+    return new (<any> this.constructor)(this.c, this.end,
         2 * Math.PI - this.angle);
   }
 
   get major(): this {
     if (this.angle >= Math.PI) return this;
-    return new (<any>this.constructor)(this.c, this.end,
+    return new (<any> this.constructor)(this.c, this.end,
         2 * Math.PI - this.angle);
   }
 
@@ -681,8 +686,8 @@ export class Polygon {
    * are ordered clockwise, and negative otherwise.
    */
   get signedArea() {
-    let p = this.points;
-    let n = p.length;
+    const p = this.points;
+    const n = p.length;
     let A = p[n - 1].x * p[0].y - p[0].x * p[n - 1].y;
 
     for (let i = 1; i < n; ++i) {
@@ -697,8 +702,8 @@ export class Polygon {
   }
 
   get centroid() {
-    let p = this.points;
-    let n = p.length;
+    const p = this.points;
+    const n = p.length;
 
     let Cx = 0;
     for (let i = 0; i < n; ++i) Cx += p[i].x;
@@ -710,10 +715,10 @@ export class Polygon {
   }
 
   get edges() {
-    let p = this.points;
-    let n = p.length;
+    const p = this.points;
+    const n = p.length;
 
-    let edges = [];
+    const edges = [];
     for (let i = 0; i < n; ++i) edges.push(new Segment(p[i], p[(i + 1) % n]));
     return edges;
   }
@@ -725,27 +730,27 @@ export class Polygon {
   }
 
   transform(m: TransformMatrix): this {
-    return new (<any>this.constructor)(...this.points.map(p => p.transform(m)));
+    return new (<any> this.constructor)(...this.points.map(p => p.transform(m)));
   }
 
   rotate(a: number, center = ORIGIN): this {
     const points = this.points.map(p => p.rotate(a, center));
-    return new (<any>this.constructor)(...points);
+    return new (<any> this.constructor)(...points);
   }
 
   reflect(line: Line): this {
     const points = this.points.map(p => p.reflect(line));
-    return new (<any>this.constructor)(...points);
+    return new (<any> this.constructor)(...points);
   }
 
   scale(sx: number, sy = sx): this {
     const points = this.points.map(p => p.scale(sx, sy));
-    return new (<any>this.constructor)(...points);
+    return new (<any> this.constructor)(...points);
   }
 
   shift(x: number, y = x): this {
     const points = this.points.map(p => p.shift(x, y));
-    return new (<any>this.constructor)(...points);
+    return new (<any> this.constructor)(...points);
   }
 
   translate(p: Point) {
@@ -771,7 +776,7 @@ export class Polygon {
     return inside;
   }
 
-  equals(other: Polygon) {
+  equals(_other: Polygon) {
     // TODO Implement
     return false;
   }
@@ -785,7 +790,7 @@ export class Polygon {
       const d1 = Point.distance(p, q1);
       if (d1 < d) {
         q = q1;
-        d = d1
+        d = d1;
       }
     }
 
@@ -800,7 +805,7 @@ export class Polygon {
   get oriented(): this {
     if (this.signedArea >= 0) return this;
     const points = [...this.points].reverse();
-    return new (<any>this.constructor)(...points);
+    return new (<any> this.constructor)(...points);
   }
 
   /**
@@ -826,7 +831,7 @@ export class Polygon {
       const nextEdge = new Segment(active.val, active.next!.val);
       active = active.next!;
 
-      for (let p of points[1 - which]) {
+      for (const p of points[1 - which]) {
         const testEdge = new Segment(p.val, p.next!.val);
         const intersect = intersections(nextEdge, testEdge)[0];
         if (intersect) {
@@ -843,8 +848,8 @@ export class Polygon {
   /** Checks if two polygons p1 and p2 collide. */
   static collision(p1: Polygon, p2: Polygon) {
     // Check if any of the edges overlap.
-    for (let e1 of p1.edges) {
-      for (let e2 of p2.edges) {
+    for (const e1 of p1.edges) {
+      for (const e2 of p2.edges) {
         if (Segment.intersect(e1, e2)) return true;
       }
     }
@@ -877,9 +882,10 @@ export class Polyline extends Polygon {
 
   /** @returns {Segment[]} */
   get edges() {
-    let edges = [];
-    for (let i = 0; i < this.points.length - 1; ++i)
+    const edges = [];
+    for (let i = 0; i < this.points.length - 1; ++i) {
       edges.push(new Segment(this.points[i], this.points[i + 1]));
+    }
     return edges;
   }
 
@@ -985,9 +991,9 @@ export class Rectangle {
    * @returns {Polygon}
    */
   get polygon() {
-    let b = new Point(this.p.x + this.w, this.p.y);
-    let c = new Point(this.p.x + this.w, this.p.y + this.h);
-    let d = new Point(this.p.x, this.p.y + this.h);
+    const b = new Point(this.p.x + this.w, this.p.y);
+    const c = new Point(this.p.x + this.w, this.p.y + this.h);
+    const d = new Point(this.p.x, this.p.y + this.h);
     return new Polygon(this.p, b, c, d);
   }
 
@@ -1020,7 +1026,7 @@ export class Rectangle {
            isBetween(p.y, this.p.y, this.p.y + this.h);
   }
 
-  equals(other: Polygon) {
+  equals(_other: Polygon) {
     // TODO Implement
     return false;
   }
@@ -1028,34 +1034,34 @@ export class Rectangle {
   project(p: SimplePoint): Point {
     // TODO Use the generic intersections() function
     // bottom right corner of rect
-    let rect1 = {x: this.p.x + this.w, y: this.p.y + this.h};
-    let center = {x: this.p.x + this.w / 2, y: this.p.y + this.h / 2};
-    let m = (center.y - p.y) / (center.x - p.x);
+    const rect1 = {x: this.p.x + this.w, y: this.p.y + this.h};
+    const center = {x: this.p.x + this.w / 2, y: this.p.y + this.h / 2};
+    const m = (center.y - p.y) / (center.x - p.x);
 
     if (p.x <= center.x) {  // check left side
-      let y = m * (this.p.x - p.x) + p.y;
+      const y = m * (this.p.x - p.x) + p.y;
       if (this.p.y < y && y < rect1.y) return new Point(this.p.x, y);
     }
 
     if (p.x >= center.x) {  // check right side
-      let y = m * (rect1.x - p.x) + p.y;
+      const y = m * (rect1.x - p.x) + p.y;
       if (this.p.y < y && y < rect1.y) return new Point(rect1.x, y);
     }
 
     if (p.y <= center.y) {  // check top side
-      let x = (this.p.y - p.y) / m + p.x;
+      const x = (this.p.y - p.y) / m + p.x;
       if (this.p.x < x && x < rect1.x) return new Point(x, this.p.y);
     }
 
     if (p.y >= center.y) {  // check bottom side
-      let x = (rect1.y - p.y) / m + p.x;
+      const x = (rect1.y - p.y) / m + p.x;
       if (this.p.x < x && x < rect1.x) return new Point(x, rect1.y);
     }
 
     return this.p;
   }
 
-  at(t: number) {
+  at(_t: number) {
     // TODO Implement
   }
 }
@@ -1104,8 +1110,9 @@ function liesOnSegment(s: Segment, p: Point) {
 }
 
 function liesOnRay(r: Ray, p: Point) {
-  if (nearlyEquals(r.p1.x, r.p2.x)) return (p.y - r.p1.y) / (r.p2.y - r.p1.y) >
-                                           0;
+  if (nearlyEquals(r.p1.x, r.p2.x)) {
+    return (p.y - r.p1.y) / (r.p2.y - r.p1.y) > 0;
+  }
   return (p.x - r.p1.x) / (r.p2.x - r.p1.x) > 0;
 }
 
@@ -1178,8 +1185,9 @@ function lineCircleIntersection(l: Line, c: Circle) {
 /** Returns the intersection of two or more geometry objects. */
 export function intersections(...elements: Shape[]): Point[] {
   if (elements.length < 2) return [];
-  if (elements.length > 2) return flatten(
-      subsets(elements, 2).map(e => intersections(...e)));
+  if (elements.length > 2) {
+    return flatten(subsets(elements, 2).map(e => intersections(...e)));
+  }
 
   let [a, b] = elements;
 
@@ -1213,8 +1221,9 @@ function simpleIntersection(a: Line|Circle, b: Line|Circle): Point[] {
   }
 
   for (const x of [a, b]) {
-    if (x.type === 'segment') results =
-        results.filter(i => liesOnSegment(x as Segment, i));
+    if (x.type === 'segment') {
+      results = results.filter(i => liesOnSegment(x as Segment, i));
+    }
     if (x.type === 'ray') results = results.filter(i => liesOnRay(x as Ray, i));
   }
 

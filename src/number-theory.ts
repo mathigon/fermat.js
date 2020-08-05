@@ -48,7 +48,7 @@ export function primeFactorisation(n: number): number[] {
   if (n === 1) return [];
   if (isPrime(n)) return [n];
 
-  let maxf = Math.sqrt(n);
+  const maxf = Math.sqrt(n);
   for (let f = 2; f <= maxf; ++f) {
     if (n % f === 0) {
       return primeFactorisation(f).concat(primeFactorisation(n / f));
@@ -66,11 +66,11 @@ export function primeFactors(n: number) {
 /** Lists all prime numbers between 0 and n. */
 export function listPrimes(n = 100) {
   if (n < 2) return [];
-  let result = [2];
+  const result = [2];
 
   for (let i = 3; i <= n; i++) {
     let notMultiple = false;
-    for (let r of result) {
+    for (const r of result) {
       notMultiple = notMultiple || (0 === i % r);
     }
     if (!notMultiple) result.push(i);

@@ -86,8 +86,8 @@ export class Complex {
     if (typeof c1 === 'number') c1 = new Complex(c1, 0);
     if (typeof c2 === 'number') c2 = new Complex(c2, 0);
 
-    let re = c1.re * c2.re - c1.im * c2.im;
-    let im = c1.im * c2.re + c1.re * c2.im;
+    const re = c1.re * c2.re - c1.im * c2.im;
+    const im = c1.im * c2.re + c1.re * c2.im;
     return new Complex(re, im);
   }
 
@@ -96,12 +96,13 @@ export class Complex {
     if (typeof c1 === 'number') c1 = new Complex(c1, 0);
     if (typeof c2 === 'number') c2 = new Complex(c2, 0);
 
-    if (Math.abs(c2.re) < Number.EPSILON || Math.abs(c2.im) < Number.EPSILON)
+    if (Math.abs(c2.re) < Number.EPSILON || Math.abs(c2.im) < Number.EPSILON) {
       return new Complex(Infinity, Infinity);
+    }
 
-    let denominator = c2.re * c2.re + c2.im * c2.im;
-    let re = (c1.re * c2.re + c1.im * c2.im) / denominator;
-    let im = (c1.im * c2.re - c1.re * c2.im) / denominator;
+    const denominator = c2.re * c2.re + c2.im * c2.im;
+    const re = (c1.re * c2.re + c1.im * c2.im) / denominator;
+    const im = (c1.im * c2.re - c1.re * c2.im) / denominator;
 
     return new Complex(re, im);
   }
