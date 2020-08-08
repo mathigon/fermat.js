@@ -28,7 +28,7 @@
     "test": "ts-node node_modules/tape/bin/tape test/**/*.ts",
     "prepublish": "npm test && npm run lint && npm run build",
     "build": "rollup --config",
-    "lint": "eslint . --ext .ts --fix"
+    "lint": "eslint . --ext .ts"
   },
   "dependencies": {
     "@mathigon/core": "^0.5.1"
