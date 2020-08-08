@@ -46,30 +46,5 @@
     "eslint": "7.6.0",
     "eslint-config-google": "0.14.0",
     "eslint-plugin-import": "2.22.0"
-  },
-  "renovate": {
-    "extends": [
-      "config:base"
-    ],
-    "schedule": [
-      "every weekend"
-    ],
-    "packageRules": [
-      {
-        "updateTypes": [
-          "patch",
-          "pin",
-          "digest"
-        ],
-        "automerge": true
-      },
-      {
-        "packagePatterns": [
-          "eslint",
-          "^@types"
-        ],
-        "automerge": true
-      }
-    ]
   }
 }
