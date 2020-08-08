@@ -1,13 +1,14 @@
 # Fermat.ts
 
+[![Build Status](https://travis-ci.org/mathigon/fermat.js.svg?branch=master)](https://travis-ci.org/mathigon/fermat.js)
+[![npm](https://img.shields.io/npm/v/@mathigon/fermat.svg)](https://www.npmjs.com/package/@mathigon/fermat)
+[![npm](https://img.shields.io/github/license/mathigon/fermat.js.svg)](https://github.com/mathigon/fermat.js/blob/master/LICENSE)
+
 Fermat.ts is a powerful mathematics, statistics and geometry library for
 TypeScript. It contains everything from number theory to random numbers,
 expression parsing and linear algebra classes. It was developed for
 [Mathigon.org](https://mathigon.org), an award-winning mathematics education
 project.
-
-[![npm](https://img.shields.io/npm/v/@mathigon/fermat.svg)](https://www.npmjs.com/package/@mathigon/fermat)
-[![npm](https://img.shields.io/github/license/mathigon/fermat.js.svg)](https://github.com/mathigon/fermat.js/blob/master/LICENSE)
 
 
 ## Features

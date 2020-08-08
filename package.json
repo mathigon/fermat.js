@@ -31,7 +31,7 @@
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "@mathigon/core": "0.5.2"
+    "@mathigon/core": "^0.5.2"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "5.0.2",
