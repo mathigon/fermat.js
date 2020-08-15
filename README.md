@@ -35,10 +35,6 @@ using
 
 ```npm install @mathigon/fermat```
 
-We recommend using Fermat.ts together with [Rollup](https://rollupjs.org/), using
-using the [rollup-plugin-node-resolve](https://github.com/rollup/rollup-plugin-node-resolve)
-plugin.
-
 Now, simply import all functions and classes you need, using
 
 ```js
