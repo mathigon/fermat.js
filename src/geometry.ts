@@ -1196,9 +1196,11 @@ export function intersections(...elements: Shape[]): Point[] {
   if (isPolygonLike(a)) {
     // This hack is necessary to capture intersections between a line and a
     // vertex of a polygon. There are more edge cases to consider!
-    const vertices = isLineLike(b) ?
-                     a.points.filter(p => (b as Line).contains(p)) : [];
-    return [...vertices, ...intersections(b, ...a.edges)];
+    const results = isLineLike(b) ?
+                    a.points.filter(p => (b as Line).contains(p)) : [];
+
+    for (const e of a.edges) results.push(...intersections(e, b));
+    return results;
   }
 
   // TODO Handle arcs, sectors and angles!
