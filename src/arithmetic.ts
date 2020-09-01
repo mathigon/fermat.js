@@ -253,3 +253,15 @@ export function quadratic(a: number, b: number, c: number) {
   const q = Math.sqrt(b * b - 4 * a * c) / 2 / a;
   return [p + q, p - q];
 }
+
+export function polynomial(x: number, coefficients: number[]) {
+  let total = 0;
+  let xi = 1;
+
+  for (const c of coefficients) {
+    total += xi * c;
+    xi *= x;
+  }
+
+  return total;
+}
