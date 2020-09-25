@@ -4,7 +4,7 @@
 // =============================================================================
 
 
-import {total, flatten, toLinkedList, tabulate, isOneOf} from '@mathigon/core';
+import {total, flatten, toLinkedList, tabulate, isOneOf, last} from '@mathigon/core';
 import {nearlyEquals, isBetween, roundTo, square, clamp, lerp} from './arithmetic';
 import {subsets} from './combinatorics';
 
@@ -330,6 +330,11 @@ export class Line {
     return Point.distance(this.p1, this.p2);
   }
 
+  /* The squared distance between the two points defining this line. */
+  get lengthSquared() {
+    return square(this.p1.x - this.p2.x) + square(this.p1.y - this.p2.y);
+  }
+
   /** The midpoint of this line. */
   get midpoint() {
     return Point.average(this.p1, this.p2);
@@ -377,12 +382,18 @@ export class Line {
     return this.perpendicular(this.midpoint);
   }
 
-  /** Projects this point onto the line `l`. */
+  /** Projects a point `p` onto this line. */
   project(p: Point) {
     const a = Point.difference(this.p2, this.p1);
     const b = Point.difference(p, this.p1);
-    const proj = a.scale(Point.dot(a, b) / this.length ** 2);
+    const proj = a.scale(Point.dot(a, b) / this.lengthSquared);
     return Point.sum(this.p1, proj);
+  }
+
+  /** Squared distance between a point and a line. */
+  distanceSquared(p: Point) {
+    const proj = this.project(p);
+    return square(p.x - proj.x) + square(p.y - proj.y);
   }
 
   /** Checks if a point p lies on this line. */
@@ -465,7 +476,7 @@ export class Segment extends Line {
     const a = Point.difference(this.p2, this.p1);
     const b = Point.difference(p, this.p1);
 
-    const q = clamp(Point.dot(a, b) / square(this.length), 0, 1);
+    const q = clamp(Point.dot(a, b) / this.lengthSquared, 0, 1);
     return Point.sum(this.p1, a.scale(q));
   }
 
@@ -674,11 +685,12 @@ export class Polygon {
   }
 
   get circumference() {
-    let C = 0;
+    if (this.points.length <= 1) return 0;
+    let length = Point.distance(this.points[0], last(this.points));
     for (let i = 1; i < this.points.length; ++i) {
-      C += Point.distance(this.points[i - 1], this.points[i]);
+      length += Point.distance(this.points[i - 1], this.points[i]);
     }
-    return C;
+    return length;
   }
 
   /**
@@ -879,6 +891,14 @@ export class Polygon {
 /** A polyline defined by its vertex points. */
 export class Polyline extends Polygon {
   readonly type = 'polyline';
+
+  get length() {
+    let length = 0;
+    for (let i = 1; i < this.points.length; ++i) {
+      length += Point.distance(this.points[i - 1], this.points[i]);
+    }
+    return length;
+  }
 
   /** @returns {Segment[]} */
   get edges() {
