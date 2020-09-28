@@ -1,7 +1,7 @@
 {
   "name": "@mathigon/fermat",
-  "version": "0.5.5",
-  "description": "Powerful mathematics, statistics and geometry library for JavaScript.",
+  "version": "0.6.0",
+  "description": "Powerful mathematics and statistics library for JavaScript.",
   "keywords": [
     "mathematics",
     "math",
@@ -10,8 +10,7 @@
     "random",
     "fractions",
     "complex numbers",
-    "matrix",
-    "geometry"
+    "matrix"
   ],
   "homepage": "https://mathigon.io/",
   "license": "MIT",

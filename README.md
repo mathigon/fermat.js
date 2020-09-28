@@ -4,21 +4,21 @@
 [![npm](https://img.shields.io/npm/v/@mathigon/fermat.svg)](https://www.npmjs.com/package/@mathigon/fermat)
 [![npm](https://img.shields.io/github/license/mathigon/fermat.js.svg)](https://github.com/mathigon/fermat.js/blob/master/LICENSE)
 
-Fermat.ts is a powerful mathematics, statistics and geometry library for
-TypeScript. It contains everything from number theory to random numbers,
-expression parsing and linear algebra classes. It was developed for
-[Mathigon.org](https://mathigon.org), an award-winning mathematics education
+Fermat.ts is a powerful mathematics and statistics library for TypeScript. It contains everything
+from number theory to random numbers, expression parsing and linear algebra classes. It was
+developed for [Mathigon.org](https://mathigon.org), an award-winning mathematics education
 project.
 
 
 ## Features
 
+Note: in version `0.6.0`, all geometry classes and functions were moved to
+[@mathigon/euclid](https://github.com/mathigon/euclid.js)!
+
 * Arithmetic: `nearlyEquals()`, `toWord()`, `toFraction()`, …
 * Combinatorics: `factorial()`, `binomial()`, `permutations()`, `subsets()`
 * Complex numbers: `Complex()`
 * Cryptography: `caesarCipher()`, `vigenereCipher()`, `letterFrequency()`
-* Geometry: `Point()`, `Line()`, `Polygon()`, `Circle()`, `Angle()`, as well as
-  methods for geometric properties, projections, intersections and much more
 * Matrices: `Matrix.product()`, `Matrix.determinant()`, `Matrix.inverse()`, …
 * Number theory: `gcd()`, `isPrime()`, `generatePrime()`, `goldbach()`, …
 * Numeric: `bisect()`, `integrate()`
