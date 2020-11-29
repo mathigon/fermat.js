@@ -32,6 +32,11 @@ export function weighted(weights: number[]) {
   return weights.findIndex((w) => (cum += w) >= x);
 }
 
+/** Randomly selects an element from an array. */
+export function find<T>(items: T[]): T {
+  return items[Math.floor(items.length * Math.random())];
+}
+
 
 // ---------------------------------------------------------------------------
 // Smart Random Number Generators
