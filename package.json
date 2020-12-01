@@ -1,6 +1,6 @@
 {
   "name": "@mathigon/fermat",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Powerful mathematics and statistics library for JavaScript.",
   "keywords": [
     "mathematics",
@@ -30,7 +30,7 @@
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "@mathigon/core": "^0.6.1"
+    "@mathigon/core": "^0.6.2"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "8.0.0",
