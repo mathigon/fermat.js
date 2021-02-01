@@ -1,6 +1,6 @@
 # Fermat.ts
 
-[![Build Status](https://travis-ci.org/mathigon/fermat.js.svg?branch=master)](https://travis-ci.org/mathigon/fermat.js)
+[![Build Status](https://github.com/mathigon/fermat.js/workflows/CI%20Tests/badge.svg)](https://github.com/mathigon/fermat.js/actions?query=workflow%3A%22CI+Tests%22)
 [![npm](https://img.shields.io/npm/v/@mathigon/fermat.svg)](https://www.npmjs.com/package/@mathigon/fermat)
 [![npm](https://img.shields.io/github/license/mathigon/fermat.js.svg)](https://github.com/mathigon/fermat.js/blob/master/LICENSE)
 
