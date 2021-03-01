@@ -33,9 +33,9 @@
     "@mathigon/core": "^0.6.4"
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "8.1.1",
+    "@rollup/plugin-typescript": "8.2.0",
     "@types/tape": "4.13.0",
-    "rollup": "2.38.2",
+    "rollup": "2.40.0",
     "tape": "5.1.1",
     "ts-node": "9.1.1",
     "tslib": "2.1.0",
