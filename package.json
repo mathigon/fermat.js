@@ -36,7 +36,7 @@
     "@rollup/plugin-typescript": "8.2.0",
     "@types/tape": "4.13.0",
     "rollup": "2.40.0",
-    "tape": "5.1.1",
+    "tape": "5.2.1",
     "ts-node": "9.1.1",
     "tslib": "2.1.0",
     "typescript": "4.2.2",
