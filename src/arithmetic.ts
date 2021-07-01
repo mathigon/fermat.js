@@ -248,7 +248,10 @@ export function log(x: number, b?: number) {
 }
 
 /** Solves the quadratic equation a x^2 + b x + c = 0 */
-export function quadratic(a: number, b: number, c: number) {
+export function quadratic(a: number, b: number, c: number): number[] {
+  if (nearlyEquals(a, 0) && nearlyEquals(b, 0)) return [];
+  if (nearlyEquals(a, 0)) return [-c / b];
+
   const p = -b / 2 / a;
   const q = Math.sqrt(b * b - 4 * a * c) / 2 / a;
   return [p + q, p - q];
