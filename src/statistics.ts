@@ -12,14 +12,29 @@ export function mean(values: number[]) {
   return values.length ? total(values) / values.length : 0;
 }
 
-/** Calculates the median of an array of numbers. */
-export function median(values: number[]) {
+/** Calculates the quantile of an array of numbers for the cumulative
+ * probability p. This method excludes the median in calculation, i.e.
+ * `quantile((1, 2, 3, 4, 5), 0.25) === 2`
+ * @param p Cumultive probability, 0 <= p <= 1
+ */
+export function quantile(values: number[], p: number): number {
   const n = values.length;
   if (!n) return 0;
 
-  const sorted = values.slice(0).sort();
-  return (n % 2 === 1) ? sorted[Math.floor(n / 2)] :
-         (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+  const sorted = values.slice(0).sort((a, b) => (a - b));
+  if (p === 1) return sorted[n - 1];
+
+  const index = n * p;
+  if (Number.isInteger(index)) {
+    return (sorted[index - 1] + sorted[index]) / 2;
+  } else {
+    return sorted[Math.floor(index)];
+  }
+}
+
+/** Calculates the median of an array of numbers. */
+export function median(values: number[]) {
+  return quantile(values, 0.5);
 }
 
 /**
