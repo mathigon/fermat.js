@@ -11,9 +11,9 @@ const PRECISION = 0.000001;
 // Checks and Comparisons
 
 /** Checks if two numbers are nearly equals. */
-export function nearlyEquals(x: number, y: number, t = PRECISION) {
-  if (isNaN(x) || isNaN(y)) return false;
-  return Math.abs(x - y) < t;
+export function nearlyEquals(a: number, b: number, t = PRECISION) {
+  if (isNaN(a) || isNaN(b)) return false;
+  return Math.abs(a - b) < t;
 }
 
 /* Checks if an object is an integer. */
@@ -22,14 +22,14 @@ export function isInteger(x: number, t = PRECISION) {
 }
 
 /** Checks if a number x is between two numbers a and b. */
-export function isBetween(x: number, a: number, b: number, t = PRECISION) {
+export function isBetween(value: number, a: number, b: number, t = PRECISION) {
   if (a > b) [a, b] = [b, a];
-  return x > a + t && x < b - t;
+  return value > a + t && value < b - t;
 }
 
 /** Returns the sign of a number x, as +1, 0 or –1. */
-export function sign(x: number, t = PRECISION) {
-  return nearlyEquals(x, 0, t) ? 0 : (x > 0 ? 1 : -1);
+export function sign(value: number, t = PRECISION) {
+  return nearlyEquals(value, 0, t) ? 0 : (value > 0 ? 1 : -1);
 }
 
 
