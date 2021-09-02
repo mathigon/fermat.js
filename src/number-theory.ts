@@ -94,7 +94,7 @@ export function generatePrime(d: number) {
 }
 
 /** Tries to write a number x as the sum of two primes. */
-export function goldbach(x: number) {
+export function goldbach(x: number): [number, number] {
   if (x === 4) return [2, 2];
 
   let a = x / 2;
@@ -110,6 +110,8 @@ export function goldbach(x: number) {
     a -= 2;
     b += 2;
   }
+
+  return [-1, -1];
 }
 
 /** Computes Euler's totient function (phi) for a given natural number x. */

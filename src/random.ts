@@ -4,7 +4,7 @@
 // ============================================================================
 
 
-import {uid, total, repeat} from '@mathigon/core';
+import {repeat, total, uid} from '@mathigon/core';
 
 
 /** Randomly shuffles the elements in an array a. */
@@ -141,7 +141,7 @@ const P = [
   12.507343278686905,
   -0.13857109526572012,
   9.9843695780195716e-6,
-  1.5056327351493116e-7,
+  1.5056327351493116e-7
 ];
 
 function gamma(z: number): number {
@@ -156,8 +156,7 @@ function gamma(z: number): number {
 }
 
 /** Riemann-integrates fn(x) from xMin to xMax with an interval size dx. */
-export function integrate(fn: (x: number) => number, xMin: number,
-    xMax: number, dx = 1) {
+export function integrate(fn: (x: number) => number, xMin: number, xMax: number, dx = 1) {
   let result = 0;
   for (let x = xMin; x < xMax; x += dx) {
     result += (fn(x) * dx || 0);
@@ -167,7 +166,6 @@ export function integrate(fn: (x: number) => number, xMin: number,
 
 /** The chi CDF function. */
 export function chiCDF(chi: number, deg: number) {
-  const int = integrate(t => Math.pow(t, (deg - 2) / 2) * Math.exp(-t / 2), 0,
-      chi);
+  const int = integrate(t => Math.pow(t, (deg - 2) / 2) * Math.exp(-t / 2), 0, chi);
   return 1 - int / Math.pow(2, deg / 2) / gamma(deg / 2);
 }

@@ -66,9 +66,9 @@ function addPowerSuffix(n: number, places = 6) {
  * adding thousands separators. `places` is the number of digits to show in the
  * result.
  */
-export function numberFormat(n: number, places = 0, seperators = true) {
+export function numberFormat(n: number, places = 0, separators = true) {
   const str = addPowerSuffix(n, places).replace('-', '–');
-  return seperators ? addThousandSeparators(str) : str;
+  return separators ? addThousandSeparators(str) : str;
 }
 
 // Numbers like 0,123 are decimals, even though they match POINT_DECIMAL.

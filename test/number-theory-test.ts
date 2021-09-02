@@ -4,8 +4,8 @@
 // =============================================================================
 
 
-import * as tape from 'tape';
-import {eulerPhi} from '../src/number-theory';
+import tape from 'tape';
+import {eulerPhi} from '../src';
 
 
 tape('eulerPhi', (test) => {
@@ -17,8 +17,7 @@ tape('eulerPhi', (test) => {
   test.equal(eulerPhi(1234567890), 329040288);
   test.equal(eulerPhi(12345678923), 12345678922);
   test.equal(eulerPhi(720720), 138240);
-  test.equal(eulerPhi(2 * 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 29 * 31),
-      30656102400);
+  test.equal(eulerPhi(2 * 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 29 * 31), 30656102400);
 
   test.throws(() => eulerPhi(0));
 

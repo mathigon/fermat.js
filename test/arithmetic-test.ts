@@ -4,8 +4,8 @@
 // =============================================================================
 
 
-import * as tape from 'tape';
-import {parseNumber, toWord} from '../src/arithmetic';
+import tape from 'tape';
+import {parseNumber, toWord} from '../src';
 
 
 tape('parseNumber', (test) => {

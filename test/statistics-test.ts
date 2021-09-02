@@ -4,8 +4,8 @@
 // =============================================================================
 
 
-import * as tape from 'tape';
-import {quantile} from '../src/statistics';
+import tape from 'tape';
+import {quantile} from '../src';
 
 
 tape('quantile', (test) => {
