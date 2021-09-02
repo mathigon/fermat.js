@@ -8,7 +8,7 @@ import {repeat, total, uid} from '@mathigon/core';
 
 
 /** Randomly shuffles the elements in an array a. */
-export function shuffle<T = any>(a: T[]): T[] {
+export function shuffle<T>(a: T[]): T[] {
   a = a.slice(0); // create copy
   for (let i = a.length - 1; i > 0; --i) {
     const j = Math.floor(Math.random() * (i + 1));

@@ -44,16 +44,16 @@ function addThousandSeparators(x: string) {
   while (NUM_REGEX.test(n)) {
     n = n.replace(NUM_REGEX, '$1,$2');
   }
-  return n + (dec ? '.' + dec : '');
+  return n + (dec ? `.${dec}` : '');
 }
 
 function addPowerSuffix(n: number, places = 6) {
-  if (!places) return '' + n;
+  if (!places) return `${n}`;
 
   // Trim short numbers to the appropriate number of decimal places.
-  const d = ('' + Math.abs(Math.floor(n))).length;
+  const d = (`${Math.abs(Math.floor(n))}`).length;
   const m = n < 0 ? 1 : 0;
-  if (d <= places - m) return '' + round(n, places - d - m - 1);
+  if (d <= places - m) return `${round(n, places - d - m - 1)}`;
 
   // Append a power suffix to longer numbers.
   const x = Math.floor(Math.log10(Math.abs(n)) / 3);
@@ -112,18 +112,18 @@ export function parseNumber(str: string) {
  */
 export function toOrdinal(x: number) {
   if (Math.abs(x) % 100 >= 11 && Math.abs(x) % 100 <= 13) {
-    return x + 'th';
+    return `${x}th`;
   }
 
   switch (x % 10) {
     case 1:
-      return x + 'st';
+      return `${x}st`;
     case 2:
-      return x + 'nd';
+      return `${x}nd`;
     case 3:
-      return x + 'rd';
+      return `${x}rd`;
     default:
-      return x + 'th';
+      return `${x}th`;
   }
 }
 
@@ -141,11 +141,11 @@ const MULTIPLIERS = ['', ' thousand', ' million', ' billion', ' trillion',
 
 function toWordSingle(number: string) {
   const [h, t, o] = number.split('');
-  const hundreds = (h === '0') ? '' : ' ' + ONES[+h] + ' hundred';
+  const hundreds = (h === '0') ? '' : ` ${ONES[+h]} hundred`;
   if (t + o === '00') return hundreds;
-  if (+t < 2) return hundreds + ' ' + ONES[+(t + o)];
-  if (o === '0') return hundreds + ' ' + TENS[+t];
-  return hundreds + ' ' + TENS[+t] + '-' + ONES[+o];
+  if (+t < 2) return `${hundreds} ${ONES[+(t + o)]}`;
+  if (o === '0') return `${hundreds} ${TENS[+t]}`;
+  return `${hundreds} ${TENS[+t]}-${ONES[+o]}`;
 }
 
 /** Spells a number as an English word. */
@@ -173,7 +173,7 @@ export function toWord(n: number) {
 
 /** Returns the digits of a number n. */
 export function digits(n: number) {
-  const str = '' + Math.abs(n);
+  const str = `${Math.abs(n)}`;
   return str.split('').reverse().map(x => +x);
 }
 
