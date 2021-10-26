@@ -20,6 +20,8 @@ tape('fromString', (test) => {
   test.deepEqual(Fraction.fromString('0/'), new Fraction(0, 1));
   test.deepEqual(Fraction.fromString('5'), new Fraction(0, 1));
   test.deepEqual(Fraction.fromString('$'), new Fraction(0, 1));
+  test.deepEqual(Fraction.fromString('9/999999999999'), new Fraction(0, 1)); // string is too long
+  test.deepEqual(Fraction.fromString('11/111'), new Fraction(0, 1)); // string is too long
   test.end();
 });
 
