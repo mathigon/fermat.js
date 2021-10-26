@@ -33,6 +33,6 @@ tape('fromDecimal', (test) => {
   test.deepEqual(Fraction.fromDecimal(0.033), new Fraction(0, 1));
   test.deepEqual(Fraction.fromDecimal(0.05), new Fraction(1, 20));
   test.deepEqual(Fraction.fromDecimal(0.04761904762), new Fraction(1, 20)); // 1/21
-  test.deepEqual(Fraction.fromDecimal(-5), new Fraction(0, 1)); // 1/21
+  test.deepEqual(Fraction.fromDecimal(-5), new Fraction(0, 1));
   test.end();
 });
