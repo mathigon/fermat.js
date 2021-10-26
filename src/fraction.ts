@@ -74,7 +74,7 @@ export class Fraction {
 
   static fromString(s: string) {
     if (s.length > 5 || !/\d+\/\d+/.test(s)) return new Fraction(0, 1);
-    const [num, den] = s.split('/').map(x => +x);
+    const [num, den] = s.split('/').map(x => Number(x));
     return new Fraction(num, den);
   }
 

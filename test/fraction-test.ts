@@ -13,6 +13,8 @@ tape('fromString', (test) => {
   test.deepEqual(Fraction.fromString('1/10'), new Fraction(1, 10));
   test.deepEqual(Fraction.fromString('1/11'), new Fraction(1, 11));
   test.deepEqual(Fraction.fromString('1/0'), new Fraction(1, 0));
+  test.deepEqual(Fraction.fromString('-1/1'), new Fraction(-1, 1));
+  test.deepEqual(Fraction.fromString('1/-1'), new Fraction(0, 1));
   test.deepEqual(Fraction.fromString('0/1'), new Fraction(0, 1));
   test.deepEqual(Fraction.fromString('0/0'), new Fraction(0, 0));
   test.deepEqual(Fraction.fromString('/0'), new Fraction(0, 1));
