@@ -72,6 +72,12 @@ export class Fraction {
     return (b > max) ? new Fraction(c, d) : new Fraction(a, b);
   }
 
+  static fromString(s: string) {
+    if (!/\d+\/\d+/.test(s)) return new Fraction(0, 1);
+    const [num, den] = s.split('/').map(x => +x);
+    return new Fraction(num, den);
+  }
+
   // ---------------------------------------------------------------------------
 
   add(a: Fraction|number) {
