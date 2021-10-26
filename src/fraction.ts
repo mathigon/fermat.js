@@ -4,6 +4,7 @@
 // =============================================================================
 
 
+import {isInteger, nearlyEquals} from './arithmetic';
 import {lcm} from './number-theory';
 
 
@@ -46,7 +47,11 @@ export class Fraction {
 
   // ---------------------------------------------------------------------------
 
-  static fromDecimal(x: number, max = 20) {
+  static fromDecimal(x: number, max = 100) {
+    const sign = Math.sign(x);
+    const whole = Math.floor(Math.abs(x));
+    x = Math.abs(x) - whole;
+
     let a = 0;
     let b = 1;
     let c = 1;
@@ -56,11 +61,11 @@ export class Fraction {
       const mediant = (a + c) / (b + d);
       if (x === mediant) {
         if (b + d <= max) {
-          return new Fraction(a + c, b + d);
+          return new Fraction(sign * (whole * (b + d) + a + c), b + d);
         } else if (d > b) {
-          return new Fraction(c, d);
+          return new Fraction(sign * (whole * d + c), d);
         } else {
-          return new Fraction(a, b);
+          return new Fraction(sign * (whole * b + a), b);
         }
       } else if (x > mediant) {
         [a, b] = [a + c, b + d];
@@ -69,12 +74,15 @@ export class Fraction {
       }
     }
 
-    return (b > max) ? new Fraction(c, d) : new Fraction(a, b);
+    if (b > max) return new Fraction(sign * (whole * d + c), d);
+    return new Fraction(sign * (whole * b + a), b);
   }
 
   static fromString(s: string) {
-    if (s.length > 5 || !/\d+\/\d+/.test(s)) return new Fraction(0, 1);
-    const [num, den] = s.split('/').map(x => Number(x));
+    if (!s.includes('/')) return isNaN(+s) ? undefined : Fraction.fromDecimal(+s);
+    const [num, den] = s.split('/').map(x => +x);
+    if (isNaN(num) || isNaN(den) || nearlyEquals(den, 0)) return;
+    if (!isInteger(num) || !isInteger(num)) return Fraction.fromDecimal(num / den);
     return new Fraction(num, den);
   }
 
