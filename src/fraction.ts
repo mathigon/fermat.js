@@ -82,7 +82,7 @@ export class Fraction {
     if (!s.includes('/')) return isNaN(+s) ? undefined : Fraction.fromDecimal(+s);
     const [num, den] = s.split('/').map(x => +x);
     if (isNaN(num) || isNaN(den) || nearlyEquals(den, 0)) return;
-    if (!isInteger(num) || !isInteger(num)) return Fraction.fromDecimal(num / den);
+    if (!isInteger(num) || !isInteger(den)) return Fraction.fromDecimal(num / den);
     return new Fraction(num, den);
   }
 
