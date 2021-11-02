@@ -7,7 +7,7 @@
 export * from './arithmetic';
 export * from './combinatorics';
 export * from './complex';
-export * from './fraction';
+export * from './xnumber';
 export * as Matrix from './matrix';
 export * from './number-theory';
 export * as Random from './random';
