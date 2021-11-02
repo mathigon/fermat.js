@@ -29,7 +29,7 @@ export class XNumber {
     if (this.unit === 'π') {
       if (num === '1') return 'π';
       if (num === '0') return '0';
-      if (num === '–1') return '–π'
+      if (num === '–1') return '–π';
     }
     return `${num}${this.unit ? this.unit : ''}`;
   }
@@ -37,7 +37,7 @@ export class XNumber {
   toMathML() {
     let str = `<mn>${this.num}</mn>`;
     if (this.den !== undefined) str = `<mfrac>${str}<mn>${this.den}</mn></mfrac>`;
-    if (this.unit) str += (this.unit === 'π') ? `<mi>π</mi>` : `<mo>%</mo>`
+    if (this.unit) str += (this.unit === 'π') ? `<mi>π</mi>` : `<mo>%</mo>`;
     return str;
   }
 
