@@ -5,7 +5,7 @@
 
 
 import {isInteger, nearlyEquals} from './arithmetic';
-import {lcm} from './number-theory';
+import {gcd} from './number-theory';
 
 
 /**  Fraction class. */
@@ -27,7 +27,7 @@ export class Fraction {
   get simplified() {
     const n = Math.abs(this.n);
     const d = Math.abs(this.d);
-    const factor = lcm(n, d);
+    const factor = gcd(n, d);
     return new Fraction(this.sign * n / factor, d / factor);
   }
 
