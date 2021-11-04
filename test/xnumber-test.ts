@@ -20,6 +20,13 @@ tape('XNumber Constructors', (test) => {
   test.equal(n(1, 2, 'π').toString(), '1/2π');
   test.equal(n(-1, undefined, 'π').toString(), '–π');
   test.equal(n(0, 2, 'π').toString(), '0');
+  test.equal(n(10000, 20000).toString(), '10,000/20,000');
+  test.end();
+});
+
+tape('Fraction Simplification', (test) => {
+  test.equal(n(4, 8).simplified.toString(), '1/2');
+  test.equal(n(-3, 9).simplified.toString(), '–1/3');
   test.end();
 });
 
@@ -28,7 +35,7 @@ tape('XNumber Arithmetic', (test) => {
   test.equal(n(-2).add(3).toString(), '1');
   test.equal(n(2).add(n(-3)).toString(), '–1');
   test.equal(n(-2).add(-3).toString(), '–5');
-  // test.equal(n(2.4).add(1.2).toString(), '3.6');  floating-point error
+  test.equal(n(2.4).add(1.2).toString(), '3.6');
   test.equal(n(1, 2).add(1.2).toString(), '1.7');
   test.equal(n(1, 2).add(2).toString(), '5/2');
   test.equal(n(1, 4).add(0.5).toString(), '0.75');  // Maybe should be 3/4?
@@ -52,6 +59,7 @@ tape('XNumber Parsing', (test) => {
   test.equal(str('10%'), '10%');
   test.equal(str(' 2/3 π  '), '2/3π');
   test.equal(str('$'), undefined);
+  test.equal(str('1,000/3000'), '1,000/3,000');
   test.end();
 });
 

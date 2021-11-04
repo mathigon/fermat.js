@@ -43,6 +43,10 @@ export class XNumber {
 
   // ---------------------------------------------------------------------------
 
+  /**
+   * Returns the value of this number as a decimal. For example, 2/5 and 40%
+   * would both return 0.4.
+   */
   get value() {
     if (this.den !== undefined) return this.num / this.den;
     if (this.unit === '%') return this.num / 100;
@@ -54,26 +58,30 @@ export class XNumber {
     return Math.sign(this.num);
   }
 
+  /** Simplifies fractions, e.g. 4/8 would become 1/2. */
   get simplified(): XNumber {
     if (!this.den) return this;
     const factor = gcd(Math.abs(this.num), this.den);
     return new XNumber(this.num / factor, this.den / factor, this.unit);
   }
 
+  /** Returns 1/x of this number. */
   get inverse() {
     if (this.den !== undefined) return new XNumber(this.den, this.num);
     return new XNumber(1 / this.num, undefined, this.unit);
   }
 
+  /** Returns -x of this number. */
   get negative() {
     return new XNumber(-this.num, this.den, this.unit);
   }
 
   // ---------------------------------------------------------------------------
 
+  /** Parses a number string, e.g. '1/2' or '20.7%'. */
   static fromString(s: string) {
     // Replace whitespace and unit suffixes
-    s = s.replace(/\s/g, '').replace('–', '-');
+    s = s.replace(/[\s,]/g, '').replace('–', '-');
     const unit = s.endsWith('%') ? '%' : s.endsWith('π') ? 'π' : undefined;
     if (unit) s = s.replace(unit, '');
 
@@ -85,9 +93,9 @@ export class XNumber {
     if (isNaN(num) || isNaN(den) || nearlyEquals(den, 0)) return;
     if (!isInteger(num) || !isInteger(den)) return new XNumber(num / den, undefined, unit);
     return new XNumber(num, den, unit);
-
   }
 
+  /** Converts a decimal into the closest fraction with a given maximum denominator. */
   static fractionFromDecimal(x: number, maxDen = 100) {
     const sign = Math.sign(x);
     const whole = Math.floor(Math.abs(x));
