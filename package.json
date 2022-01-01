@@ -1,6 +1,6 @@
 {
   "name": "@mathigon/fermat",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "license": "MIT",
   "homepage": "https://mathigon.io/fermat",
   "repository": "mathigon/fermat.js",
@@ -16,7 +16,7 @@
     "matrix"
   ],
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   },
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -31,7 +31,7 @@
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "@mathigon/core": "1.0.5"
+    "@mathigon/core": "1.0.6"
   },
   "devDependencies": {
     "@types/tape": "4.13.2",
