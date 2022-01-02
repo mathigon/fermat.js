@@ -5,6 +5,7 @@
 
 
 import {repeat2D, tabulate2D} from '@mathigon/core';
+import {nearlyEquals} from './arithmetic';
 
 
 type Matrix = number[][];
@@ -126,8 +127,8 @@ export function determinant(M: Matrix) {
     let diagLeft = M[0][j];
     let diagRight = M[0][j];
     for (let i = 1; i < n; ++i) {
-      diagRight *= M[i][j + i % n];
-      diagLeft *= M[i][j - i % n];
+      diagRight *= M[i][(j + i) % n];
+      diagLeft *= M[i][(j - i + n) % n];
     }
     det += diagRight - diagLeft;
   }
@@ -152,7 +153,7 @@ export function inverse(M: Matrix) {
     let e = C[i][i];
 
     // If e is 0, we need to swap this row with a lower row.
-    if (!e) {
+    if (nearlyEquals(e, 0)) {
       for (let ii = i + 1; ii < n; ++ii) {
         if (C[ii][i] !== 0) {
           for (let j = 0; j < n; ++j) {
@@ -163,7 +164,7 @@ export function inverse(M: Matrix) {
         }
       }
       e = C[i][i];
-      if (!e) throw new Error('Matrix not invertible.');
+      if (nearlyEquals(e, 0)) throw new Error('Matrix not invertible.');
     }
 
     // Scale row by e, so that we have a 1 on the diagonal.
