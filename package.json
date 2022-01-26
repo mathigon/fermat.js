@@ -31,7 +31,7 @@
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "@mathigon/core": "1.0.6"
+    "@mathigon/core": "1.0.7"
   },
   "devDependencies": {
     "@types/tape": "4.13.2",
