@@ -5,6 +5,7 @@
 
 
 import {total} from '@mathigon/core';
+import {lerp} from './arithmetic';
 
 
 /** Calculates the mean of an array of numbers. */
@@ -12,24 +13,24 @@ export function mean(values: number[]) {
   return values.length ? total(values) / values.length : 0;
 }
 
-/** Calculates the quantile of an array of numbers for the cumulative
- * probability p. This method excludes the median in calculation, i.e.
- * `quantile((1, 2, 3, 4, 5), 0.25) === 2`
- * @param p Cumultive probability, 0 <= p <= 1
- */
+/** Finds the quantile of an array of numbers for the cumulative probability p. */
 export function quantile(values: number[], p: number): number {
   const n = values.length;
   if (!n) return 0;
 
   const sorted = values.slice(0).sort((a, b) => (a - b));
-  if (p === 1) return sorted[n - 1];
+  if (p === 0) return values[0];
+  if (p === 1) return values[n - 1];
 
-  const index = n * p;
-  if (Number.isInteger(index)) {
-    return (sorted[index - 1] + sorted[index]) / 2;
-  } else {
-    return sorted[Math.floor(index)];
-  }
+  // See https://en.wikipedia.org/wiki/Quantile#Estimating_quantiles_from_a_sample
+  const index = n * p - 0.5;
+  // Option A: (n - 1) * p        Excel Default, Python/NumPy, Google Docs, R Default
+  // Option B: (n + 1) * p - 1    Excel Option, WIKI 4
+  // Option C: n * p - 0.5        >> WIKI 3, Matlab, Mathematics
+
+  if (Number.isInteger(index)) return sorted[index];
+  const floor = Math.floor(index);
+  return lerp(sorted[floor], sorted[floor + 1], index - floor);
 }
 
 /** Calculates the median of an array of numbers. */
