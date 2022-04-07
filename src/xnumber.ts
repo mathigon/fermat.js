@@ -8,12 +8,16 @@ import {isInteger, nearlyEquals, numberFormat} from './arithmetic';
 import {gcd} from './number-theory';
 
 
+const FORMAT = /^([0-9\-.]*)([%πkmbtq]?)(\/([0-9\-.]+))?([%π]?)$/;
+type Suffix = '%'|'π'|undefined;
+
+
 /**  Extended Number class. */
 export class XNumber {
   num: number;  /** Used for all number types (decimals, fractions, units, ...). */
   den?: number;  /** Only used for fractions and always ≥ 0. */
 
-  constructor(num: number, den?: number, public unit?: '%'|'π') {
+  constructor(num: number, den?: number, public unit?: Suffix) {
     // Ensure that den is always positive
     this.num = (den !== undefined && den < 0) ? -num : num;
     if (den !== undefined && Math.abs(den) !== 1 && num !== 0) this.den = Math.abs(den);
@@ -23,15 +27,13 @@ export class XNumber {
     return this.value;
   }
 
-  toString() {
-    let num = `${numberFormat(this.num, 6)}`;
-    if (this.den !== undefined) num = `${num}/${numberFormat(this.den, 6)}`;
-    if (this.unit === 'π') {
-      if (num === '1') return 'π';
-      if (num === '0') return '0';
-      if (num === '–1') return '–π';
-    }
-    return `${num}${this.unit ? this.unit : ''}`;
+  toString(precision = 4) {
+    let num = numberFormat(this.num, precision);
+    let unit = this.unit || '';
+    const den = this.den ? `/${numberFormat(this.den, precision)}` : '';
+    if (num === '0') unit = '';
+    if (unit === 'π' && !this.den && (num === '1' || num === '–1')) num = num.replace('1', '');
+    return `${num}${den}${unit}`;
   }
 
   toMathML() {
@@ -48,10 +50,8 @@ export class XNumber {
    * would both return 0.4.
    */
   get value() {
-    if (this.den !== undefined) return this.num / this.den;
-    if (this.unit === '%') return this.num / 100;
-    if (this.unit === 'π') return this.num * Math.PI;
-    return this.num;
+    const unit = (this.unit === '%') ? 1/100 : (this.unit === 'π') ? Math.PI : 1;
+    return this.num * unit / (this.den || 1);
   }
 
   get sign() {
@@ -67,7 +67,7 @@ export class XNumber {
 
   /** Returns 1/x of this number. */
   get inverse() {
-    if (this.den !== undefined) return new XNumber(this.den, this.num);
+    if (!this.den) return new XNumber(this.den!, this.num);
     return new XNumber(1 / this.num, undefined, this.unit);
   }
 
@@ -80,19 +80,30 @@ export class XNumber {
 
   /** Parses a number string, e.g. '1/2' or '20.7%'. */
   static fromString(s: string) {
-    // Replace whitespace and unit suffixes
-    s = s.replace(/[\s,]/g, '').replace('–', '-');
-    const unit = s.endsWith('%') ? '%' : s.endsWith('π') ? 'π' : undefined;
-    if (unit) s = s.replace(unit, '');
+    s = s.toLowerCase().replace(/[\s,]/g, '').replace('–', '-').replace('pi', 'π');
+    const match = s.match(FORMAT);
+    if (!match) return;
 
-    // Handle integers or decimals
-    if (!s.includes('/')) return isNaN(+s) ? undefined : new XNumber(+s, undefined, unit);
+    let suffix = (match[2] || match[5] || undefined) as Suffix;
+    let num = match[1] ? +match[1] : undefined;
+    const den = match[4] ? +match[4] : undefined;
 
-    // Handle fractions
-    const [num, den] = s.split('/').map(x => +x);
-    if (isNaN(num) || isNaN(den) || nearlyEquals(den, 0)) return;
-    if (!isInteger(num) || !isInteger(den)) return new XNumber(num / den, undefined, unit);
-    return new XNumber(num, den, unit);
+    // Special handling for π and -π
+    if (suffix === 'π' && (!match[1] || match[1] === '-')) num = match[1] ? -1 : 1;
+    if (num === undefined || isNaN(num)) return;
+
+    // Handle larger power suffixes
+    const power = suffix ? 'kmbtq'.indexOf(suffix) : -1;
+    if (power >= 0) {
+      num *= 1000 ** (power + 1);
+      suffix = undefined;
+    }
+
+    // Create XNumber instances
+    if (den === undefined) return new XNumber(num, undefined, suffix);
+    if (isNaN(den) || nearlyEquals(den, 0)) return;
+    if (!isInteger(num) || !isInteger(den)) return new XNumber(num / den, undefined, suffix);
+    return new XNumber(num, den, suffix);
   }
 
   /** Converts a decimal into the closest fraction with a given maximum denominator. */
@@ -129,6 +140,13 @@ export class XNumber {
 
   // ---------------------------------------------------------------------------
 
+  clamp(min?: number, max?: number) {
+    const v = this.value;
+    if (min !== undefined && v < min) return new XNumber(min);
+    if (max !== undefined && v > max) return new XNumber(max);
+    return this;
+  }
+
   add(a: XNumber|number) {
     return XNumber.sum(this, a);
   }
@@ -148,16 +166,17 @@ export class XNumber {
   /** Calculates the sum of two fractions a and b. */
   static sum(a: XNumber, b: XNumber|number): XNumber {
     if (typeof b === 'number') b = new XNumber(b);
+    if (a.num === 0) return b;
 
     // If units are different, always convert to a decimal
     // TODO Maybe have special handling for fraction + percentage?
     if (a.unit !== b.unit) return new XNumber(a.value + b.value);
 
     // Neither a nor b are fractions
-    if (a.den === undefined && b.den === undefined) return new XNumber(a.num + b.num, undefined, a.unit);
+    if (!a.den && !b.den) return new XNumber(a.num + b.num, undefined, a.unit);
 
     // Ensure that a is always a fraction
-    if (a.den === undefined) [a, b] = [b, a];
+    if (!a.den) [a, b] = [b, a];
 
     // Trying to add a decimal to a fraction.
     // TODO Maybe try XNumber.fractionFromDecimal?

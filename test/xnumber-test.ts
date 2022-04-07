@@ -20,7 +20,7 @@ tape('XNumber Constructors', (test) => {
   test.equal(n(1, 2, 'π').toString(), '1/2π');
   test.equal(n(-1, undefined, 'π').toString(), '–π');
   test.equal(n(0, 2, 'π').toString(), '0');
-  test.equal(n(10000, 20000).toString(), '10,000/20,000');
+  test.equal(n(10000, 20000).toString(), '10k/20k');
   test.end();
 });
 
@@ -42,6 +42,7 @@ tape('XNumber Arithmetic', (test) => {
   test.equal(n(20, undefined, '%').add(0.2).toString(), '0.4');
   test.equal(n(20, undefined, '%').add(n(30, undefined, '%')).toString(), '50%');
   test.equal(n(1, 2, 'π').add(n(3, 2, 'π')).toString(), '2π');
+  test.equal(n(0).add(n(2, undefined, 'π')).toString(), '2π');
   test.end();
 });
 
@@ -58,8 +59,20 @@ tape('XNumber Parsing', (test) => {
   test.equal(str('0.2'), '0.2');
   test.equal(str('10%'), '10%');
   test.equal(str(' 2/3 π  '), '2/3π');
+  test.equal(str('π'), 'π');
+  test.equal(str('-π'), '–π');
+  test.equal(str('-π/2'), '–1/2π');
   test.equal(str('$'), undefined);
   test.equal(str('1,000/3000'), '1,000/3,000');
+  test.end();
+});
+
+tape('XNumber Power Suffixes', (test) => {
+  test.equal(str('1k'), '1,000');
+  test.equal(str('10m'), '10m');
+  test.equal(str('1.2m'), '1.2m');
+  test.equal(str('1.b'), '1b');
+  test.equal(str('.5b'), '500m');
   test.end();
 });
 
