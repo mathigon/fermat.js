@@ -17,7 +17,7 @@ tape('numberFormat', (test) => {
     [1000000, '1,000,000', '1m']
   ];
   for (const [val, str1, str2] of positiveIntegers.slice()) {
-    const str = str1.slice(0, str1.length - 1) + '1';
+    const str = `${str1.slice(0, str1.length - 1)}1`;
     positiveIntegers.push([val + 1, str, str2]);
   }
   const positiveRationals: t[] = [
@@ -35,7 +35,7 @@ tape('numberFormat', (test) => {
     doSingleNumberFormatTest(val, val >= 0 ? strlen + 1 : strlen, str1);
     doSingleNumberFormatTest(val, val >= 0 ? strlen : strlen - 1, str1);
     doSingleNumberFormatTest(val, val >= 0 ? strlen - 1 : strlen - 2, str2);
-  }
+  };
   for (const e of positiveIntegers) {
     doNumberFormatTests(e);
     doNumberFormatTests(makeNegative(e));
