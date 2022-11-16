@@ -5,8 +5,47 @@
 
 
 import tape from 'tape';
-import {parseNumber, toWord} from '../src';
+import {numberFormat, parseNumber, toWord} from '../src';
 
+
+tape('numberFormat', (test) => {
+  type t = [number, string, string];
+  const positiveIntegers: t[] = [
+    [1000, '1,000', '1k'],
+    [10000, '10,000', '10k'],
+    [100000, '100,000', '100k'],
+    [1000000, '1,000,000', '1m']
+  ];
+  for (const [val, str1, str2] of positiveIntegers.slice()) {
+    const str = str1.slice(0, str1.length - 1) + '1';
+    positiveIntegers.push([val + 1, str, str2]);
+  }
+  const positiveRationals: t[] = [
+    [0.1, '0.1', '0'],
+    [0.01, '0.01', '0'],
+    [0.001, '0.001', '0']
+  ];
+  const makeNegative = ([val, str1, str2]: t) => [-1 * val, `–${str1}`, str2 === '0' ? str2 : `–${str2}`] as t;
+  const doSingleNumberFormatTest = (val: number, digits: number, expect: string) => {
+    const result = numberFormat(val, digits);
+    test.equal(result, expect, `:: numberFormat(${val}, ${digits}) === "${expect}"`);
+  };
+  const doNumberFormatTests = ([val, str1, str2]: t) => {
+    const strlen = val.toString().replace('.', '').length;
+    doSingleNumberFormatTest(val, val >= 0 ? strlen + 1 : strlen, str1);
+    doSingleNumberFormatTest(val, val >= 0 ? strlen : strlen - 1, str1);
+    doSingleNumberFormatTest(val, val >= 0 ? strlen - 1 : strlen - 2, str2);
+  }
+  for (const e of positiveIntegers) {
+    doNumberFormatTests(e);
+    doNumberFormatTests(makeNegative(e));
+  }
+  for (const e of positiveRationals) {
+    doNumberFormatTests(e);
+    doNumberFormatTests(makeNegative(e));
+  }
+  test.end();
+});
 
 tape('parseNumber', (test) => {
   test.equal(parseNumber('1234'), 1234);
