@@ -9,41 +9,72 @@ import {numberFormat, parseNumber, toWord} from '../src';
 
 
 tape('numberFormat', (test) => {
-  type t = [number, string, string];
-  const positiveIntegers: t[] = [
-    [1000, '1,000', '1k'],
-    [10000, '10,000', '10k'],
-    [100000, '100,000', '100k'],
-    [1000000, '1,000,000', '1m']
-  ];
-  for (const [val, str1, str2] of positiveIntegers.slice()) {
-    const str = `${str1.slice(0, str1.length - 1)}1`;
-    positiveIntegers.push([val + 1, str, str2]);
-  }
-  const positiveRationals: t[] = [
-    [0.1, '0.1', '0'],
-    [0.01, '0.01', '0'],
-    [0.001, '0.001', '0']
-  ];
-  const makeNegative = ([val, str1, str2]: t) => [-1 * val, `–${str1}`, str2 === '0' ? str2 : `–${str2}`] as t;
-  const doSingleNumberFormatTest = (val: number, digits: number, expect: string) => {
-    const result = numberFormat(val, digits);
-    test.equal(result, expect, `:: numberFormat(${val}, ${digits}) === "${expect}"`);
-  };
-  const doNumberFormatTests = ([val, str1, str2]: t) => {
-    const strlen = val.toString().replace('.', '').length;
-    doSingleNumberFormatTest(val, val >= 0 ? strlen + 1 : strlen, str1);
-    doSingleNumberFormatTest(val, val >= 0 ? strlen : strlen - 1, str1);
-    doSingleNumberFormatTest(val, val >= 0 ? strlen - 1 : strlen - 2, str2);
-  };
-  for (const e of positiveIntegers) {
-    doNumberFormatTests(e);
-    doNumberFormatTests(makeNegative(e));
-  }
-  for (const e of positiveRationals) {
-    doNumberFormatTests(e);
-    doNumberFormatTests(makeNegative(e));
-  }
+  test.equal(numberFormat(1000, 5), '1,000', ':: numberFormat(1000, 5) === "1,000"');
+  test.equal(numberFormat(1000, 4), '1,000', ':: numberFormat(1000, 4) === "1,000"');
+  test.equal(numberFormat(1000, 3), '1k', ':: numberFormat(1000, 3) === "1k"');
+  test.equal(numberFormat(-1000, 6), '–1,000', ':: numberFormat(-1000, 6) === "–1,000"');
+  test.equal(numberFormat(-1000, 5), '–1,000', ':: numberFormat(-1000, 5) === "–1,000"');
+  test.equal(numberFormat(-1000, 4), '–1k', ':: numberFormat(-1000, 4) === "–1k"');
+  test.equal(numberFormat(10000, 6), '10,000', ':: numberFormat(10000, 6) === "10,000"');
+  test.equal(numberFormat(10000, 5), '10,000', ':: numberFormat(10000, 5) === "10,000"');
+  test.equal(numberFormat(10000, 4), '10k', ':: numberFormat(10000, 4) === "10k"');
+  test.equal(numberFormat(-10000, 7), '–10,000', ':: numberFormat(-10000, 7) === "–10,000"');
+  test.equal(numberFormat(-10000, 6), '–10,000', ':: numberFormat(-10000, 6) === "–10,000"');
+  test.equal(numberFormat(-10000, 5), '–10k', ':: numberFormat(-10000, 5) === "–10k"');
+  test.equal(numberFormat(100000, 7), '100,000', ':: numberFormat(100000, 7) === "100,000"');
+  test.equal(numberFormat(100000, 6), '100,000', ':: numberFormat(100000, 6) === "100,000"');
+  test.equal(numberFormat(100000, 5), '100k', ':: numberFormat(100000, 5) === "100k"');
+  test.equal(numberFormat(-100000, 8), '–100,000', ':: numberFormat(-100000, 8) === "–100,000"');
+  test.equal(numberFormat(-100000, 7), '–100,000', ':: numberFormat(-100000, 7) === "–100,000"');
+  test.equal(numberFormat(-100000, 6), '–100k', ':: numberFormat(-100000, 6) === "–100k"');
+  test.equal(numberFormat(1000000, 8), '1,000,000', ':: numberFormat(1000000, 8) === "1,000,000"');
+  test.equal(numberFormat(1000000, 7), '1,000,000', ':: numberFormat(1000000, 7) === "1,000,000"');
+  test.equal(numberFormat(1000000, 6), '1m', ':: numberFormat(1000000, 6) === "1m"');
+  test.equal(numberFormat(-1000000, 9), '–1,000,000', ':: numberFormat(-1000000, 9) === "–1,000,000"');
+  test.equal(numberFormat(-1000000, 8), '–1,000,000', ':: numberFormat(-1000000, 8) === "–1,000,000"');
+  test.equal(numberFormat(-1000000, 7), '–1m', ':: numberFormat(-1000000, 7) === "–1m"');
+  test.equal(numberFormat(1001, 5), '1,001', ':: numberFormat(1001, 5) === "1,001"');
+  test.equal(numberFormat(1001, 4), '1,001', ':: numberFormat(1001, 4) === "1,001"');
+  test.equal(numberFormat(1001, 3), '1k', ':: numberFormat(1001, 3) === "1k"');
+  test.equal(numberFormat(-1001, 6), '–1,001', ':: numberFormat(-1001, 6) === "–1,001"');
+  test.equal(numberFormat(-1001, 5), '–1,001', ':: numberFormat(-1001, 5) === "–1,001"');
+  test.equal(numberFormat(-1001, 4), '–1k', ':: numberFormat(-1001, 4) === "–1k"');
+  test.equal(numberFormat(10001, 6), '10,001', ':: numberFormat(10001, 6) === "10,001"');
+  test.equal(numberFormat(10001, 5), '10,001', ':: numberFormat(10001, 5) === "10,001"');
+  test.equal(numberFormat(10001, 4), '10k', ':: numberFormat(10001, 4) === "10k"');
+  test.equal(numberFormat(-10001, 7), '–10,001', ':: numberFormat(-10001, 7) === "–10,001"');
+  test.equal(numberFormat(-10001, 6), '–10,001', ':: numberFormat(-10001, 6) === "–10,001"');
+  test.equal(numberFormat(-10001, 5), '–10k', ':: numberFormat(-10001, 5) === "–10k"');
+  test.equal(numberFormat(100001, 7), '100,001', ':: numberFormat(100001, 7) === "100,001"');
+  test.equal(numberFormat(100001, 6), '100,001', ':: numberFormat(100001, 6) === "100,001"');
+  test.equal(numberFormat(100001, 5), '100k', ':: numberFormat(100001, 5) === "100k"');
+  test.equal(numberFormat(-100001, 8), '–100,001', ':: numberFormat(-100001, 8) === "–100,001"');
+  test.equal(numberFormat(-100001, 7), '–100,001', ':: numberFormat(-100001, 7) === "–100,001"');
+  test.equal(numberFormat(-100001, 6), '–100k', ':: numberFormat(-100001, 6) === "–100k"');
+  test.equal(numberFormat(1000001, 8), '1,000,001', ':: numberFormat(1000001, 8) === "1,000,001"');
+  test.equal(numberFormat(1000001, 7), '1,000,001', ':: numberFormat(1000001, 7) === "1,000,001"');
+  test.equal(numberFormat(1000001, 6), '1m', ':: numberFormat(1000001, 6) === "1m"');
+  test.equal(numberFormat(-1000001, 9), '–1,000,001', ':: numberFormat(-1000001, 9) === "–1,000,001"');
+  test.equal(numberFormat(-1000001, 8), '–1,000,001', ':: numberFormat(-1000001, 8) === "–1,000,001"');
+  test.equal(numberFormat(-1000001, 7), '–1m', ':: numberFormat(-1000001, 7) === "–1m"');
+  test.equal(numberFormat(0.1, 3), '0.1', ':: numberFormat(0.1, 3) === "0.1"');
+  test.equal(numberFormat(0.1, 2), '0.1', ':: numberFormat(0.1, 2) === "0.1"');
+  test.equal(numberFormat(0.1, 1), '0', ':: numberFormat(0.1, 1) === "0"');
+  test.equal(numberFormat(-0.1, 4), '–0.1', ':: numberFormat(-0.1, 4) === "–0.1"');
+  test.equal(numberFormat(-0.1, 3), '–0.1', ':: numberFormat(-0.1, 3) === "–0.1"');
+  test.equal(numberFormat(-0.1, 2), '0', ':: numberFormat(-0.1, 2) === "0"');
+  test.equal(numberFormat(0.01, 4), '0.01', ':: numberFormat(0.01, 4) === "0.01"');
+  test.equal(numberFormat(0.01, 3), '0.01', ':: numberFormat(0.01, 3) === "0.01"');
+  test.equal(numberFormat(0.01, 2), '0', ':: numberFormat(0.01, 2) === "0"');
+  test.equal(numberFormat(-0.01, 5), '–0.01', ':: numberFormat(-0.01, 5) === "–0.01"');
+  test.equal(numberFormat(-0.01, 4), '–0.01', ':: numberFormat(-0.01, 4) === "–0.01"');
+  test.equal(numberFormat(-0.01, 3), '0', ':: numberFormat(-0.01, 3) === "0"');
+  test.equal(numberFormat(0.001, 5), '0.001', ':: numberFormat(0.001, 5) === "0.001"');
+  test.equal(numberFormat(0.001, 4), '0.001', ':: numberFormat(0.001, 4) === "0.001"');
+  test.equal(numberFormat(0.001, 3), '0', ':: numberFormat(0.001, 3) === "0"');
+  test.equal(numberFormat(-0.001, 6), '–0.001', ':: numberFormat(-0.001, 6) === "–0.001"');
+  test.equal(numberFormat(-0.001, 5), '–0.001', ':: numberFormat(-0.001, 5) === "–0.001"');
+  test.equal(numberFormat(-0.001, 4), '0', ':: numberFormat(-0.001, 4) === "0"');
   test.end();
 });
 
