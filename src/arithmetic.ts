@@ -51,14 +51,15 @@ function addPowerSuffix(n: number, places = 6) {
   if (!places) return `${n}`;
 
   // Trim short numbers to the appropriate number of decimal places.
-  const d = (`${Math.abs(Math.floor(n))}`).length;
-  const m = n < 0 ? 1 : 0;
-  if (d <= places - m) return `${round(n, places - d - m - 1)}`;
+  const digits = (`${Math.abs(Math.floor(n))}`).length;
+  const chars = digits + (n < 0 ? 1 : 0);
+  if (chars <= places) return `${round(n, places - chars)}`;
 
   // Append a power suffix to longer numbers.
   const x = Math.floor(Math.log10(Math.abs(n)) / 3);
-  return (round(n / Math.pow(10, 3 * x), places - ((d % 3) || 3) - m - 1)) +
-         POWER_SUFFIX[x];
+  const suffix = POWER_SUFFIX[x];
+  const decimalPlaces = places - ((digits % 3) || 3) - (suffix ? 1 : 0) - (n < 0 ? 1 : 0);
+  return round(n / Math.pow(10, 3 * x), decimalPlaces) + suffix;
 }
 
 /**

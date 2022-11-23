@@ -5,8 +5,46 @@
 
 
 import tape from 'tape';
-import {parseNumber, toWord} from '../src';
+import {numberFormat, parseNumber, toWord} from '../src';
 
+
+tape('numberFormat', (test) => {
+  test.equal(numberFormat(1234, 5), '1,234', ':: numberFormat(1234, 5)');
+  test.equal(numberFormat(1234, 4), '1,234', ':: numberFormat(1234, 4)');
+  test.equal(numberFormat(1234, 3), '1.2k', ':: numberFormat(1234, 3)');
+  test.equal(numberFormat(1000, 3), '1k', ':: numberFormat(1000, 3)');
+  test.equal(numberFormat(-1234, 6), '–1,234', ':: numberFormat(-1234, 6)');
+  test.equal(numberFormat(-1234, 5), '–1,234', ':: numberFormat(-1234, 5)');
+  test.equal(numberFormat(-1234, 4), '–1.2k', ':: numberFormat(-1234, 4)');
+  test.equal(numberFormat(-1000, 4), '–1k', ':: numberFormat(-1000, 4)');
+
+  test.equal(numberFormat(10001, 5), '10,001', ':: numberFormat(10001, 5)');
+  test.equal(numberFormat(10001, 4), '10k', ':: numberFormat(10001, 4)');
+  test.equal(numberFormat(-10001, 6), '–10,001', ':: numberFormat(-10001, 6)');
+  test.equal(numberFormat(-10001, 5), '–10k', ':: numberFormat(-10001, 5)');
+  test.equal(numberFormat(100001, 6), '100,001', ':: numberFormat(100001, 6)');
+  test.equal(numberFormat(100001, 5), '100k', ':: numberFormat(100001, 5)');
+  test.equal(numberFormat(-100001, 7), '–100,001', ':: numberFormat(-100001, 7)');
+  test.equal(numberFormat(-100001, 6), '–100k', ':: numberFormat(-100001, 6)');
+  test.equal(numberFormat(1000001, 7), '1,000,001', ':: numberFormat(1000001, 7)');
+  test.equal(numberFormat(1000001, 6), '1m', ':: numberFormat(1000001, 6)');
+  test.equal(numberFormat(-1000001, 8), '–1,000,001', ':: numberFormat(-1000001, 8)');
+  test.equal(numberFormat(-1000001, 7), '–1m', ':: numberFormat(-1000001, 7)');
+
+  test.equal(numberFormat(0.1, 2), '0.1', ':: numberFormat(0.1, 2)');
+  test.equal(numberFormat(0.1, 1), '0', ':: numberFormat(0.1, 1)');
+  test.equal(numberFormat(-0.1, 3), '–0.1', ':: numberFormat(-0.1, 3)');
+  test.equal(numberFormat(-0.1, 2), '0', ':: numberFormat(-0.1, 2)');
+  test.equal(numberFormat(0.01, 3), '0.01', ':: numberFormat(0.01, 3)');
+  test.equal(numberFormat(0.01, 2), '0', ':: numberFormat(0.01, 2)');
+  test.equal(numberFormat(-0.01, 4), '–0.01', ':: numberFormat(-0.01, 4)');
+  test.equal(numberFormat(-0.01, 3), '0', ':: numberFormat(-0.01, 3)');
+  test.equal(numberFormat(0.001, 4), '0.001', ':: numberFormat(0.001, 4)');
+  test.equal(numberFormat(0.001, 3), '0', ':: numberFormat(0.001, 3)');
+  test.equal(numberFormat(-0.001, 5), '–0.001', ':: numberFormat(-0.001, 5)');
+  test.equal(numberFormat(-0.001, 4), '0', ':: numberFormat(-0.001, 4)');
+  test.end();
+});
 
 tape('parseNumber', (test) => {
   test.equal(parseNumber('1234'), 1234);
