@@ -36,50 +36,28 @@ export function sign(value: number, t = PRECISION) {
 // -----------------------------------------------------------------------------
 // String Conversion
 
-const NUM_REGEX = /(\d+)(\d{3})/;
-const POWER_SUFFIX = ['', 'k', 'm', 'b', 't', 'q'];
-
-function addThousandSeparators(x: string) {
-  let [n, dec] = x.split('.');
-  while (NUM_REGEX.test(n)) {
-    n = n.replace(NUM_REGEX, '$1,$2');
-  }
-  return n + (dec ? `.${dec}` : '');
-}
-
-function addPowerSuffix(n: number, places = 6) {
-  if (!places) return `${n}`;
-
-  // Trim short numbers to the appropriate number of decimal places.
-  const digits = (`${Math.abs(Math.floor(n))}`).length;
-  const chars = digits + (n < 0 ? 1 : 0);
-  if (chars <= places) return `${round(n, places - chars)}`;
-
-  // Append a power suffix to longer numbers.
-  const x = Math.floor(Math.log10(Math.abs(n)) / 3);
-  const suffix = POWER_SUFFIX[x];
-  const decimalPlaces = places - ((digits % 3) || 3) - (suffix ? 1 : 0) - (n < 0 ? 1 : 0);
-  return round(n / Math.pow(10, 3 * x), decimalPlaces) + suffix;
-}
-
 /**
- * Converts a number to a clean string, by rounding, adding power suffixes, and
- * adding thousands separators. `places` is the number of digits to show in the
- * result.
+ * Converts a number to a clean string, by rounding, adding abbreviation suffixes, and
+ * adding grouping separators. `digits` is the number of numeric characters to
+ * show in the result, for example if `digits` is `3`, then for `n` = `10.12` the result
+ * will be `"10.1"`.
+ * Note: leading zeros are not counted towards how many digits to include; this means that
+ * if `digits` is `3`, then for `n` = `0.0123` the result will be `"0.0123"`
+ * Note: does not work for numbers > 10^21 or < 10^-6
  */
-export function numberFormat(n: number, places = 0, separators = true) {
-  const str = addPowerSuffix(n, places).replace('-', '–');
-  return separators ? addThousandSeparators(str) : str;
+export function numberFormat(n: number, digits: number, separators = true, locale = 'en') {
+  const rawDigitsCount = n.toString().replace('.', '').replace('-', '').length;
+  const formatter = new Intl.NumberFormat(locale, {
+    useGrouping: separators,
+    maximumSignificantDigits: digits,
+    notation: digits < rawDigitsCount ? 'compact' : 'standard'
+  });
+  if (locale === 'en') {
+    return formatter.format(n).replace('-', '–').toLowerCase();
+  } else {
+    return formatter.format(n).replace('-', '–');
+  }
 }
-
-// Numbers like 0,123 are decimals, even though they match POINT_DECIMAL.
-const SPECIAL_DECIMAL = /^-?0,[0-9]+$/;
-
-// Points as decimal points, Commas as 1k separators, allow starting .
-const POINT_DECIMAL = /^-?([0-9]+(,[0-9]{3})*)?\.?[0-9]*$/;
-
-// Commas as decimal points, Points as 1k separators, don't allow starting ,
-const COMMA_DECIMAL = /^-?[0-9]+(\.[0-9]{3})*,?[0-9]*$/;
 
 /**
  * Converts a number to a string, including . or , decimal points and
@@ -87,23 +65,15 @@ const COMMA_DECIMAL = /^-?[0-9]+(\.[0-9]{3})*,?[0-9]*$/;
  * @param {string} str
  * @returns {number}
  */
-export function parseNumber(str: string) {
-  str = str.replace(/^–/, '-').trim();
-  if (!str || str.match(/[^0-9.,-]/)) return NaN;
-
-  if (SPECIAL_DECIMAL.test(str)) {
-    return parseFloat(str.replace(/,/, '.'));
-  }
-
-  if (POINT_DECIMAL.test(str)) {
-    return parseFloat(str.replace(/,/g, ''));
-  }
-
-  if (COMMA_DECIMAL.test(str)) {
-    return parseFloat(str.replace(/\./g, '').replace(/,/, '.'));
-  }
-
-  return NaN;
+export function parseNumber(str: string, locale = 'en') {
+  // https://observablehq.com/@mbostock/localized-number-parsing
+  const parts = (new Intl.NumberFormat(locale)).formatToParts(11111111111.111111);
+  /* eslint-disable @typescript-eslint/no-non-null-assertion */
+  const decimal = parts.find(p => p.type === 'decimal')!.value;
+  const group = parts.find(p => p.type === 'group')!.value;
+  /* eslint-enable @typescript-eslint/no-non-null-assertion */
+  const neutral = str.replace('–', '-').replaceAll(group, '').replace(decimal, '.');
+  return +neutral;
 }
 
 /**
