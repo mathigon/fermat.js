@@ -45,8 +45,9 @@ export function sign(value: number, t = PRECISION) {
  * if `digits` is `3`, then for `n` = `0.0123` the result will be `"0.0123"`
  * Note: does not work for numbers > 10^21 or < 10^-6
  */
-export function numberFormat(n: number, digits: number, separators = true, locale = 'en') {
+export function numberFormat(n: number, digits?: number, separators = true, locale = 'en') {
   const rawDigitsCount = n.toString().replace('.', '').replace('-', '').length;
+  if (digits === undefined) digits = rawDigitsCount;
   const formatter = new Intl.NumberFormat(locale, {
     useGrouping: separators,
     maximumSignificantDigits: digits,
