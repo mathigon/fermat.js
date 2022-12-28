@@ -72,7 +72,11 @@ export function parseNumber(str: string, locale = 'en') {
   const decimal = parts.find(p => p.type === 'decimal')!.value;
   const group = parts.find(p => p.type === 'group')!.value;
   /* eslint-enable @typescript-eslint/no-non-null-assertion */
-  const neutral = str.replace('–', '-').replaceAll(group, '').replace(decimal, '.');
+  const neutral =
+    str
+      .replace('–', '-')
+      .replace(new RegExp(`\\${group}`, 'g'), '')
+      .replace(decimal, '.');
   return +neutral;
 }
 
