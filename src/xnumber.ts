@@ -27,8 +27,9 @@ export class XNumber {
     return this.value;
   }
 
-  toString(precision = 4) {
-    let num = numberFormat(this.num, precision);
+  toString(precision?: number | 'auto', locale = 'en') {
+    if (precision === 'auto' || precision === undefined) precision = 4;
+    let num = numberFormat(this.num, precision, 'auto', locale);
     let unit = this.unit || '';
     const den = this.den ? `/${numberFormat(this.den, precision)}` : '';
     if (num === '0') unit = '';
