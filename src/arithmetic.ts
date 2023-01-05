@@ -48,13 +48,15 @@ export function sign(value: number, t = PRECISION) {
 export function numberFormat(
   n: number, digits: number | 'auto' = 'auto',
   separators: boolean | 'auto' = 'auto',
-  locale = 'en'
+  locale = 'en',
+  otherFormatterOptions?: Intl.NumberFormatOptions
 ) {
   const rawDigitsCount = n.toString().replace('.', '').replace('-', '').length;
   const formatter = new Intl.NumberFormat(locale, {
     useGrouping: separators === 'auto' ? undefined : separators,
     maximumSignificantDigits: digits === 'auto' ? undefined : digits,
-    notation: digits !== 'auto' && digits < rawDigitsCount ? 'compact' : 'standard'
+    notation: digits !== 'auto' && digits < rawDigitsCount ? 'compact' : 'standard',
+    ...otherFormatterOptions
   });
   if (locale === 'en') {
     return formatter.format(n).replace('-', '–').toLowerCase();
