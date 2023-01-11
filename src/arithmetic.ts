@@ -46,7 +46,8 @@ export function sign(value: number, t = PRECISION) {
  * Note: does not work for numbers > 10^21 or < 10^-6
  */
 export function numberFormat(
-  n: number, digits: number | 'auto' = 'auto',
+  n: number,
+  digits: number | 'auto' = 'auto',
   separators: boolean | 'auto' = 'auto',
   locale = 'en',
   otherFormatterOptions?: Intl.NumberFormatOptions
