@@ -41,8 +41,9 @@ tape('XNumber Arithmetic', (test) => {
   test.equal(n(1, 4).add(0.5).toString(), '0.75');  // Maybe should be 3/4?
   test.equal(n(20, undefined, '%').add(0.2).toString(), '0.4');
   test.equal(n(20, undefined, '%').add(n(30, undefined, '%')).toString(), '50%');
-  test.equal(n(1, 2, 'π').add(n(3, 2, 'π')).toString(), '2π');
+  test.equal(n(1, 2, 'π').add(n(3, 2, 'π')).simplified.toString(), '2π');
   test.equal(n(0).add(n(2, undefined, 'π')).toString(), '2π');
+  test.equal(n(0).add(n(5, 10).multiply(3)).toString(), '15/10');
   test.end();
 });
 
