@@ -44,6 +44,11 @@ tape('XNumber Arithmetic', (test) => {
   test.equal(n(1, 2, 'π').add(n(3, 2, 'π')).simplified.toString(), '2π');
   test.equal(n(0).add(n(2, undefined, 'π')).toString(), '2π');
   test.equal(n(0).add(n(5, 10).multiply(3)).toString(), '15/10');
+  test.equal(n(3, 3).toString(), '3/3');
+  test.equal(n(6, 3).toString(), '6/3');
+  test.equal(n(3, 3).simplified.toString(), '1');
+  test.equal(n(6, 3).simplified.toString(), '2');
+  test.equal(n(0).add(n(3, 3)).toString(), n(3, 3).toString());
   test.end();
 });
 
