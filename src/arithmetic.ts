@@ -18,7 +18,7 @@ export function nearlyEquals(a: number, b: number, t = PRECISION) {
 
 /* Checks if an object is an integer. */
 export function isInteger(x: number, t = PRECISION) {
-  return nearlyEquals(x % 1, 0, t);
+  return nearlyEquals(x, Math.round(x), t);
 }
 
 /** Checks if a number x is between two numbers a and b. */
