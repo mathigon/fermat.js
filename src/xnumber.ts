@@ -182,7 +182,7 @@ export class XNumber {
     // TODO Maybe try XNumber.fractionFromDecimal?
     if (!isInteger(b.num)) return new XNumber(a.value + b.value, undefined, a.unit);
 
-    return new XNumber(a.num * (b.den || 1) + b.num * a.den!, a.den! * (b.den || 1), a.unit).simplified;
+    return new XNumber(a.num * (b.den || 1) + b.num * a.den!, a.den! * (b.den || 1), a.unit);
   }
 
   /** Calculates the difference of two numbers a and b. */
@@ -196,8 +196,8 @@ export class XNumber {
     if (typeof b === 'number') b = new XNumber(b);
 
     // Handle simple integer multiplication
-    if (!a.unit && !a.den && isInteger(a.num)) return new XNumber(a.num * b.num, b.den, b.unit).simplified;
-    if (!b.unit && !b.den && isInteger(b.num)) return new XNumber(a.num * b.num, a.den, a.unit).simplified;
+    if (!a.unit && !a.den && isInteger(a.num)) return new XNumber(a.num * b.num, b.den, b.unit);
+    if (!b.unit && !b.den && isInteger(b.num)) return new XNumber(a.num * b.num, a.den, a.unit);
 
     // Decimals or units that need to be converted
     if (a.unit === 'π' || b.unit === 'π' || !isInteger(a.num) || !isInteger(b.num)) return new XNumber(a.value * b.value);
