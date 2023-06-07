@@ -52,6 +52,13 @@ tape('XNumber Arithmetic', (test) => {
   test.end();
 });
 
+tape('Thousands Separators', (test) => {
+  test.equal(XNumber.fromString('1,000')?.add(XNumber.fromString('1/2')!).toString(), '2001/2');
+  test.equal(XNumber.fromString('1/2')?.add(XNumber.fromString('1,000')!).toString(), '2001/2');
+  test.equal(str('1000π'), '1000π');
+  test.end();
+});
+
 tape('XNumber Parsing', (test) => {
   test.equal(str('1/3'), '1/3');
   test.equal(str('1/0'), undefined);
@@ -69,7 +76,7 @@ tape('XNumber Parsing', (test) => {
   test.equal(str('-π'), '–π');
   test.equal(str('-π/2'), '–1/2π');
   test.equal(str('$'), undefined);
-  test.equal(str('1,000/3000'), '1,000/3,000');
+  test.equal(str('1,000/3000'), '1000/3000');
   test.end();
 });
 

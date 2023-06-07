@@ -28,9 +28,10 @@ export class XNumber {
   }
 
   toString(precision = 4) {
-    let num = numberFormat(this.num, precision);
+    const separators = !this.den && !this.unit;
+    let num = numberFormat(this.num, precision, separators);
     let unit = this.unit || '';
-    const den = this.den ? `/${numberFormat(this.den, precision)}` : '';
+    const den = this.den ? `/${numberFormat(this.den, precision, separators)}` : '';
     if (num === '0') unit = '';
     if (unit === 'π' && !this.den && (num === '1' || num === '–1')) num = num.replace('1', '');
     return `${num}${den}${unit}`;
