@@ -52,6 +52,13 @@ tape('XNumber Arithmetic', (test) => {
   test.end();
 });
 
+tape('Fraction simplification', (test) => {
+  test.equal(n(1, 4).add(n(2, 4)).toString(), '3/4');
+  test.equal(n(1, 4).add(n(1, 2)).toString(), '3/4');
+  test.equal(n(1, 4).add(n(1, 3)).toString(), '7/12');
+  test.end();
+});
+
 tape('Thousands Separators', (test) => {
   test.equal(XNumber.fromString('1,000')?.add(XNumber.fromString('1/2')!).toString(), '2001/2');
   test.equal(XNumber.fromString('1/2')?.add(XNumber.fromString('1,000')!).toString(), '2001/2');

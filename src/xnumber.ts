@@ -5,7 +5,7 @@
 
 
 import {isInteger, nearlyEquals, numberFormat} from './arithmetic';
-import {gcd} from './number-theory';
+import {gcd, lcm} from './number-theory';
 
 
 const FORMAT = /^([0-9\-.]*)([%πkmbtq]?)(\/([0-9\-.]+))?([%π]?)$/;
@@ -183,7 +183,10 @@ export class XNumber {
     // TODO Maybe try XNumber.fractionFromDecimal?
     if (!isInteger(b.num)) return new XNumber(a.value + b.value, undefined, a.unit);
 
-    return new XNumber(a.num * (b.den || 1) + b.num * a.den!, a.den! * (b.den || 1), a.unit);
+    const common = lcm(a.den!, b.den ||1);
+    const fa = common / a.den!;
+    const fb = common / (b.den || 1);
+    return new XNumber(a.num * fa + b.num * fb, common, a.unit);
   }
 
   /** Calculates the difference of two numbers a and b. */
