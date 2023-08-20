@@ -5,7 +5,7 @@
 
 
 import tape from 'tape';
-import {numberFormat, parseNumber, toWord} from '../src';
+import {numberFormat, parseNumber, scientificFormat, toWord} from '../src';
 
 
 tape('numberFormat', (test) => {
@@ -43,6 +43,18 @@ tape('numberFormat', (test) => {
   test.equal(numberFormat(0.001, 3), '0', ':: numberFormat(0.001, 3)');
   test.equal(numberFormat(-0.001, 5), '–0.001', ':: numberFormat(-0.001, 5)');
   test.equal(numberFormat(-0.001, 4), '0', ':: numberFormat(-0.001, 4)');
+
+  test.equal(scientificFormat(123123123, 6), '1.231 × 10^8');
+  test.equal(scientificFormat(123123, 6), '123,123');
+  test.equal(scientificFormat(-123123123, 6), '-1.23 × 10^8');
+
+  test.equal(scientificFormat(0.000123, 6), '0.00012');
+  test.equal(scientificFormat(0.000000123, 6), '1.23 × 10^(–7)');
+  test.equal(scientificFormat(-0.000000123, 6), '-1.23 × 10^(–7)');
+
+  test.equal(scientificFormat(-Number.MAX_VALUE * 10, 6), '–∞');
+  test.equal(scientificFormat(-Number.MIN_VALUE / 10, 6), '0');
+
   test.end();
 });
 

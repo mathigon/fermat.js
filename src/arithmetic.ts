@@ -72,6 +72,22 @@ export function numberFormat(n: number, places = 0, separators = true) {
   return separators ? addThousandSeparators(str) : str;
 }
 
+export function scientificFormat(value: number, places = 6) {
+  const abs = Math.abs(value);
+  if (isBetween(abs, Math.pow(10, -places), Math.pow(10, places))) {
+    return numberFormat(value, places);
+  }
+
+  // TODO Decide how we want to handle these special cases
+  if (abs > Number.MAX_VALUE) return `${Math.sign(value) < 0 ? '–' : ''}∞`;
+  if (abs < Number.MIN_VALUE) return '0';
+
+  const [str, exponent] = value.toExponential().split('e');
+  const top = exponent.replace('+', '').replace('-', '–');
+  const isNegative = top.startsWith('–');
+  return `${str.slice(0, 5)} × 10^${(isNegative ? '(' : '') + top + (isNegative ? ')' : '')}`;
+}
+
 // Numbers like 0,123 are decimals, even though they match POINT_DECIMAL.
 const SPECIAL_DECIMAL = /^-?0,[0-9]+$/;
 
