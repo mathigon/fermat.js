@@ -186,7 +186,7 @@ export function toWord(n: number) {
 
 
 // -----------------------------------------------------------------------------
-// Rounding, Decimals and Decimals
+// Rounding, Decimals and Fractions
 
 /** Returns the digits of a number n. */
 export function digits(n: number) {
@@ -209,21 +209,30 @@ export function roundTo(n: number, increment = 1) {
  * Returns an [numerator, denominator] array that approximated a `decimal` to
  * `precision`. See http://en.wikipedia.org/wiki/Continued_fraction
  */
-export function toFraction(decimal: number, precision = PRECISION) {
-  let n = [1, 0]; let d = [0, 1];
-  let a = Math.floor(decimal);
-  let rem = decimal - a;
+export function toFraction(x: number, maxDen = 1000, precision = 1e-12): [num: number, den: number] | undefined {
+  let n = [1, 0];
+  let d = [0, 1];
+  const absX = Math.abs(x);
+  let rem = absX;
 
-  while (d[0] <= 1 / precision) {
-    if (nearlyEquals(n[0] / d[0], precision)) return [n[0], d[0]];
+  while (Math.abs(n[0] / d[0] - absX) > precision) {
+    const a = Math.floor(rem);
     n = [a * n[0] + n[1], n[0]];
     d = [a * d[0] + d[1], d[0]];
-    a = Math.floor(1 / rem);
-    rem = 1 / rem - a;
+    if (d[0] > maxDen) return;
+    rem = 1 / (rem - a);
   }
 
-  // No nice rational representation so return an irrational "fraction"
-  return [decimal, 1];
+  // We get as close as we want with our tolerance, and if that fraction is still good past our computation we return it.
+  // Otherwise, we return false, meaning we didn't find a good enough rational approximation.
+  if (d[0] === 1 || !nearlyEquals(n[0] / d[0], absX, precision)) return;
+  return [sign(x) * n[0], d[0]];
+}
+
+export function toMixedNumber(x: number, maxDen?: number, precision?: number): [base: number, num: number, den: number] | undefined {
+  const base = Math.trunc(x);
+  const fraction = toFraction(Math.abs(x - base), maxDen, precision);
+  return (fraction) ? [base, ...fraction] : undefined;
 }
 
 

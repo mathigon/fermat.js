@@ -5,7 +5,7 @@
 
 
 import tape from 'tape';
-import {numberFormat, parseNumber, scientificFormat, toWord} from '../src';
+import {numberFormat, parseNumber, scientificFormat, toFraction, toMixedNumber, toWord} from '../src';
 
 
 tape('numberFormat', (test) => {
@@ -104,6 +104,23 @@ tape('parseNumber', (test) => {
   test.equal(toWord(35783), 'thirty-five thousand seven hundred eighty-three');
   test.equal(toWord(1000000), 'one million');
   test.equal(toWord(10000011), 'ten million eleven');
+
+  test.end();
+});
+
+
+tape('fractions', (test) => {
+  test.deepEqual(toFraction(0.333333333333), [1, 3]);
+  test.deepEqual(toFraction(-0.333333333333), [-1, 3]);
+  test.deepEqual(toFraction(0.999999999999), undefined);
+  test.deepEqual(toFraction(0.833333333333), [5, 6]);
+  test.deepEqual(toFraction(0.171717171717), [17, 99]);
+
+  test.deepEqual(toFraction(0.123412341234), undefined);
+  test.deepEqual(toFraction(0.123412341234, 10000), [1234, 9999]);
+
+  test.deepEqual(toMixedNumber(1.333333333333), [1, 1, 3]);
+  test.deepEqual(toMixedNumber(-1.333333333333), [-1, 1, 3]);
 
   test.end();
 });
