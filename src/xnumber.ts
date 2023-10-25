@@ -4,11 +4,12 @@
 // =============================================================================
 
 
-import {isInteger, nearlyEquals, numberFormat} from './arithmetic';
+import {isInteger, nearlyEquals, numberFormat, sign} from './arithmetic';
 import {gcd, lcm} from './number-theory';
 
 
 const FORMAT = /^([0-9\-.]*)([%πkmbtq]?)(\/([0-9\-.]+))?([%π]?)$/;
+const tooBig = (x: number) => x >= Number.MAX_SAFE_INTEGER;
 type Suffix = '%'|'π'|undefined;
 
 
@@ -27,11 +28,44 @@ export class XNumber {
     return this.value;
   }
 
+  toMixed() {
+    if (!this.den || this.unit) return this.toString();
+    const part = Math.abs(this.num) % this.den;
+    const whole = Math.abs(Math.trunc(this.value));
+    if (!whole) return this.toString();
+    return `${this.sign < 0 ? '–' : ''}${whole} ${part}/${this.den}`;
+  }
+
+  toExpr(type?: 'decimal'|'fraction'|'mixed'|'scientific', precision = 4) {
+    const v = this.value;
+    // TODO Decide if we really want to return infinity here...
+    if (Math.abs(v) >= Number.MAX_VALUE) return '∞';
+    if (tooBig(this.num) || this.den && tooBig(this.den)) type = 'decimal';
+
+    // In scientific notation, we try to return a number in the form a × 10^b
+    if (type === 'scientific' || Math.abs(v) >= Number.MAX_SAFE_INTEGER) {
+      const [base, power] = this.value.toExponential(precision - 1).split('e');
+      if (Math.abs(+power) >= precision) {
+        const isNeg = power.startsWith('-');
+        const exp = `${isNeg ? '(' : ''}${isNeg ? power : power.slice(1)}${isNeg ? ')' : ''}`;
+        return `${base.replace(/\.?0+$/, '')} × 10^${exp}${this.unit || ''}`;
+      }
+    }
+
+    if ((!this.unit && !this.den) || type === 'decimal' || type === 'scientific') {
+      const formatted = numberFormat(this.value, precision);
+      // For non-standard number formatting, we add quotes for expr parsing.
+      return (formatted.match(/^[\d.]+$/g) ? formatted : `"${formatted}"`);
+    } else {
+      return type === 'mixed' ? this.toMixed() : this.toString();
+    }
+  }
+
   toString(precision = 4) {
     const separators = !this.den && !this.unit;
-    let num = numberFormat(this.num, precision, separators);
+    let num = numberFormat(this.num, this.den ? 0 : precision, separators);
     let unit = this.unit || '';
-    const den = this.den ? `/${numberFormat(this.den, precision, separators)}` : '';
+    const den = this.den ? `/${numberFormat(this.den, 0, separators)}` : '';
     if (num === '0') unit = '';
     if (unit === 'π' && !this.den && (num === '1' || num === '–1')) num = num.replace('1', '');
     return `${num}${den}${unit}`;
@@ -77,11 +111,16 @@ export class XNumber {
     return new XNumber(-this.num, this.den, this.unit);
   }
 
+  get fraction() {
+    if (this.unit || !isInteger(this.num)) return;
+    return [this.num, this.den || 1];
+  }
+
   // ---------------------------------------------------------------------------
 
   /** Parses a number string, e.g. '1/2' or '20.7%'. */
   static fromString(s: string) {
-    s = s.toLowerCase().replace(/[\s,]/g, '').replace('–', '-').replace('pi', 'π');
+    s = s.toLowerCase().replace(/[\s,"]/g, '').replace('–', '-').replace('pi', 'π');
     const match = s.match(FORMAT);
     if (!match) return;
 
@@ -108,35 +147,22 @@ export class XNumber {
   }
 
   /** Converts a decimal into the closest fraction with a given maximum denominator. */
-  static fractionFromDecimal(x: number, maxDen = 100) {
-    const sign = Math.sign(x);
-    const whole = Math.floor(Math.abs(x));
-    x = Math.abs(x) - whole;
+  static fractionFromDecimal(x: number, maxDen = 1000, precision = 1e-12) {
+    let n = [1, 0];
+    let d = [0, 1];
+    const absX = Math.abs(x);
+    let rem = absX;
 
-    let a = 0;
-    let b = 1;
-    let c = 1;
-    let d = 1;
-
-    while (b <= maxDen && d <= maxDen) {
-      const mediant = (a + c) / (b + d);
-      if (x === mediant) {
-        if (b + d <= maxDen) {
-          return new XNumber(sign * (whole * (b + d) + a + c), b + d);
-        } else if (d > b) {
-          return new XNumber(sign * (whole * d + c), d);
-        } else {
-          return new XNumber(sign * (whole * b + a), b);
-        }
-      } else if (x > mediant) {
-        [a, b] = [a + c, b + d];
-      } else {
-        [c, d] = [a + c, b + d];
-      }
+    while (Math.abs(n[0] / d[0] - absX) > precision) {
+      const a = Math.floor(rem);
+      n = [a * n[0] + n[1], n[0]];
+      d = [a * d[0] + d[1], d[0]];
+      if (d[0] > maxDen) return new XNumber(x);
+      rem = 1 / (rem - a);
     }
 
-    if (b > maxDen) return new XNumber(sign * (whole * d + c), d);
-    return new XNumber(sign * (whole * b + a), b);
+    if (!nearlyEquals(n[0] / d[0], absX, precision)) return new XNumber(x);
+    return new XNumber(sign(x) * n[0], d[0] === 1 ? undefined : d[0]);
   }
 
   // ---------------------------------------------------------------------------

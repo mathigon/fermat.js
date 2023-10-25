@@ -11,6 +11,7 @@ import {XNumber} from '../src';
 const n = (n: number, d?: number, u?: '%'|'π') => new XNumber(n, d, u);
 const str = (s: string) => XNumber.fromString(s)?.toString();
 const dec = (s: number) => XNumber.fractionFromDecimal(s)?.toString();
+const expr = (s: number, type: 'decimal'|'fraction'|'mixed'|'scientific') => XNumber.fractionFromDecimal(s)?.toExpr(type);
 
 tape('XNumber Constructors', (test) => {
   test.equal(n(2.5).toString(), '2.5');
@@ -20,7 +21,7 @@ tape('XNumber Constructors', (test) => {
   test.equal(n(1, 2, 'π').toString(), '1/2π');
   test.equal(n(-1, undefined, 'π').toString(), '–π');
   test.equal(n(0, 2, 'π').toString(), '0');
-  test.equal(n(10000, 20000).toString(), '10k/20k');
+  test.equal(n(10000, 20000).toString(), '10000/20000');
   test.end();
 });
 
@@ -105,10 +106,36 @@ tape('Decimal to String', (test) => {
   test.equal(dec(2.5), '5/2');
   test.equal(dec(-2.5), '–5/2');
   test.equal(dec(0.33), '33/100');
-  test.equal(dec(0.333), '1/3');
-  test.equal(dec(0.0333), '1/30');
+  test.equal(dec(0.333), '333/1000');
+  test.equal(dec(0.333333333333), '1/3');
+  test.equal(dec(0.0333333333333), '1/30');
   test.equal(dec(0.05), '1/20');
   test.equal(dec(0.04761904762), '1/21');
   test.equal(dec(-5), '–5');
+
+  test.equal(dec(0.333333333333), '1/3');
+  test.equal(dec(-0.333333333333), '–1/3');
+  test.equal(dec(0.999999999999), '1');
+  test.equal(dec(0.833333333333), '5/6');
+  test.equal(dec(0.171717171717), '17/99');
+
+  test.end();
+});
+
+tape('Mixed numbers', (test) => {
+  test.deepEqual(expr(1.999999999999, 'mixed'), '2');
+  test.deepEqual(expr(0.333333333333, 'mixed'), '1/3');
+  test.deepEqual(expr(1.333333333333, 'mixed'), '1 1/3');
+  test.deepEqual(expr(-1.333333333333, 'mixed'), '–1 1/3');
+  test.end();
+});
+
+tape('Scientific notation', (test) => {
+  test.deepEqual(expr(0.000002, 'scientific'), '2 × 10^(-6)');
+  test.deepEqual(expr(0.00012, 'scientific'), '1.2 × 10^(-4)');
+  test.deepEqual(expr(1234.3, 'scientific'), '"1,234"');
+  test.deepEqual(expr(12343.2, 'decimal'), '"12.3k"');
+  test.deepEqual(expr(12343.2, 'scientific'), '1.234 × 10^4');
+  test.deepEqual(expr(123432.1, 'scientific'), '1.234 × 10^5');
   test.end();
 });
