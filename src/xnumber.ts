@@ -4,11 +4,12 @@
 // =============================================================================
 
 
-import {isInteger, nearlyEquals, numberFormat} from './arithmetic';
-import {gcd} from './number-theory';
+import {isInteger, nearlyEquals, numberFormat, sign} from './arithmetic';
+import {gcd, lcm} from './number-theory';
 
 
 const FORMAT = /^([0-9\-.]*)([%πkmbtq]?)(\/([0-9\-.]+))?([%π]?)$/;
+const tooBig = (x: number) => x >= Number.MAX_SAFE_INTEGER;
 type Suffix = '%'|'π'|undefined;
 
 
@@ -27,9 +28,43 @@ export class XNumber {
     return this.value;
   }
 
-  toString(precision?: number | 'auto', locale = 'en') {
-    if (precision === 'auto' || precision === undefined) precision = 4;
-    let num = numberFormat(this.num, precision, 'auto', locale);
+  toMixed() {
+    if (!this.den || this.unit) return this.toString();
+    const part = Math.abs(this.num) % this.den;
+    const whole = Math.abs(Math.trunc(this.value));
+    if (!whole) return this.toString();
+    return `${this.sign < 0 ? '–' : ''}${whole} ${part}/${this.den}`;
+  }
+
+  toExpr(type?: 'decimal'|'fraction'|'mixed'|'scientific', precision = 4) {
+    const v = this.value;
+    // TODO Decide if we really want to return infinity here...
+    if (Math.abs(v) >= Number.MAX_VALUE) return '∞';
+    if (tooBig(this.num) || this.den && tooBig(this.den)) type = 'decimal';
+
+    // In scientific notation, we try to return a number in the form a × 10^b
+    if (type === 'scientific' || Math.abs(v) >= Number.MAX_SAFE_INTEGER) {
+      const [base, power] = this.value.toExponential(precision - 1).split('e');
+      if (Math.abs(+power) >= precision) {
+        const isNeg = power.startsWith('-');
+        const exp = `${isNeg ? '(' : ''}${isNeg ? power : power.slice(1)}${isNeg ? ')' : ''}`;
+        return `${base.replace(/\.?0+$/, '')} × 10^${exp}${this.unit || ''}`;
+      }
+    }
+
+    if ((!this.unit && !this.den) || type === 'decimal' || type === 'scientific') {
+      const formatted = numberFormat(this.value, precision);
+      // For non-standard number formatting, we add quotes for expr parsing.
+      return (formatted.match(/^[\d.]+$/g) ? formatted : `"${formatted}"`);
+    } else {
+      return type === 'mixed' ? this.toMixed() : this.toString();
+    }
+  }
+
+  toString(precision: number | 'auto' = 4, locale = 'en') {
+    const separators = (this.den || this.unit) ? false : 'auto';
+    const actualPrecision = this.den ? 0 : precision;
+    let num = numberFormat(this.num, actualPrecision, separators, locale);
     let unit = this.unit || '';
     const den = this.den ? `/${numberFormat(this.den, precision)}` : '';
     if (num === '0') unit = '';
@@ -77,11 +112,16 @@ export class XNumber {
     return new XNumber(-this.num, this.den, this.unit);
   }
 
+  get fraction() {
+    if (this.unit || !isInteger(this.num)) return;
+    return [this.num, this.den || 1];
+  }
+
   // ---------------------------------------------------------------------------
 
   /** Parses a number string, e.g. '1/2' or '20.7%'. */
   static fromString(s: string) {
-    s = s.toLowerCase().replace(/[\s,]/g, '').replace('–', '-').replace('pi', 'π');
+    s = s.toLowerCase().replace(/[\s,"]/g, '').replace('–', '-').replace('pi', 'π');
     const match = s.match(FORMAT);
     if (!match) return;
 
@@ -108,35 +148,22 @@ export class XNumber {
   }
 
   /** Converts a decimal into the closest fraction with a given maximum denominator. */
-  static fractionFromDecimal(x: number, maxDen = 100) {
-    const sign = Math.sign(x);
-    const whole = Math.floor(Math.abs(x));
-    x = Math.abs(x) - whole;
+  static fractionFromDecimal(x: number, maxDen = 1000, precision = 1e-12) {
+    let n = [1, 0];
+    let d = [0, 1];
+    const absX = Math.abs(x);
+    let rem = absX;
 
-    let a = 0;
-    let b = 1;
-    let c = 1;
-    let d = 1;
-
-    while (b <= maxDen && d <= maxDen) {
-      const mediant = (a + c) / (b + d);
-      if (x === mediant) {
-        if (b + d <= maxDen) {
-          return new XNumber(sign * (whole * (b + d) + a + c), b + d);
-        } else if (d > b) {
-          return new XNumber(sign * (whole * d + c), d);
-        } else {
-          return new XNumber(sign * (whole * b + a), b);
-        }
-      } else if (x > mediant) {
-        [a, b] = [a + c, b + d];
-      } else {
-        [c, d] = [a + c, b + d];
-      }
+    while (Math.abs(n[0] / d[0] - absX) > precision) {
+      const a = Math.floor(rem);
+      n = [a * n[0] + n[1], n[0]];
+      d = [a * d[0] + d[1], d[0]];
+      if (d[0] > maxDen) return new XNumber(x);
+      rem = 1 / (rem - a);
     }
 
-    if (b > maxDen) return new XNumber(sign * (whole * d + c), d);
-    return new XNumber(sign * (whole * b + a), b);
+    if (!nearlyEquals(n[0] / d[0], absX, precision)) return new XNumber(x);
+    return new XNumber(sign(x) * n[0], d[0] === 1 ? undefined : d[0]);
   }
 
   // ---------------------------------------------------------------------------
@@ -183,7 +210,10 @@ export class XNumber {
     // TODO Maybe try XNumber.fractionFromDecimal?
     if (!isInteger(b.num)) return new XNumber(a.value + b.value, undefined, a.unit);
 
-    return new XNumber(a.num * (b.den || 1) + b.num * a.den!, a.den! * (b.den || 1), a.unit).simplified;
+    const common = lcm(a.den!, b.den ||1);
+    const fa = common / a.den!;
+    const fb = common / (b.den || 1);
+    return new XNumber(a.num * fa + b.num * fb, common, a.unit);
   }
 
   /** Calculates the difference of two numbers a and b. */
@@ -197,8 +227,8 @@ export class XNumber {
     if (typeof b === 'number') b = new XNumber(b);
 
     // Handle simple integer multiplication
-    if (!a.unit && !a.den && isInteger(a.num)) return new XNumber(a.num * b.num, b.den, b.unit).simplified;
-    if (!b.unit && !b.den && isInteger(b.num)) return new XNumber(a.num * b.num, a.den, a.unit).simplified;
+    if (!a.unit && !a.den && isInteger(a.num)) return new XNumber(a.num * b.num, b.den, b.unit);
+    if (!b.unit && !b.den && isInteger(b.num)) return new XNumber(a.num * b.num, a.den, a.unit);
 
     // Decimals or units that need to be converted
     if (a.unit === 'π' || b.unit === 'π' || !isInteger(a.num) || !isInteger(b.num)) return new XNumber(a.value * b.value);

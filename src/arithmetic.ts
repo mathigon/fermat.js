@@ -18,7 +18,7 @@ export function nearlyEquals(a: number, b: number, t = PRECISION) {
 
 /* Checks if an object is an integer. */
 export function isInteger(x: number, t = PRECISION) {
-  return nearlyEquals(x % 1, 0, t);
+  return nearlyEquals(x, Math.round(x), t);
 }
 
 /** Checks if a number x is between two numbers a and b. */
@@ -64,6 +64,22 @@ export function numberFormat(
   } else {
     return formatter.format(n).replace('-', '–');
   }
+}
+
+export function scientificFormat(value: number, places = 6) {
+  const abs = Math.abs(value);
+  if (isBetween(abs, Math.pow(10, -places), Math.pow(10, places))) {
+    return numberFormat(value, places);
+  }
+
+  // TODO Decide how we want to handle these special cases
+  if (abs > Number.MAX_VALUE) return `${Math.sign(value) < 0 ? '–' : ''}∞`;
+  if (abs < Number.MIN_VALUE) return '0';
+
+  const [str, exponent] = value.toExponential().split('e');
+  const top = exponent.replace('+', '').replace('-', '–');
+  const isNegative = top.startsWith('–');
+  return `${str.slice(0, 5)} × 10^${(isNegative ? '(' : '') + top + (isNegative ? ')' : '')}`;
 }
 
 /**
@@ -151,7 +167,7 @@ export function toWord(n: number) {
 
 
 // -----------------------------------------------------------------------------
-// Rounding, Decimals and Decimals
+// Rounding, Decimals and Fractions
 
 /** Returns the digits of a number n. */
 export function digits(n: number) {
@@ -168,27 +184,6 @@ export function round(n: number, precision = 0) {
 /** Round a number `n` to the nearest multiple of `increment`. */
 export function roundTo(n: number, increment = 1) {
   return Math.round(n / increment) * increment;
-}
-
-/**
- * Returns an [numerator, denominator] array that approximated a `decimal` to
- * `precision`. See http://en.wikipedia.org/wiki/Continued_fraction
- */
-export function toFraction(decimal: number, precision = PRECISION) {
-  let n = [1, 0]; let d = [0, 1];
-  let a = Math.floor(decimal);
-  let rem = decimal - a;
-
-  while (d[0] <= 1 / precision) {
-    if (nearlyEquals(n[0] / d[0], precision)) return [n[0], d[0]];
-    n = [a * n[0] + n[1], n[0]];
-    d = [a * d[0] + d[1], d[0]];
-    a = Math.floor(1 / rem);
-    rem = 1 / rem - a;
-  }
-
-  // No nice rational representation so return an irrational "fraction"
-  return [decimal, 1];
 }
 
 

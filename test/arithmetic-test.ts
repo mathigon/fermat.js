@@ -5,7 +5,7 @@
 
 
 import tape from 'tape';
-import {numberFormat, parseNumber, toWord} from '../src';
+import {numberFormat, parseNumber, scientificFormat, toWord} from '../src';
 
 
 tape('numberFormat', (test) => {
@@ -32,21 +32,33 @@ tape('numberFormat', (test) => {
   test.equal(numberFormat(-1000001, 7, true), '–1,000,001');
   test.equal(numberFormat(-1000001, 6, true), '–1m');
 
-  test.equal(numberFormat(0.11, 2, true), '0.11');
-  test.equal(numberFormat(0.11, 1, true), '0.1');
-  test.equal(numberFormat(-0.11, 2, true), '–0.11');
-  test.equal(numberFormat(-0.11, 1, true), '–0.1');
-  test.equal(numberFormat(0.0111, 3, true), '0.0111');
-  test.equal(numberFormat(0.011, 2, true), '0.011');
-  test.equal(numberFormat(-0.011, 2, true), '–0.011');
-  test.equal(numberFormat(-0.011, 1, true), '–0.01');
-  test.equal(numberFormat(0.0011, 2, true), '0.0011');
-  test.equal(numberFormat(0.0011, 1, true), '0.001');
-  test.equal(numberFormat(-0.0011, 2, true), '–0.0011');
-  test.equal(numberFormat(-0.0011, 1, true), '–0.001');
-  test.equal(numberFormat(1000.11, 8, true, 'de'), '1.000,11');
-  test.equal(numberFormat(1000.11, 8, true, 'es'), '1000,11');
-  test.equal(numberFormat(10000.11, 8, true, 'es'), '10.000,11');
+  test.equal(numberFormat(0.11, 2, true), '0.11', ':: numberFormat(0.11, 2, true)');
+  test.equal(numberFormat(0.11, 1, true), '0.1', ':: numberFormat(0.11, 1, true)');
+  test.equal(numberFormat(-0.11, 2, true), '–0.11', ':: numberFormat(-0.11, 2, true)');
+  test.equal(numberFormat(-0.11, 1, true), '–0.1', ':: numberFormat(-0.11, 1, true)');
+  test.equal(numberFormat(0.0111, 3, true), '0.0111', ':: numberFormat(0.0111, 3, true)');
+  test.equal(numberFormat(0.011, 2, true), '0.011'), ':: numberFormat(0.011, 2, true)';
+  test.equal(numberFormat(-0.011, 2, true), '–0.011', ':: numberFormat(-0.011, 2, true)');
+  test.equal(numberFormat(-0.011, 1, true), '–0.01', ':: numberFormat(-0.01, 1, true)');
+  test.equal(numberFormat(0.0011, 2, true), '0.0011', ':: numberFormat(0.0011, 2, true)');
+  test.equal(numberFormat(0.0011, 1, true), '0.001', ':: numberFormat(0.001, 1, true)');
+  test.equal(numberFormat(-0.0011, 2, true), '–0.0011', ':: numberFormat(-0.0011, 2, true)');
+  test.equal(numberFormat(-0.0011, 1, true), '–0.001', ':: numberFormat(-0.0011, 1, true)');
+  test.equal(numberFormat(1000.11, 8, true, 'de'), '1.000,11', ":: numberFormat(1000.11, 8, true, 'de')");
+  test.equal(numberFormat(1000.11, 8, true, 'es'), '1000,11', ":: numberFormat(1000.11, 8, true, 'es')");
+  test.equal(numberFormat(10000.11, 8, true, 'es'), '10.000,11', ":: numberFormat(10000.11, 8, true, 'es')");
+
+  test.equal(scientificFormat(123123123, 6), '1.231 × 10^8');
+  test.equal(scientificFormat(123123, 6), '123,123');
+  test.equal(scientificFormat(-123123123, 6), '-1.23 × 10^8');
+
+  test.equal(scientificFormat(0.000123, 6), '0.00012');
+  test.equal(scientificFormat(0.000000123, 6), '1.23 × 10^(–7)');
+  test.equal(scientificFormat(-0.000000123, 6), '-1.23 × 10^(–7)');
+
+  test.equal(scientificFormat(-Number.MAX_VALUE * 10, 6), '–∞');
+  test.equal(scientificFormat(-Number.MIN_VALUE / 10, 6), '0');
+
   test.end();
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "@mathigon/fermat",
-  "version": "1.1.4",
+  "version": "1.1.13",
   "license": "MIT",
   "homepage": "https://mathigon.io/fermat",
   "repository": "mathigon/fermat.js",
@@ -16,7 +16,7 @@
     "matrix"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -35,18 +35,18 @@
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "@mathigon/core": "1.1.4"
+    "@mathigon/core": "1.1.14"
   },
   "devDependencies": {
-    "@types/tape": "4.13.2",
-    "@typescript-eslint/eslint-plugin": "5.45.0",
-    "@typescript-eslint/parser": "5.45.0",
-    "esbuild": "0.15.16",
-    "eslint": "8.28.0",
-    "eslint-plugin-import": "2.26.0",
-    "tape": "5.6.1",
+    "@types/tape": "5.6.4",
+    "@typescript-eslint/eslint-plugin": "6.12.0",
+    "@typescript-eslint/parser": "6.12.0",
+    "esbuild": "0.19.8",
+    "eslint": "8.54.0",
+    "eslint-plugin-import": "2.29.0",
+    "tape": "5.7.2",
     "ts-node": "10.9.1",
-    "tslib": "2.4.1",
-    "typescript": "4.9.3"
+    "tslib": "2.6.2",
+    "typescript": "5.2.2"
   }
 }

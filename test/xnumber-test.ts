@@ -11,6 +11,7 @@ import {XNumber} from '../src';
 const n = (n: number, d?: number, u?: '%'|'π') => new XNumber(n, d, u);
 const str = (s: string) => XNumber.fromString(s)?.toString();
 const dec = (s: number) => XNumber.fractionFromDecimal(s)?.toString();
+const expr = (s: number, type: 'decimal'|'fraction'|'mixed'|'scientific') => XNumber.fractionFromDecimal(s)?.toExpr(type);
 
 tape('XNumber Constructors', (test) => {
   test.equal(n(2.5).toString(), '2.5');
@@ -20,7 +21,7 @@ tape('XNumber Constructors', (test) => {
   test.equal(n(1, 2, 'π').toString(), '1/2π');
   test.equal(n(-1, undefined, 'π').toString(), '–π');
   test.equal(n(0, 2, 'π').toString(), '0');
-  test.equal(n(10000, 20000).toString(), '10k/20k');
+  test.equal(n(10000, 20000).toString(), '10000/20000');
   test.end();
 });
 
@@ -41,8 +42,28 @@ tape('XNumber Arithmetic', (test) => {
   test.equal(n(1, 4).add(0.5).toString(), '0.75');  // Maybe should be 3/4?
   test.equal(n(20, undefined, '%').add(0.2).toString(), '0.4');
   test.equal(n(20, undefined, '%').add(n(30, undefined, '%')).toString(), '50%');
-  test.equal(n(1, 2, 'π').add(n(3, 2, 'π')).toString(), '2π');
+  test.equal(n(1, 2, 'π').add(n(3, 2, 'π')).simplified.toString(), '2π');
   test.equal(n(0).add(n(2, undefined, 'π')).toString(), '2π');
+  test.equal(n(0).add(n(5, 10).multiply(3)).toString(), '15/10');
+  test.equal(n(3, 3).toString(), '3/3');
+  test.equal(n(6, 3).toString(), '6/3');
+  test.equal(n(3, 3).simplified.toString(), '1');
+  test.equal(n(6, 3).simplified.toString(), '2');
+  test.equal(n(0).add(n(3, 3)).toString(), n(3, 3).toString());
+  test.end();
+});
+
+tape('Fraction simplification', (test) => {
+  test.equal(n(1, 4).add(n(2, 4)).toString(), '3/4');
+  test.equal(n(1, 4).add(n(1, 2)).toString(), '3/4');
+  test.equal(n(1, 4).add(n(1, 3)).toString(), '7/12');
+  test.end();
+});
+
+tape('Thousands Separators', (test) => {
+  test.equal(XNumber.fromString('1,000')?.add(XNumber.fromString('1/2')!).toString(), '2001/2');
+  test.equal(XNumber.fromString('1/2')?.add(XNumber.fromString('1,000')!).toString(), '2001/2');
+  test.equal(str('1000π'), '1000π');
   test.end();
 });
 
@@ -63,7 +84,7 @@ tape('XNumber Parsing', (test) => {
   test.equal(str('-π'), '–π');
   test.equal(str('-π/2'), '–1/2π');
   test.equal(str('$'), undefined);
-  test.equal(str('1,000/3000'), '1,000/3,000');
+  test.equal(str('1,000/3000'), '1000/3000');
   test.end();
 });
 
@@ -85,10 +106,36 @@ tape('Decimal to String', (test) => {
   test.equal(dec(2.5), '5/2');
   test.equal(dec(-2.5), '–5/2');
   test.equal(dec(0.33), '33/100');
-  test.equal(dec(0.333), '1/3');
-  test.equal(dec(0.0333), '1/30');
+  test.equal(dec(0.333), '333/1000');
+  test.equal(dec(0.333333333333), '1/3');
+  test.equal(dec(0.0333333333333), '1/30');
   test.equal(dec(0.05), '1/20');
   test.equal(dec(0.04761904762), '1/21');
   test.equal(dec(-5), '–5');
+
+  test.equal(dec(0.333333333333), '1/3');
+  test.equal(dec(-0.333333333333), '–1/3');
+  test.equal(dec(0.999999999999), '1');
+  test.equal(dec(0.833333333333), '5/6');
+  test.equal(dec(0.171717171717), '17/99');
+
+  test.end();
+});
+
+tape('Mixed numbers', (test) => {
+  test.deepEqual(expr(1.999999999999, 'mixed'), '2');
+  test.deepEqual(expr(0.333333333333, 'mixed'), '1/3');
+  test.deepEqual(expr(1.333333333333, 'mixed'), '1 1/3');
+  test.deepEqual(expr(-1.333333333333, 'mixed'), '–1 1/3');
+  test.end();
+});
+
+tape('Scientific notation', (test) => {
+  test.deepEqual(expr(0.000002, 'scientific'), '2 × 10^(-6)');
+  test.deepEqual(expr(0.00012, 'scientific'), '1.2 × 10^(-4)');
+  test.deepEqual(expr(1234.3, 'scientific'), '"1,234"');
+  test.deepEqual(expr(12343.2, 'decimal'), '"12.3k"');
+  test.deepEqual(expr(12343.2, 'scientific'), '1.234 × 10^4');
+  test.deepEqual(expr(123432.1, 'scientific'), '1.234 × 10^5');
   test.end();
 });
