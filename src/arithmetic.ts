@@ -36,6 +36,22 @@ export function sign(value: number, t = PRECISION) {
 // -----------------------------------------------------------------------------
 // String Conversion
 
+/** Get total number of digits (numeric chars) */
+function getRawDigitsCount(of: number) {
+  const digit = /\d/g;
+  return of.toString().match(digit)?.length ?? 0;
+}
+
+function getIntegerDigitsCount(of: number) {
+  return getRawDigitsCount(Math.trunc(of));
+}
+
+/** Get total number of zeroes */
+function getZeroesCount(of: number) {
+  const digit = /0/g;
+  return of.toString().match(digit)?.length ?? 0;
+}
+
 /**
  * Converts a number to a clean string, by rounding, adding abbreviation suffixes, and
  * adding grouping separators. `digits` is the number of numeric characters to
@@ -52,11 +68,12 @@ export function numberFormat(
   locale = 'en',
   otherFormatterOptions?: Intl.NumberFormatOptions
 ) {
-  const rawDigitsCount = n.toString().replace('.', '').replace('-', '').length;
   const formatter = new Intl.NumberFormat(locale, {
     useGrouping: separators === 'auto' ? undefined : separators,
     maximumSignificantDigits: digits === 'auto' ? undefined : digits,
-    notation: digits !== 'auto' && digits < rawDigitsCount ? 'compact' : 'standard',
+    // If the display digits count is less than the integer digits count then we want to use an abbreviated format.
+    // For example: given `n = 12343.2` and `digits = 4`, we would like a result of `'12.34K'` rather than `'12,340'`.
+    notation: digits !== 'auto' && digits < getIntegerDigitsCount(n) ? 'compact' : 'standard',
     ...otherFormatterOptions
   });
   if (locale === 'en') {
@@ -69,7 +86,12 @@ export function numberFormat(
 export function scientificFormat(value: number, places = 6) {
   const abs = Math.abs(value);
   if (isBetween(abs, Math.pow(10, -places), Math.pow(10, places))) {
-    return numberFormat(value, places);
+    if (abs >= 1) {
+      return numberFormat(value, places);
+    } else {
+      const digitsDelta = places - getZeroesCount(value);
+      return numberFormat(value, digitsDelta > 0 ? digitsDelta : places);
+    }
   }
 
   // TODO Decide how we want to handle these special cases
