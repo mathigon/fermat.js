@@ -44,9 +44,9 @@ tape('numberFormat', (test) => {
   test.equal(numberFormat(0.0011, 1, true), '0.001', ':: numberFormat(0.001, 1, true)');
   test.equal(numberFormat(-0.0011, 2, true), '–0.0011', ':: numberFormat(-0.0011, 2, true)');
   test.equal(numberFormat(-0.0011, 1, true), '–0.001', ':: numberFormat(-0.0011, 1, true)');
-  test.equal(numberFormat(1000.11, 8, true, 'de'), '1.000,11', ":: numberFormat(1000.11, 8, true, 'de')");
-  test.equal(numberFormat(1000.11, 8, true, 'es'), '1000,11', ":: numberFormat(1000.11, 8, true, 'es')");
-  test.equal(numberFormat(10000.11, 8, true, 'es'), '10.000,11', ":: numberFormat(10000.11, 8, true, 'es')");
+  test.equal(numberFormat(1000.11, 8, 'auto', 'de'), '1.000,11', `:: numberFormat(1000.11, 8, true, 'de')`);
+  test.equal(numberFormat(1000.11, 8, 'auto', 'es'), '1000,11', `:: numberFormat(1000.11, 8, true, 'es')`);
+  test.equal(numberFormat(10000.11, 8, 'auto', 'es'), '10.000,11', `:: numberFormat(10000.11, 8, true, 'es')`);
 
   test.equal(scientificFormat(123123123, 6), '1.231 × 10^8');
   test.equal(scientificFormat(123123, 6), '123,123');
