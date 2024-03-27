@@ -134,7 +134,7 @@ tape('Scientific notation', (test) => {
   test.deepEqual(expr(0.000002, 'scientific'), '2 × 10^(-6)');
   test.deepEqual(expr(0.00012, 'scientific'), '1.2 × 10^(-4)');
   test.deepEqual(expr(1234.3, 'scientific'), '"1,234"');
-  test.deepEqual(expr(12343.2, 'decimal'), '"12.3k"');
+  test.deepEqual(expr(12343.2, 'decimal'), '"12.34k"');
   test.deepEqual(expr(12343.2, 'scientific'), '1.234 × 10^4');
   test.deepEqual(expr(123432.1, 'scientific'), '1.234 × 10^5');
   test.end();
