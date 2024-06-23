@@ -23,18 +23,11 @@ export function quantile(values: number[], p: number, method: number = 1): numbe
   if (p === 1) return values[n - 1];
 
   // See https://en.wikipedia.org/wiki/Quantile#Estimating_quantiles_from_a_sample
-  if (method === 1) { // Method 1: n * p - 0.5        >> WIKI 3, Matlab, Mathematics
-    const index = n * p - 0.5;
-  }
-  else if (method === 2) { // Method 2: (n - 1) * p        Excel Default, Python/NumPy, Google Docs, R Default
-    const index = (n - 1) * p;
-  }
-  else if (method === 3) { // Method 3: (n + 1) * p - 1    Excel Option, WIKI 4
-    const index = (n + 1) * p - 1;
-  }
-  else {
-    throw new Error('Invalid method. Please enter 1, 2 or 3.');
-    
+  if (![1, 2, 3].includes(method)) throw new RangeError('Invalid quantile method.');
+  const index = (method === 1) ? n * p - 0.5 : // Matlab, Mathematica
+    (method === 2) ? (n - 1) * p :             // Excel, NumPy, Google Docs, R, Python (option)
+      (n + 1) * p - 1;                         // Python, Excel (option)
+
   if (Number.isInteger(index)) return sorted[index];
   const floor = Math.floor(index);
   return lerp(sorted[floor], sorted[floor + 1], index - floor);
