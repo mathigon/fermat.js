@@ -49,17 +49,14 @@ export function mode(values: number[]) {
   let result: number|undefined = undefined;
 
   for (const v of values) {
-    if (!counts.has(v)) {
-      counts.set(v, 1);
-    } else {
-      const newCount = counts.get(v)! + 1;
-      counts.set(v, newCount);
-      if (newCount === maxCount) {
-        result = undefined;
-      } else if (newCount > maxCount) {
-        maxCount = newCount;
-        result = v;
-      }
+    if (!counts.has(v)) counts.set(v, 0);
+    const newCount = counts.get(v)! + 1;
+    counts.set(v, newCount);
+    if (newCount === maxCount) {
+      result = undefined;
+    } else if (newCount > maxCount) {
+      maxCount = newCount;
+      result = v;
     }
   }
 

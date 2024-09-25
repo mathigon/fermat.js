@@ -5,8 +5,19 @@
 
 
 import tape from 'tape';
-import {quantile} from '../src';
+import {mode, quantile} from '../src';
 
+
+tape('mode', (test) => {
+  test.equal(mode([]), undefined);
+  test.equal(mode([2]), 2);
+  test.equal(mode([2, 3]), undefined);
+  test.equal(mode([2, 3, 3]), 3);
+  test.equal(mode([2, 2, 3, 3, 4]), undefined);
+  test.equal(mode([2, 2, 2, 3, 3, 4]), 2);
+
+  test.end();
+});
 
 tape('quantile', (test) => {
   test.equal(quantile([], 0.5), 0);
