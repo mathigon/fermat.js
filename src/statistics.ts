@@ -19,8 +19,8 @@ export function quantile(values: number[], p: number, method: number = 1): numbe
   if (!n) return 0;
 
   const sorted = values.slice(0).sort((a, b) => (a - b));
-  if (p === 0) return values[0];
-  if (p === 1) return values[n - 1];
+  if (p === 0) return sorted[0];
+  if (p === 1) return sorted[n - 1];
 
   // See https://en.wikipedia.org/wiki/Quantile#Estimating_quantiles_from_a_sample
   if (![1, 2, 3].includes(method)) throw new RangeError('Invalid quantile method.');
