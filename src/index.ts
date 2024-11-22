@@ -14,3 +14,4 @@ export * as Random from './random';
 export * as Regression from './regression';
 export * from './statistics';
 export * from './vector';
+export * from './probability';
