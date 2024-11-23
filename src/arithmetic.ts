@@ -47,13 +47,13 @@ function addThousandSeparators(x: string) {
   return n + (dec ? `.${dec}` : '');
 }
 
-function addPowerSuffix(n: number, places = 6) {
-  if (!places) return `${n}`;
+function addPowerSuffix(n: number, places = 6, fixed?: number) {
+  if (!places) return fixed !== undefined ? n.toFixed(fixed) : `${n}`;
 
   // Trim short numbers to the appropriate number of decimal places.
   const digits = (`${Math.abs(Math.floor(n))}`).length;
   const chars = digits + (n < 0 ? 1 : 0);
-  if (chars <= places) return `${round(n, places - chars)}`;
+  if (chars <= places) return fixed !== undefined ? n.toFixed(fixed) : `${round(n, places - chars)}`;
 
   // Append a power suffix to longer numbers.
   const x = Math.floor(Math.log10(Math.abs(n)) / 3);
@@ -67,20 +67,20 @@ function addPowerSuffix(n: number, places = 6) {
  * adding thousands separators. `places` is the number of digits to show in the
  * result.
  */
-export function numberFormat(n: number, places = 0, separators = true) {
-  const str = addPowerSuffix(n, places).replace('-', '–');
+export function numberFormat(n: number, places = 0, separators = true, fixed?: number) {
+  const str = addPowerSuffix(n, places, fixed).replace('-', '–');
   return separators ? addThousandSeparators(str) : str;
 }
 
-export function scientificFormat(value: number, places = 6) {
+export function scientificFormat(value: number, places = 6, fixed?: number) {
   const abs = Math.abs(value);
   if (isBetween(abs, Math.pow(10, -places), Math.pow(10, places))) {
-    return numberFormat(value, places);
+    return numberFormat(value, places, true, fixed);
   }
 
   // TODO Decide how we want to handle these special cases
   if (abs > Number.MAX_VALUE) return `${Math.sign(value) < 0 ? '–' : ''}∞`;
-  if (abs < Number.MIN_VALUE) return '0';
+  if (abs < Number.MIN_VALUE) return fixed !== undefined ? Number(0).toFixed(fixed) : '0';
 
   const [str, exponent] = value.toExponential().split('e');
   const top = exponent.replace('+', '').replace('-', '–');
