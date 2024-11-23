@@ -61,11 +61,14 @@ export class XNumber {
     }
   }
 
-  toString(precision = 4) {
-    const separators = !this.den && !this.unit;
-    let num = numberFormat(this.num, this.den ? 0 : precision, separators);
+  toString(digits: number | 'auto' = 4, locale = 'en') {
+    // If this is a fraction or has a unit then we do not want separators; otherwise we go with the locale default
+    const separators = (this.den || this.unit) ? false : 'auto';
+    // If this is a fraction then we do not accept a manually specified value for the length of the numerator
+    const actualDigits = this.den ? 'auto' : digits;
+    let num = numberFormat(this.num, actualDigits, separators, locale);
     let unit = this.unit || '';
-    const den = this.den ? `/${numberFormat(this.den, 0, separators)}` : '';
+    const den = this.den ? `/${numberFormat(this.den, 'auto', false)}` : '';
     if (num === '0') unit = '';
     if (unit === 'π' && !this.den && (num === '1' || num === '–1')) num = num.replace('1', '');
     return `${num}${den}${unit}`;

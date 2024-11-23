@@ -9,40 +9,44 @@ import {numberFormat, parseNumber, scientificFormat, toWord} from '../src';
 
 
 tape('numberFormat', (test) => {
-  test.equal(numberFormat(1234, 5), '1,234', ':: numberFormat(1234, 5)');
-  test.equal(numberFormat(1234, 4), '1,234', ':: numberFormat(1234, 4)');
-  test.equal(numberFormat(1234, 3), '1.2k', ':: numberFormat(1234, 3)');
-  test.equal(numberFormat(1000, 3), '1k', ':: numberFormat(1000, 3)');
-  test.equal(numberFormat(-1234, 6), '–1,234', ':: numberFormat(-1234, 6)');
-  test.equal(numberFormat(-1234, 5), '–1,234', ':: numberFormat(-1234, 5)');
-  test.equal(numberFormat(-1234, 4), '–1.2k', ':: numberFormat(-1234, 4)');
-  test.equal(numberFormat(-1000, 4), '–1k', ':: numberFormat(-1000, 4)');
+  test.equal(numberFormat(1234, 5, true), '1,234');
+  test.equal(numberFormat(1234, 4, true), '1,234');
+  test.equal(numberFormat(1234, 3, true), '1.23k');
+  test.equal(numberFormat(12345.6, 3, true), '12.3k');
+  test.equal(numberFormat(12345.6, 4, true), '12.35k');
+  test.equal(numberFormat(-1234, 6, true), '–1,234');
+  test.equal(numberFormat(-1234, 4, true), '–1,234');
+  test.equal(numberFormat(-1234, 3, true), '–1.23k');
+  test.equal(numberFormat(-1000, 3, true), '–1k');
 
-  test.equal(numberFormat(10001, 5), '10,001', ':: numberFormat(10001, 5)');
-  test.equal(numberFormat(10001, 4), '10k', ':: numberFormat(10001, 4)');
-  test.equal(numberFormat(-10001, 6), '–10,001', ':: numberFormat(-10001, 6)');
-  test.equal(numberFormat(-10001, 5), '–10k', ':: numberFormat(-10001, 5)');
-  test.equal(numberFormat(100001, 6), '100,001', ':: numberFormat(100001, 6)');
-  test.equal(numberFormat(100001, 5), '100k', ':: numberFormat(100001, 5)');
-  test.equal(numberFormat(-100001, 7), '–100,001', ':: numberFormat(-100001, 7)');
-  test.equal(numberFormat(-100001, 6), '–100k', ':: numberFormat(-100001, 6)');
-  test.equal(numberFormat(1000001, 7), '1,000,001', ':: numberFormat(1000001, 7)');
-  test.equal(numberFormat(1000001, 6), '1m', ':: numberFormat(1000001, 6)');
-  test.equal(numberFormat(-1000001, 8), '–1,000,001', ':: numberFormat(-1000001, 8)');
-  test.equal(numberFormat(-1000001, 7), '–1m', ':: numberFormat(-1000001, 7)');
+  test.equal(numberFormat(10001, 5, true), '10,001');
+  test.equal(numberFormat(10001, 4, true), '10k');
+  test.equal(numberFormat(-10001, 5, true), '–10,001');
+  test.equal(numberFormat(-10001, 4, true), '–10k');
+  test.equal(numberFormat(100001, 6, true), '100,001');
+  test.equal(numberFormat(100001, 5, true), '100k');
+  test.equal(numberFormat(-100001, 6, true), '–100,001');
+  test.equal(numberFormat(-100001, 5, true), '–100k');
+  test.equal(numberFormat(1000001, 7, true), '1,000,001');
+  test.equal(numberFormat(1000001, 6, true), '1m');
+  test.equal(numberFormat(-1000001, 7, true), '–1,000,001');
+  test.equal(numberFormat(-1000001, 6, true), '–1m');
 
-  test.equal(numberFormat(0.1, 2), '0.1', ':: numberFormat(0.1, 2)');
-  test.equal(numberFormat(0.1, 1), '0', ':: numberFormat(0.1, 1)');
-  test.equal(numberFormat(-0.1, 3), '–0.1', ':: numberFormat(-0.1, 3)');
-  test.equal(numberFormat(-0.1, 2), '0', ':: numberFormat(-0.1, 2)');
-  test.equal(numberFormat(0.01, 3), '0.01', ':: numberFormat(0.01, 3)');
-  test.equal(numberFormat(0.01, 2), '0', ':: numberFormat(0.01, 2)');
-  test.equal(numberFormat(-0.01, 4), '–0.01', ':: numberFormat(-0.01, 4)');
-  test.equal(numberFormat(-0.01, 3), '0', ':: numberFormat(-0.01, 3)');
-  test.equal(numberFormat(0.001, 4), '0.001', ':: numberFormat(0.001, 4)');
-  test.equal(numberFormat(0.001, 3), '0', ':: numberFormat(0.001, 3)');
-  test.equal(numberFormat(-0.001, 5), '–0.001', ':: numberFormat(-0.001, 5)');
-  test.equal(numberFormat(-0.001, 4), '0', ':: numberFormat(-0.001, 4)');
+  test.equal(numberFormat(0.11, 2, true), '0.11', ':: numberFormat(0.11, 2, true)');
+  test.equal(numberFormat(0.11, 1, true), '0.1', ':: numberFormat(0.11, 1, true)');
+  test.equal(numberFormat(-0.11, 2, true), '–0.11', ':: numberFormat(-0.11, 2, true)');
+  test.equal(numberFormat(-0.11, 1, true), '–0.1', ':: numberFormat(-0.11, 1, true)');
+  test.equal(numberFormat(0.0111, 3, true), '0.0111', ':: numberFormat(0.0111, 3, true)');
+  test.equal(numberFormat(0.011, 2, true), '0.011'), ':: numberFormat(0.011, 2, true)';
+  test.equal(numberFormat(-0.011, 2, true), '–0.011', ':: numberFormat(-0.011, 2, true)');
+  test.equal(numberFormat(-0.011, 1, true), '–0.01', ':: numberFormat(-0.01, 1, true)');
+  test.equal(numberFormat(0.0011, 2, true), '0.0011', ':: numberFormat(0.0011, 2, true)');
+  test.equal(numberFormat(0.0011, 1, true), '0.001', ':: numberFormat(0.001, 1, true)');
+  test.equal(numberFormat(-0.0011, 2, true), '–0.0011', ':: numberFormat(-0.0011, 2, true)');
+  test.equal(numberFormat(-0.0011, 1, true), '–0.001', ':: numberFormat(-0.0011, 1, true)');
+  test.equal(numberFormat(1000.11, 8, 'auto', 'de'), '1.000,11', `:: numberFormat(1000.11, 8, true, 'de')`);
+  test.equal(numberFormat(1000.11, 8, 'auto', 'es'), '1000,11', `:: numberFormat(1000.11, 8, true, 'es')`);
+  test.equal(numberFormat(10000.11, 8, 'auto', 'es'), '10.000,11', `:: numberFormat(10000.11, 8, true, 'es')`);
 
   test.equal(scientificFormat(123123123, 6), '1.231 × 10^8');
   test.equal(scientificFormat(123123, 6), '123,123');
@@ -60,29 +64,41 @@ tape('numberFormat', (test) => {
 
 tape('parseNumber', (test) => {
   test.equal(parseNumber('1234'), 1234);
-  test.equal(parseNumber('1.234,56'), 1234.56);
+  test.equal(parseNumber('1.234,56'), 1.23456);
+  test.equal(parseNumber('1,23456', 'de'), 1.23456);
+  test.equal(parseNumber('1,23456', 'es'), 1.23456);
   test.equal(parseNumber('1,234.56'), 1234.56);
+  test.equal(parseNumber('1.234,56', 'de'), 1234.56);
+  test.equal(parseNumber('1.234,56', 'es'), 1234.56);
   test.equal(parseNumber('1,234,567'), 1234567);
-  test.equal(parseNumber('1.234.567'), 1234567);
+  test.equal(parseNumber('1.234.567', 'de'), 1234567);
+  test.equal(parseNumber('1.234.567', 'es'), 1234567);
   test.equal(parseNumber('1,234.567'), 1234.567);
-  test.equal(parseNumber('1.234,567'), 1234.567);
-  test.equal(parseNumber('1.234'), 1.234);  // ambiguous!
-  test.equal(parseNumber('1,234'), 1234);  // ambiguous!
-  test.equal(parseNumber('0,123'), 0.123);  // ambiguous!
-  test.equal(parseNumber('1,23'), 1.23);
+  test.equal(parseNumber('1.234,567', 'de'), 1234.567);
+  test.equal(parseNumber('1.234,567', 'es'), 1234.567);
+  test.equal(parseNumber('1.234'), 1.234);
+  test.equal(parseNumber('1,234', 'de'), 1.234);
+  test.equal(parseNumber('1,234', 'es'), 1.234);
+  test.equal(parseNumber('1,234'), 1234);
+  test.equal(parseNumber('1.234', 'de'), 1234);
+  test.equal(parseNumber('1.234', 'es'), 1234);
+  test.equal(parseNumber('0.123'), 0.123);
+  test.equal(parseNumber('0,123', 'de'), 0.123);
+  test.equal(parseNumber('0,123', 'es'), 0.123);
+  test.equal(parseNumber('1.23'), 1.23);
+  test.equal(parseNumber('1,23'), 123);
+  test.equal(parseNumber('1,23', 'de'), 1.23);
+  test.equal(parseNumber('1.23', 'de'), 123);
   test.equal(parseNumber('1.2345'), 1.2345);
   test.equal(parseNumber('.123'), 0.123);
 
   test.equal(parseNumber('-123'), -123);
   test.equal(parseNumber('–123'), -123);
 
-  test.equal(parseNumber('-123,456'), -123456);  // ambiguous!
-  test.equal(parseNumber('-123.456'), -123.456);  // ambiguous!
-
-  test.ok(isNaN(parseNumber('1,2345,678')));
+  test.notOk(isNaN(parseNumber('1,2345,678')));
   test.ok(isNaN(parseNumber('1.2345.678')));
-  test.ok(isNaN(parseNumber('1,2345.678')));
-  test.ok(isNaN(parseNumber('1.2345,678')));
+  test.notOk(isNaN(parseNumber('1,2345.678')));
+  test.notOk(isNaN(parseNumber('1.2345,678')));
 
   test.ok(isNaN(parseNumber('1.234,56A')));
   test.ok(isNaN(parseNumber('123A456')));
