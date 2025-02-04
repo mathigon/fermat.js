@@ -35,5 +35,13 @@ tape('quantile', (test) => {
   test.equal(quantile(oddPopulation, 0.5), 3.5);
   test.equal(quantile(oddPopulation, 0.75), 5);
   test.equal(quantile(oddPopulation, 1), 6);
+
+  const randomPopulation = [4, 1, 2, 6, 3, 5];
+  test.equal(quantile(randomPopulation, 0), 1);
+  test.equal(quantile(randomPopulation, 0.25), 2);
+  test.equal(quantile(randomPopulation, 0.5), 3.5);
+  test.equal(quantile(randomPopulation, 0.75), 5);
+  test.equal(quantile(randomPopulation, 1), 6);
+
   test.end();
 });
